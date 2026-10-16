@@ -1,0 +1,128 @@
+<title>Beat Quest Android</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Pixelify+Sans:wght@400;600&family=VT323&display=swap">
+<style>
+/* Layout: one narrow centered column; header with PIP, one big download button, then the numbered install steps. Single dark theme on purpose: it matches the game. */
+:root{
+  --night:#0f0b1c;--panel:#1a1430;--panel2:#241c40;--edge:#3d3166;
+  --ink:#f1e7d0;--dim:#a092c2;--amber:#ffb547;--neon:#3ef0c8;--magenta:#ff4f9a;
+  --f-disp:'Silkscreen','Courier New',monospace;
+  --f-body:'Pixelify Sans','Trebuchet MS',system-ui,sans-serif;
+  --f-num:'VT323','Courier New',monospace;
+  --notch:polygon(4px 0,calc(100% - 4px) 0,100% 4px,100% calc(100% - 4px),calc(100% - 4px) 100%,4px 100%,0 calc(100% - 4px),0 4px);
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--night);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.45}
+.stack{display:flex;flex-direction:column;gap:10px}
+.page{max-width:520px;margin:0 auto;padding-block:28px 48px;padding-inline:16px;display:flex;flex-direction:column;gap:22px}
+header{display:flex;align-items:center;gap:16px}
+canvas{image-rendering:pixelated;image-rendering:crisp-edges;display:block;flex:none}
+h1{font-family:var(--f-disp);font-weight:700;font-size:34px;line-height:.95;margin:0;color:var(--amber);text-shadow:0 3px 0 #5a2410}
+h1 span{display:block;font-size:15px;color:var(--ink);text-shadow:none;letter-spacing:.12em;margin-top:8px}
+h2{font-family:var(--f-disp);font-size:14px;letter-spacing:.12em;color:var(--dim);margin:0 0 12px;text-transform:uppercase}
+p{margin:0}
+.lead{font-size:18px;max-width:40ch}
+.btn{font-family:var(--f-disp);font-weight:700;font-size:17px;letter-spacing:.06em;text-transform:uppercase;width:100%;min-height:64px;border:3px solid #2a1606;background:var(--amber);color:#2a1606;clip-path:var(--notch);box-shadow:inset 0 -5px 0 rgba(0,0,0,.22),inset 0 3px 0 rgba(255,255,255,.35);cursor:pointer}
+.btn:active{transform:translateY(2px)}
+.btn:disabled{filter:grayscale(1) brightness(.6);cursor:progress}
+.btn:focus-visible{outline:none;box-shadow:inset 0 0 0 3px var(--neon)}
+.meta{display:flex;flex-wrap:wrap;gap:6px 14px;font-family:var(--f-num);font-size:20px;color:var(--dim)}
+.status{min-height:1.5em;font-size:16px}
+.status.ok{color:var(--neon)}
+.status.err{color:var(--magenta)}
+.win{background:var(--panel);border:3px solid var(--edge);clip-path:var(--notch);padding:16px}
+ol{margin:0;padding:0;list-style:none;counter-reset:s;display:flex;flex-direction:column;gap:14px}
+ol li{counter-increment:s;display:grid;grid-template-columns:34px 1fr;gap:12px;align-items:start}
+ol li::before{content:counter(s);font-family:var(--f-disp);font-weight:700;font-size:16px;color:#2a1606;background:var(--amber);width:34px;height:34px;display:grid;place-items:center}
+ol b{color:var(--amber);font-weight:600}
+.warn{border-color:#6a4718;background:#221a0c}
+.warn p+p{margin-top:8px}
+ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
+.fallback{border-color:var(--magenta);background:#2a0f1e}
+code{font-family:var(--f-num);font-size:19px;color:var(--ink);background:#0a0714;padding:0 6px;word-break:break-all}
+a{color:var(--neon)}
+[hidden]{display:none!important}
+@media (prefers-reduced-motion:reduce){.btn:active{transform:none}}
+</style>
+
+<main class="page">
+  <header>
+    <canvas id="pip" width="96" height="96" aria-hidden="true"></canvas>
+    <h1>BEAT QUEST<span>POUR ANDROID</span></h1>
+  </header>
+  <p class="lead">Le jeu complet sur ton téléphone : une icône sur l'écran d'accueil, le plein écran, et il marche sans Internet.</p>
+
+  <section class="stack">
+    <button class="btn" id="dl" disabled>Préparation…</button>
+    <p class="status" id="status" role="status"></p>
+    <div class="meta"><span>Version __VERSION__</span><span>__SIZE__ Ko</span><span>Android 7.0 ou plus récent</span></div>
+  </section>
+
+  <div class="win fallback" id="fallback" hidden>
+    <p>Le téléchargement n'est pas disponible dans cette vue. Ouvre cette page sur ton téléphone Android, connecté à claude.ai. Ou, sur ton PC, copie <code>D:\beat-quest\__APKNAME__</code> sur le téléphone avec un câble USB, puis reprends à l'étape 3.</p>
+  </div>
+
+  <section class="win">
+    <h2>Installer en 4 étapes</h2>
+    <ol>
+      <li><p>Sur ton téléphone Android, touche <b>Télécharger pour Android</b>. Tu obtiens le fichier <b>__ZIPNAME__</b>.</p></li>
+      <li><p>Ouvre l'appli <b>Fichiers</b>, va dans <b>Téléchargements</b>, touche le zip puis <b>Extraire</b>.</p></li>
+      <li><p>Touche <b>__APKNAME__</b>. Android demande l'autorisation d'installer des applis depuis cette source : touche <b>Paramètres</b>, active <b>Autoriser</b>, puis reviens en arrière.</p></li>
+      <li><p>Touche <b>Installer</b>, puis <b>Ouvrir</b>. L'icône Beat Quest apparaît avec tes autres applis.</p></li>
+    </ol>
+  </section>
+
+  <section class="win warn">
+    <h2>Si Play Protect affiche un avertissement</h2>
+    <p>C'est normal : l'appli ne vient pas du Play Store. Touche <b style="color:var(--amber)">Plus de détails</b>, puis <b style="color:var(--amber)">Installer quand même</b>.</p>
+    <p>L'appli a été construite pour toi et signée avec une clé qui reste sur ton PC. Elle ne contient ni pub ni pistage.</p>
+  </section>
+
+  <section>
+    <h2>Bon à savoir</h2>
+    <ul>
+      <li>Ta progression est enregistrée sur le téléphone.</li>
+      <li>Le bouton Retour d'Android ramène à l'écran précédent, et quitte le jeu depuis l'accueil.</li>
+      <li>Hors ligne, PIP répond à 10 questions intégrées.</li>
+      <li>Inclus : Beat Forest complet (9 étapes), Ear Gym, rappels espacés, quêtes personnelles, maîtrise en 3 parties, capacités, Master Trial et l’aperçu du Compression Volcano. Les 6 autres mondes arriveront dans de futures mises à jour.</li>
+      <li>Pour une nouvelle version, installe le nouvel APK par-dessus : ta progression est conservée.</li>
+    </ul>
+  </section>
+
+  <p><a href="https://claude.ai/artifact/VuHd8n1UrckeFWPx8xPzD8">Jouer dans le navigateur à la place</a></p>
+</main>
+
+<script>
+"use strict";
+const ZIP_B64="__ZIP_B64__";
+const PIP=[".....ka.....",".....k......","..kkkkkkkk..",".kmmmmmmmmk.",".kmkkmmkkmk.",".kmkekkekmk.",".kmmmmmmmmk.",".kmmggggmmk.",".kmmgkgkmmk.",".kmmggggmmk.","..kkkkkkkk..","...k....k..."];
+const PAL={k:'#140d1f',m:'#ffb547',e:'#3ef0c8',g:'#7a4a1a',a:'#ff4f9a'};
+(()=>{const c=document.getElementById('pip'),g=c.getContext('2d');g.fillStyle='#1a1430';g.fillRect(0,0,96,96);PIP.forEach((r,y)=>{[...r].forEach((ch,x)=>{if(PAL[ch]){g.fillStyle=PAL[ch];g.fillRect(x*8,y*8,8,8)}})})})();
+
+const btn=document.getElementById('dl'),status=document.getElementById('status'),fallback=document.getElementById('fallback');
+let downloads=null;
+function say(t,cls){status.textContent=t;status.className='status'+(cls?' '+cls:'')}
+function unavailable(){btn.hidden=true;fallback.hidden=false}
+(async()=>{
+  try{downloads=window.claude&&window.claude.use?await window.claude.use('downloads'):null}catch(e){downloads=null}
+  if(!downloads){unavailable();return}
+  btn.disabled=false;btn.textContent='Télécharger pour Android';
+})();
+btn.addEventListener('click',async()=>{
+  if(!downloads)return;
+  btn.disabled=true;say('Confirme le téléchargement dans la fenêtre qui s’ouvre…');
+  try{
+    const bin=atob(ZIP_B64);const bytes=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
+    await downloads.save({filename:'__ZIPNAME__',data:bytes});
+    say('Téléchargé. Passe à l’étape 2.','ok');
+  }catch(e){
+    const c=e&&e.code;
+    if(c==='declined')say('Téléchargement annulé. Touche le bouton pour recommencer.','err');
+    else if(c==='rate_limited')say('Une fenêtre de téléchargement est déjà ouverte. Réessaie dans un instant.','err');
+    else if(c==='rejected_extension'||c==='extension_not_enabled')say('Ce type de fichier n’est pas disponible ici. Utilise le câble USB (voir ci-dessous).','err');
+    else{say('');unavailable()}
+  }finally{btn.disabled=false}
+});
+</script>

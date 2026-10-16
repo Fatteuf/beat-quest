@@ -1,0 +1,14 @@
+# Clé de signature Android : ne jamais publier.
+# Avec elle, n'importe qui pourrait signer une fausse mise à jour de l'appli.
+android/beatquest.jks
+android/signing.properties
+
+# Outils de build Android (binaires Google, 34 Mo) et sortie du build
+android/tools/
+android/build/
+
+# Fichiers générés ou temporaires
+beat-quest-android.html
+.t/
+*.bak.js
+__pycache__/

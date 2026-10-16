@@ -1,0 +1,1158 @@
+<title>Beat Quest</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Pixelify+Sans:wght@400;500;600;700&family=VT323&display=swap">
+<style>
+/* Layout: one portrait phone column (max 430px). Screens stack absolutely inside #app; bottom tab bar; RPG "window" panels with notched pixel corners. Deliberately single dark theme: a night-time pixel world. */
+:root{
+  --void:#07050d;      /* outside the phone */
+  --night:#0f0b1c;     /* app ground */
+  --panel:#1a1430;     /* RPG window fill */
+  --panel2:#241c40;    /* raised fill */
+  --edge:#3d3166;      /* window border */
+  --ink:#f1e7d0;       /* parchment text */
+  --dim:#a092c2;       /* secondary text */
+  --amber:#ffb547;     /* primary accent: warm lamp light */
+  --magenta:#ff4f9a;   /* enemies, damage, snare */
+  --neon:#3ef0c8;      /* success, hi-hat, crit */
+  --violet:#a98bff;    /* bass, magic */
+  --leaf:#6fd36a;      /* forest */
+  --f-disp:'Silkscreen','Courier New',monospace;
+  --f-body:'Pixelify Sans','Trebuchet MS',system-ui,sans-serif;
+  --f-num:'VT323','Courier New',monospace;
+  --notch:polygon(4px 0,calc(100% - 4px) 0,100% 4px,100% calc(100% - 4px),calc(100% - 4px) 100%,4px 100%,0 calc(100% - 4px),0 4px);
+  color-scheme:dark;
+}
+[hidden]{display:none!important}
+html{height:100%;box-sizing:border-box}
+*,*::before,*::after{box-sizing:border-box}
+body{height:100%;margin:0;background:var(--void);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.4;display:flex;justify-content:center;align-items:center;-webkit-tap-highlight-color:transparent;overscroll-behavior:none}
+button{font:inherit;color:inherit;cursor:pointer;touch-action:manipulation}
+button:focus-visible,input:focus-visible{outline:3px solid var(--neon);outline-offset:2px}
+.btn:focus-visible,.menubtn:focus-visible,.abbtn:focus-visible,.tool:focus-visible,.jam:focus-visible,.pad:focus-visible,.pip-cta:focus-visible,.trio button:focus-visible{outline:none;box-shadow:inset 0 0 0 3px var(--neon)}
+canvas.px{image-rendering:pixelated;image-rendering:crisp-edges;display:block}
+canvas.bg{object-fit:cover}
+#app{position:relative;width:100%;max-width:430px;height:100%;background:var(--night);overflow:hidden;isolation:isolate}
+@media (min-width:520px){#app{height:min(100%,920px);box-shadow:0 0 0 4px #1d1733,0 0 0 8px #0c0916,0 30px 80px rgba(0,0,0,.6)}}
+.screen{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;padding:0 16px 104px;scrollbar-width:none}
+.screen::-webkit-scrollbar{display:none}
+.screen.full{padding-bottom:24px}
+.screen.enter{animation:enter .28s steps(5) both}
+@keyframes enter{from{transform:translateY(8px)}to{transform:none}}
+
+/* type */
+h1,h2,h3{font-family:var(--f-disp);font-weight:700;margin:0;text-wrap:balance;letter-spacing:.02em}
+h2{font-size:20px;line-height:1.15}
+h3{font-size:15px;line-height:1.2}
+p{margin:0}
+.eyebrow{font-family:var(--f-disp);font-size:11px;letter-spacing:.14em;color:var(--dim);text-transform:uppercase}
+.num{font-family:var(--f-num);font-variant-numeric:tabular-nums}
+.muted{color:var(--dim)}
+.stack{display:flex;flex-direction:column;gap:12px}
+.row{display:flex;gap:10px;align-items:center}
+.wrap{flex-wrap:wrap}
+.grow{flex:1;min-width:0}
+
+/* RPG windows & buttons */
+.win{background:var(--panel);border:3px solid var(--edge);clip-path:var(--notch);padding:14px;position:relative}
+.win.raised{background:var(--panel2)}
+.btn{font-family:var(--f-disp);font-weight:700;font-size:14px;letter-spacing:.06em;min-height:50px;padding:10px 16px;border:3px solid #2a1606;background:var(--amber);color:#2a1606;clip-path:var(--notch);box-shadow:inset 0 -5px 0 rgba(0,0,0,.22),inset 0 3px 0 rgba(255,255,255,.35);display:inline-flex;align-items:center;justify-content:center;gap:10px;text-transform:uppercase;transition:transform .06s steps(2)}
+.btn:active{transform:translateY(2px);box-shadow:inset 0 -2px 0 rgba(0,0,0,.22),inset 0 3px 0 rgba(255,255,255,.2)}
+.btn:disabled{filter:grayscale(1) brightness(.6);cursor:not-allowed}
+.btn.block{width:100%}
+.btn.ghost{background:var(--panel2);color:var(--ink);border-color:var(--edge);box-shadow:inset 0 -4px 0 rgba(0,0,0,.25)}
+.btn.neon{background:var(--neon);color:#062a22;border-color:#062a22}
+.btn.pink{background:var(--magenta);color:#2b0515;border-color:#2b0515}
+.btn.sm{min-height:44px;font-size:12px;padding:6px 12px}
+.btn.big{min-height:62px;font-size:17px}
+.chip{font-family:var(--f-disp);font-size:11px;letter-spacing:.08em;padding:4px 8px;background:var(--panel2);border:2px solid var(--edge);display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.chip.amber{border-color:var(--amber);color:var(--amber)}
+.chip.neon{border-color:var(--neon);color:var(--neon)}
+.chip.pink{border-color:var(--magenta);color:var(--magenta)}
+.bar{height:12px;background:#0a0714;border:2px solid var(--edge);position:relative;overflow:hidden}
+.bar>i{position:absolute;inset:0 auto 0 0;background:repeating-linear-gradient(90deg,transparent 0 6px,rgba(0,0,0,.28) 6px 8px),var(--c,var(--amber));transition:width .6s steps(12)}
+
+/* top bar */
+.topbar{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:8px;padding:14px 0 10px;background:linear-gradient(var(--night) 70%,transparent)}
+.topbar .title{font-family:var(--f-disp);font-size:16px;font-weight:700;flex:1;min-width:0}
+.iconbtn{min-width:44px;min-height:44px;background:var(--panel2);border:2px solid var(--edge);display:inline-flex;align-items:center;justify-content:center;gap:6px;font-family:var(--f-disp);font-size:13px;padding:0 10px}
+
+/* bottom nav */
+#nav{position:absolute;left:0;right:0;bottom:0;z-index:20;display:grid;grid-template-columns:repeat(5,1fr);background:#0b0816;border-top:3px solid var(--edge);padding:6px 4px 10px}
+#nav button{background:none;border:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:5px;min-height:54px;font-family:var(--f-disp);font-size:9.5px;letter-spacing:.06em;color:var(--dim);opacity:.8}
+#nav button.on{color:var(--amber);opacity:1}
+#nav button.on canvas{filter:drop-shadow(0 0 6px rgba(255,181,71,.55))}
+
+/* title */
+#s-title{padding:0}
+.title-scene{position:absolute;inset:0}
+.title-scene canvas{width:100%;height:100%}
+.title-ui{position:relative;z-index:2;min-height:100%;padding:13% 20px 40px;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center}
+.logo{font-family:var(--f-disp);font-weight:700;font-size:clamp(46px,15vw,64px);line-height:.9;color:var(--amber);text-shadow:0 4px 0 #b3561a,0 8px 0 #5a2410,0 12px 18px rgba(0,0,0,.7);letter-spacing:.02em}
+.logo span{display:block;color:var(--ink);text-shadow:0 4px 0 #7b6aa8,0 8px 0 #2d2350,0 12px 18px rgba(0,0,0,.7)}
+.tagline{font-size:17px;color:var(--ink);max-width:30ch;text-shadow:0 2px 0 #000}
+.title-hero{margin-top:auto;display:flex;align-items:flex-end;gap:10px}
+.blink{animation:blink 1.1s steps(2) infinite}
+@keyframes blink{50%{opacity:.35}}
+
+/* home hero */
+.hero-card{padding:0;overflow:hidden}
+.scene{position:relative;height:210px;background:#120e22}
+.scene canvas.bg{width:100%;height:100%}
+.sprite{position:absolute;bottom:22px}
+.bob{animation:bob 1.2s steps(2) infinite}
+@keyframes bob{50%{transform:translateY(-3px)}}
+.float{animation:float 2.4s steps(6) infinite}
+@keyframes float{50%{transform:translateY(-8px)}}
+.plate{padding:12px 14px 14px;display:flex;flex-direction:column;gap:8px}
+.plate .lvl{font-family:var(--f-disp);font-size:18px;font-weight:700}
+.statgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.stat{background:var(--panel);border:2px solid var(--edge);padding:10px 4px 8px;display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center}
+.stat b{font-family:var(--f-num);font-size:30px;line-height:.9;font-weight:400}
+.stat span{font-size:12px;color:var(--dim);line-height:1.1}
+.menugrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.menubtn{background:var(--panel);border:3px solid var(--edge);clip-path:var(--notch);min-height:74px;padding:12px;display:flex;align-items:center;gap:12px;font-family:var(--f-disp);font-size:13px;font-weight:700;text-align:left;letter-spacing:.04em}
+.menubtn:active{background:var(--panel2)}
+.menubtn canvas{flex:none}
+.pip-cta{display:flex;align-items:center;gap:12px;background:linear-gradient(90deg,#2a1d0c,var(--panel));border:3px solid #6a4718;clip-path:var(--notch);padding:12px 14px;text-align:left;width:100%}
+.pip-cta b{font-family:var(--f-disp);font-size:13px;color:var(--amber)}
+
+/* map */
+.mapwrap{position:relative;margin-inline:-16px}
+.mapwrap canvas{width:100%;height:auto}
+.mnode{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:0;padding:0}
+.mnode .pin{width:44px;height:44px;display:grid;place-items:center;background:var(--panel);border:3px solid var(--edge);clip-path:var(--notch);font-family:var(--f-disp);font-size:18px;font-weight:700}
+.mnode.open .pin{border-color:var(--amber);background:#2b1d0a;color:var(--amber);animation:pulse 1.2s steps(3) infinite}
+.mnode.clear .pin{border-color:var(--neon);background:#0b2a24}
+.mnode .lab{font-family:var(--f-disp);font-size:11px;font-weight:700;background:rgba(10,7,20,.86);padding:3px 6px;border:2px solid var(--edge);white-space:nowrap}
+.mnode.locked .lab{color:var(--dim)}
+.mnode .tag{font-family:var(--f-disp);font-size:8.5px;color:var(--amber);letter-spacing:.1em;background:rgba(10,7,20,.86);padding:1px 4px}
+@keyframes pulse{50%{filter:brightness(1.7)}}
+.maphero{position:absolute;margin:-42px 0 0 -16px;pointer-events:none}
+
+/* region path */
+.region-banner{padding:0;overflow:hidden}
+.region-banner .scene{height:150px}
+.region-banner .over{position:absolute;left:14px;bottom:12px;right:14px}
+.path{position:relative;display:flex;flex-direction:column;gap:14px;padding-left:34px}
+.path::before{content:"";position:absolute;left:12px;top:18px;bottom:18px;width:4px;background:repeating-linear-gradient(var(--edge) 0 6px,transparent 6px 12px)}
+.stage{position:relative;width:100%;text-align:left;display:flex;gap:12px;align-items:center;background:var(--panel);border:3px solid var(--edge);padding:12px}
+.stage::before{content:"";position:absolute;left:-32px;top:50%;width:18px;height:18px;margin-top:-9px;background:var(--edge)}
+.stage.done{border-color:#1f5c50}
+.stage.done::before{background:var(--neon)}
+.stage.current{border-color:var(--amber);background:#221a0c}
+.stage.current::before{background:var(--amber);animation:blink 1s steps(2) infinite}
+.stage.locked{opacity:.55}
+.stage .ic{width:44px;height:44px;display:grid;place-items:center;background:#0b0816;flex:none}
+.stage .k{font-family:var(--f-disp);font-size:10px;letter-spacing:.12em;color:var(--dim)}
+.stage.current .k{color:var(--amber)}
+.stage .t{font-family:var(--f-disp);font-size:14px;font-weight:700}
+.stage .s{font-size:14px;color:var(--dim)}
+.stage .st{font-family:var(--f-disp);font-size:10px;text-align:right;flex:none;color:var(--dim)}
+
+/* lesson */
+.lhead{position:sticky;top:0;z-index:5;background:var(--night);padding:14px 0 10px;display:flex;flex-direction:column;gap:10px}
+.stepper{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+.stepper span{font-family:var(--f-disp);font-size:9px;letter-spacing:.08em;text-align:center;padding:6px 0 5px;background:var(--panel);border-bottom:3px solid var(--edge);color:var(--dim)}
+.stepper span.on{color:var(--amber);border-color:var(--amber)}
+.stepper span.ok{color:var(--neon);border-color:var(--neon)}
+.lbody{display:flex;flex-direction:column;gap:14px;padding-bottom:12px}
+.lbody.enter{animation:enter .28s steps(5) both}
+.lfoot{position:sticky;bottom:0;padding:12px 0 18px;background:linear-gradient(transparent,var(--night) 30%)}
+.pip-say{display:flex;gap:12px;align-items:flex-start}
+.pip-say canvas{flex:none}
+.bubble{background:var(--ink);color:#1a1226;padding:12px 14px;clip-path:var(--notch);font-size:16.5px;line-height:1.45;position:relative;flex:1;min-width:0}
+.bubble b{color:#8a3d06}
+.big-title{font-family:var(--f-disp);font-size:24px;font-weight:700;line-height:1.1;text-wrap:balance}
+.lamp{width:72px;height:72px;margin:6px auto;background:var(--amber);border:6px solid #5a3a10;clip-path:var(--notch)}
+.lamp.go{animation:lamp var(--dur,1s) steps(2) infinite}
+@keyframes lamp{0%{filter:brightness(1.3);transform:scale(1.06)}50%{filter:brightness(.45);transform:scale(.94)}}
+.ab{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.abbtn{background:var(--panel);border:3px solid var(--edge);clip-path:var(--notch);padding:14px 12px;text-align:left;display:flex;flex-direction:column;gap:6px;min-height:118px}
+.abbtn .L{font-family:var(--f-disp);font-size:26px;font-weight:700;color:var(--amber);line-height:1}
+.abbtn.playing{border-color:var(--amber);background:#241a0a}
+.abbtn.heard .L::after{content:" ✓";color:var(--neon);font-size:16px}
+.abbtn small{font-size:14px;color:var(--dim);line-height:1.25}
+.scope{width:100%;height:64px;background:#08060f;border:2px solid var(--edge)}
+.ruler{display:flex;flex-direction:column;gap:4px}
+.ruler div{display:flex;justify-content:space-between;padding:6px 10px;background:var(--panel);border-left:4px solid var(--edge);font-size:15px}
+.ruler div.on{border-color:var(--amber);background:#241a0a;color:var(--amber)}
+.ruler div.seen:not(.on){border-color:#1f5c50}
+.ruler .num{font-size:19px}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:30px;background:transparent}
+input[type=range]::-webkit-slider-runnable-track{height:10px;background:#0a0714;border:2px solid var(--edge)}
+input[type=range]::-moz-range-track{height:10px;background:#0a0714;border:2px solid var(--edge)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:26px;margin-top:-10px;background:var(--amber);border:3px solid #2a1606;border-radius:0}
+input[type=range]::-moz-range-thumb{width:18px;height:22px;background:var(--amber);border:3px solid #2a1606;border-radius:0}
+.bpmread{font-family:var(--f-num);font-size:64px;line-height:.8;color:var(--amber);text-align:center}
+.check{display:flex;flex-direction:column;gap:6px}
+.check div{display:flex;gap:10px;align-items:flex-start;font-size:15.5px}
+.check div::before{content:"";flex:none;width:14px;height:14px;margin-top:3px;border:2px solid var(--dim)}
+.check div.ok{color:var(--neon)}
+.check div.ok::before{background:var(--neon);border-color:var(--neon)}
+.fb{font-size:15.5px;padding:10px 12px;border-left:4px solid var(--magenta);background:#2a0f1e}
+.fb.good{border-color:var(--neon);background:#0b2620}
+.trio{display:grid;gap:10px}
+.trio button{display:flex;gap:12px;align-items:center;text-align:left;background:var(--panel);border:3px solid var(--edge);clip-path:var(--notch);padding:12px}
+.trio button canvas{flex:none}
+.trio b{font-family:var(--f-disp);font-size:14px}
+.trio p{font-size:15px;color:var(--dim)}
+
+/* sequencer */
+.seq{display:flex;flex-direction:column;gap:8px}
+.beatrow,.cells{display:grid;grid-template-columns:repeat(16,1fr);gap:3px}
+.beatrow span{font-family:var(--f-num);font-size:15px;text-align:center;color:#5c5184;line-height:1}
+.beatrow span.b{color:var(--amber)}
+.trk-h{display:flex;align-items:center;gap:8px;font-family:var(--f-disp);font-size:11px;letter-spacing:.08em;margin-bottom:4px}
+.trk-h .dot{width:10px;height:10px;flex:none}
+.trk-h input{flex:1;min-width:0;height:22px}
+.trk-h .vv{font-family:var(--f-num);font-size:16px;color:var(--dim);width:28px;text-align:right}
+.cell{height:40px;min-width:0;background:#130f24;border:0;padding:0;box-shadow:inset 0 0 0 2px #2a2248;font-family:var(--f-disp);font-size:10px;font-weight:700;color:#130f24}
+.cell.beat{background:#1d1736;box-shadow:inset 0 0 0 2px #3d3166}
+.cell.on{background:var(--c);box-shadow:inset 0 -4px 0 rgba(0,0,0,.28),inset 0 3px 0 rgba(255,255,255,.35)}
+.cell.ph{outline:2px solid var(--ink);outline-offset:-2px;filter:brightness(1.4)}
+.cell.lockc{cursor:default}
+.transport{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.bpmbox{display:flex;align-items:center;gap:4px;background:#0a0714;border:2px solid var(--edge);padding:2px}
+.bpmbox button{width:40px;height:40px;background:var(--panel2);border:0;font-family:var(--f-disp);font-size:16px}
+.bpmbox .num{font-size:26px;min-width:52px;text-align:center;color:var(--amber)}
+.barc{font-family:var(--f-num);font-size:22px;color:var(--dim);margin-left:auto}
+
+/* tap widget */
+.tapw{display:flex;flex-direction:column;align-items:center;gap:12px}
+.tapdots{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+.tapdots i{width:16px;height:16px;background:#130f24;border:2px solid var(--edge)}
+.tapdots i.hit{background:var(--neon);border-color:var(--neon)}
+.tapdots i.miss{background:var(--magenta);border-color:var(--magenta)}
+.tapdots i.now{border-color:var(--amber)}
+.pad{width:min(62vw,220px);aspect-ratio:1;max-width:100%;background:var(--panel2);border:4px solid var(--edge);clip-path:var(--notch);font-family:var(--f-disp);font-size:24px;font-weight:700;color:var(--dim);touch-action:none;user-select:none;-webkit-user-select:none}
+.pad.flash{background:#3a2a10;border-color:var(--amber);color:var(--amber)}
+.pad.pressed{transform:scale(.96);background:#0e3a30;color:var(--neon)}
+.tapmsg{font-size:16px;text-align:center;min-height:2.8em}
+
+/* quantize lane */
+.lane{position:relative;height:64px;background:#08060f;border:2px solid var(--edge);overflow:hidden}
+.lane .gl{position:absolute;top:0;bottom:0;width:1px;background:#2a2248}
+.lane .gl.b{width:2px;background:#4d3f80}
+.lane .gl.g{background:rgba(62,240,200,.6)}
+.lane .nt{position:absolute;top:14px;width:10px;height:22px;margin-left:-5px;background:var(--neon);transition:left .5s steps(5)}
+.lane .nt.k{top:42px;background:var(--amber);height:14px}
+.qbtns{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+
+/* battle */
+#s-battle{padding-top:12px}
+.bt-top{display:flex;flex-direction:column;gap:6px}
+.bt-name{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.bt-name h2{font-size:17px;color:var(--magenta)}
+.hpbar{--c:var(--magenta);height:16px}
+.arena{position:relative;height:230px;margin:10px -16px 0;overflow:hidden;background:#100c1e}
+#s-battle.puzzle .arena{height:150px}
+.arena canvas.bg{width:100%;height:100%}
+.enemy{position:absolute;right:12%;top:26px;transform-origin:50% 100%}
+.enemy.slime canvas{animation:squish .9s steps(3) infinite;transform-origin:50% 100%}
+@keyframes squish{50%{transform:scale(1.08,.9)}}
+.enemy.hurt{animation:hurt .4s steps(4)}
+@keyframes hurt{25%{transform:translateX(-10px);filter:brightness(3)}50%{transform:translateX(8px)}75%{transform:translateX(-4px);filter:brightness(2)}}
+.enemy.dead{animation:die .9s steps(6) forwards}
+@keyframes die{to{opacity:0;transform:scale(1.4,.1)}}
+.bhero{position:absolute;left:12%;bottom:16px}
+.arena.shake{animation:shake .35s steps(4)}
+@keyframes shake{25%{transform:translate(6px,-3px)}50%{transform:translate(-6px,3px)}75%{transform:translate(3px,2px)}}
+.arena .flashred{position:absolute;inset:0;background:var(--magenta);opacity:0;pointer-events:none}
+.arena .flashred.go{animation:fr .4s steps(3)}
+@keyframes fr{30%{opacity:.35}}
+.pop{position:absolute;left:68%;top:34px;font-family:var(--f-disp);font-weight:700;font-size:22px;line-height:1.1;text-align:center;color:var(--ink);text-shadow:0 3px 0 #000;animation:pop 1.1s steps(8) forwards;pointer-events:none;white-space:nowrap;transform:translateX(-50%)}
+.pop.crit{font-size:20px;color:var(--neon)}
+.pop.miss{color:var(--dim)}
+@keyframes pop{0%{opacity:0;margin-top:10px}15%{opacity:1}100%{opacity:0;margin-top:-50px}}
+.spark{position:absolute;left:75%;top:80px;width:6px;height:6px;pointer-events:none;animation:spark .7s steps(6) forwards}
+@keyframes spark{to{transform:translate(var(--dx),var(--dy));opacity:0}}
+.hearts{display:flex;gap:4px;align-items:center;margin:10px 0 8px}
+.hearts .eyebrow{margin-right:6px}
+.dialog{min-height:92px;cursor:pointer}
+.dialog p{font-size:17px;line-height:1.45}
+.dialog .who{font-family:var(--f-disp);font-size:11px;color:var(--amber);letter-spacing:.1em;margin-bottom:4px}
+.bt-act{margin-top:12px;display:flex;flex-direction:column;gap:10px}
+.actgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.actgrid .btn:first-child{grid-column:1/-1}
+.opts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+
+/* modals */
+.modal-back{position:absolute;inset:0;z-index:50;background:rgba(5,3,10,.78);display:flex;align-items:center;justify-content:center;padding:16px;animation:enter .2s steps(4)}
+.modal{width:100%;max-height:92%;overflow-y:auto;overflow-x:hidden;text-align:center;display:flex;flex-direction:column;gap:14px;align-items:center}
+.rw-t{font-size:26px;color:var(--amber);text-shadow:0 3px 0 #5a2410}
+.rw-list{display:flex;flex-direction:column;gap:8px;width:100%}
+.rw-i{display:flex;align-items:center;justify-content:center;gap:10px;font-family:var(--f-disp);font-size:14px;padding:10px;background:var(--panel2);animation:enter .3s steps(4) both}
+.rw-i b{font-family:var(--f-num);font-size:28px;font-weight:400;color:var(--neon)}
+.lvup{font-family:var(--f-disp);font-weight:700;font-size:20px;color:var(--neon);animation:blink .5s steps(2) 4}
+.dramatic{background:radial-gradient(circle at 50% 42%,#3a2408,#05030a 70%)}
+.unlock{position:relative;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;padding:10px 6px;width:100%}
+.rays{position:absolute;left:50%;top:120px;width:520px;height:520px;margin:-260px 0 0 -260px;background:repeating-conic-gradient(rgba(255,181,71,.16) 0 10deg,transparent 10deg 20deg);animation:spin 14s linear infinite;pointer-events:none;-webkit-mask:radial-gradient(circle,#000 20%,transparent 65%);mask:radial-gradient(circle,#000 20%,transparent 65%)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ul-icon{position:relative;animation:grow .8s steps(8) both}
+@keyframes grow{from{transform:scale(0)}70%{transform:scale(1.2)}to{transform:scale(1)}}
+.unlock h2{font-size:30px;color:var(--amber);text-shadow:0 4px 0 #5a2410;position:relative}
+.unlock .weapon{font-family:var(--f-disp);font-size:12px;color:var(--neon);letter-spacing:.12em;position:relative}
+.unlock p,.unlock .btn{position:relative}
+
+/* studio */
+.room{padding:0;overflow:hidden}
+.room .scene{height:190px}
+.gear{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.gear div{background:var(--panel);border:2px solid var(--edge);padding:6px 2px;display:flex;flex-direction:column;align-items:center;gap:3px;font-family:var(--f-disp);font-size:8px;text-align:center;line-height:1.1;letter-spacing:.04em}
+.gear div.have{border-color:var(--amber);color:var(--amber)}
+.gear div:not(.have){color:#6a5f9a}
+.pads{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.jam{min-height:90px;border:3px solid var(--edge);clip-path:var(--notch);background:var(--panel2);font-family:var(--f-disp);font-size:14px;font-weight:700;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;touch-action:none}
+.jam.hit{background:var(--c);color:#130f24}
+.spec{width:100%;height:48px;background:#08060f;border:2px solid var(--edge)}
+.cbanner{border-color:var(--amber);background:#221a0c}
+.scorebars{display:flex;flex-direction:column;gap:8px;width:100%;text-align:left}
+.scorebars div{display:grid;grid-template-columns:1fr 2fr 40px;gap:8px;align-items:center;font-size:15px}
+.scorebars .num{font-size:22px;text-align:right}
+.tips{text-align:left;display:flex;flex-direction:column;gap:6px;width:100%}
+.tips p{font-size:15px;padding-left:14px;position:relative}
+.tips p::before{content:"";position:absolute;left:0;top:8px;width:6px;height:6px;background:var(--amber)}
+
+/* quests, inventory */
+.quest{display:flex;gap:12px;align-items:center}
+.quest canvas{flex:none}
+.quest .t{font-family:var(--f-disp);font-size:13px;font-weight:700}
+.quest .d{font-size:14px;color:var(--dim)}
+.quest .rw{font-size:12px;color:var(--amber);font-family:var(--f-disp)}
+.quest.claimed{opacity:.55}
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.tabs button{min-height:44px;background:var(--panel);border:0;border-bottom:3px solid var(--edge);font-family:var(--f-disp);font-size:12px;letter-spacing:.1em;color:var(--dim)}
+.tabs button.on{color:var(--amber);border-color:var(--amber)}
+.tools{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tool{text-align:left;display:flex;flex-direction:column;gap:6px;background:var(--panel);border:3px solid var(--edge);clip-path:var(--notch);padding:12px;min-width:0}
+.tool.have{border-color:#6a4718}
+.tool.locked{opacity:.6}
+.tool .n{font-family:var(--f-disp);font-size:13px;font-weight:700}
+.tool .w{font-size:13px;color:var(--neon)}
+.tool .r{font-family:var(--f-disp);font-size:9.5px;color:var(--dim);letter-spacing:.06em}
+.tool .bar{height:9px}
+.swatches{display:flex;gap:8px;flex-wrap:wrap}
+.sw{min-width:44px;min-height:44px;padding:6px 10px;background:var(--panel2);border:3px solid var(--edge);display:flex;align-items:center;gap:8px;font-size:14px}
+.sw i{width:18px;height:18px;flex:none;border:2px solid rgba(0,0,0,.5)}
+.sw.on{border-color:var(--amber)}
+.sw.lock{opacity:.55}
+.dressing{display:flex;justify-content:center;align-items:flex-end;gap:10px;padding:16px;background:radial-gradient(circle at 50% 70%,#2a1f4a,var(--panel) 70%)}
+
+/* coach */
+.sheet{position:absolute;inset:0;z-index:60;background:rgba(5,3,10,.7);display:flex;align-items:flex-end}
+.sheet-in{width:100%;height:88%;background:var(--panel);border-top:3px solid var(--amber);display:flex;flex-direction:column;animation:up .25s steps(5)}
+@keyframes up{from{transform:translateY(40%)}}
+.sheet-h{display:flex;gap:12px;align-items:center;padding:14px 16px;border-bottom:2px solid var(--edge)}
+.msgs{flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.msg{max-width:88%;padding:10px 12px;font-size:15.5px;line-height:1.45;white-space:pre-wrap;clip-path:var(--notch)}
+.msg.me{align-self:flex-end;background:var(--amber);color:#2a1606}
+.msg.pip{align-self:flex-start;background:var(--ink);color:#1a1226}
+.msg.note{align-self:center;background:none;color:var(--dim);font-size:13px;text-align:center;clip-path:none}
+.chips{display:flex;gap:6px;overflow-x:auto;padding:0 16px 8px;scrollbar-width:none}
+.chips.wrap{flex-wrap:wrap;max-height:40%;overflow-y:auto;padding-bottom:16px}
+.chips button{flex:none;background:var(--panel2);border:2px solid var(--edge);padding:8px 10px;font-size:14px;white-space:nowrap;min-height:40px}
+.composer{display:flex;gap:8px;padding:10px 16px 16px;border-top:2px solid var(--edge)}
+.composer input{flex:1;min-width:0;min-height:48px;background:#0a0714;border:2px solid var(--edge);color:var(--ink);font:inherit;font-size:16px;padding:0 12px}
+
+#wipe{position:absolute;inset:0;z-index:40;pointer-events:none;background:var(--night);opacity:0}
+#wipe.go{animation:wipe .3s steps(4)}
+@keyframes wipe{0%{opacity:1}100%{opacity:0}}
+.toast{position:absolute;left:16px;right:16px;top:14px;z-index:70;background:var(--panel2);border:3px solid var(--neon);clip-path:var(--notch);padding:10px 14px;font-family:var(--f-disp);font-size:12px;letter-spacing:.06em;color:var(--neon);animation:toast 2.6s steps(6) forwards;pointer-events:none}
+@keyframes toast{0%{transform:translateY(-120%)}12%,85%{transform:none}100%{transform:translateY(-120%)}}
+.victory-hero{display:flex;justify-content:center;align-items:flex-end;gap:14px;padding:18px 0 6px}
+.learned{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.learned span{background:var(--panel2);padding:8px 10px;font-size:14.5px;border-left:3px solid var(--neon)}
+
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition:none!important}}
+</style>
+
+<div id="app">
+  <section class="screen full" id="s-title"></section>
+  <section class="screen" id="s-home" hidden></section>
+  <section class="screen" id="s-map" hidden></section>
+  <section class="screen" id="s-region" hidden></section>
+  <section class="screen full" id="s-lesson" hidden></section>
+  <section class="screen full" id="s-battle" hidden></section>
+  <section class="screen" id="s-studio" hidden></section>
+  <section class="screen" id="s-quests" hidden></section>
+  <section class="screen" id="s-bag" hidden></section>
+  <section class="screen full" id="s-victory" hidden></section>
+  <nav id="nav" hidden aria-label="Main">
+    <button data-go="home"><canvas class="px" data-ic="home"></canvas>HOME</button>
+    <button data-go="map"><canvas class="px" data-ic="flag"></canvas>MAP</button>
+    <button data-go="studio"><canvas class="px" data-ic="drums"></canvas>STUDIO</button>
+    <button data-go="quests"><canvas class="px" data-ic="scroll"></canvas>QUESTS</button>
+    <button data-go="bag"><canvas class="px" data-ic="chest"></canvas>BAG</button>
+  </nav>
+  <div id="wipe"></div>
+</div>
+
+<script>
+"use strict";
+/* ================= helpers ================= */
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const app=$('#app');
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const haptic=ms=>{try{navigator.vibrate&&navigator.vibrate(ms)}catch(e){}};
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+function rng(seed){let s=seed%2147483647||1;return()=>(s=s*16807%2147483647)/2147483647}
+function shade(hex,f){const n=parseInt(hex.slice(1),16);let r=n>>16,g=n>>8&255,b=n&255;const m=f<0?1+f:1;const a=f>0?f:0;r=Math.round(r*m+(255-r)*a);g=Math.round(g*m+(255-g)*a);b=Math.round(b*m+(255-b)*a);return'#'+((1<<24)|(r<<16)|(g<<8)|b).toString(16).slice(1)}
+const dayStr=d=>d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
+const todayStr=()=>dayStr(new Date());
+
+/* ================= pixel sprites ================= */
+function drawSprite(cv,rows,pal,sc){const w=Math.max(...rows.map(r=>r.length)),h=rows.length;cv.width=w*sc;cv.height=h*sc;cv.style.width=w*sc+'px';cv.style.height=h*sc+'px';const g=cv.getContext('2d');g.clearRect(0,0,cv.width,cv.height);rows.forEach((r,y)=>{for(let x=0;x<r.length;x++){const c=pal[r[x]];if(c){g.fillStyle=c;g.fillRect(x*sc,y*sc,sc,sc)}}});return cv}
+function sprite(rows,pal,sc,cls){const c=document.createElement('canvas');c.className='px'+(cls?' '+cls:'');return drawSprite(c,rows,pal,sc)}
+
+const HERO=[
+"....kkkkkkkk....",
+"...kppppppppk...",
+"..kphhhhhhhhpk..",
+".kphhhhhhhhhhpk.",
+".kPkhhhhhhhhkPk.",
+".kPkhsssssshkPk.",
+".kPksesssseskPk.",
+".kPksssssssskPk.",
+"..kkssskkssskk..",
+"...kksssssskk...",
+"..kcccksskccck..",
+".kcccccccccccck.",
+"kccccaaaaaacccck",
+"kckccaaaaaacckck",
+"kskccccccccccksk",
+".k.kcccccccck.k.",
+"...kjjjjjjjjk...",
+"...kjjjkkjjjk...",
+"...kjjk..kjjk...",
+"..kbbbk..kbbbk..",
+"..kkkkk..kkkkk.."];
+
+const PIP=[
+".....ka.....",
+".....k......",
+"..kkkkkkkk..",
+".kmmmmmmmmk.",
+".kmkkmmkkmk.",
+".kmkekkekmk.",
+".kmmmmmmmmk.",
+".kmmggggmmk.",
+".kmmgkgkmmk.",
+".kmmggggmmk.",
+"..kkkkkkkk..",
+"...k....k..."];
+const PIP_PAL={k:'#140d1f',m:'#ffb547',e:'#3ef0c8',g:'#7a4a1a',a:'#ff4f9a'};
+
+const SLIME=[
+"......kkkk......",
+"....kkggggkk....",
+"...kggggggwgk...",
+"..kgggggggwwgk..",
+".kggggggggggggk.",
+".kggwkwggwkwggk.",
+"kggggggggggggggk",
+"kgggggkkkkgggggk",
+"kddgggggggggggdk",
+"kddddggggggddddk",
+".kkkkkkkkkkkkkk."];
+const SLIME_PAL={k:'#140d1f',g:'#c24dff',d:'#7a2ab0',w:'#ffffff'};
+
+const METRO=[
+".......kk.......",
+"......kyyk......",
+"......kbbk......",
+".....kbbbbk.....",
+".....kbbybk.....",
+"....kbbbybbk....",
+"....kbbbbybk....",
+"...kbbbbbbybk...",
+"...kbrrbbbrrbk..",
+"..kbbbbbbbbbbbk.",
+"..kbbbkkkkkbbbk.",
+".kbbbbbbbbbbbbbk",
+".kyyyyyyyyyyyyyk",
+"kkkkkkkkkkkkkkkk"];
+const METRO_PAL={k:'#140d1f',b:'#8a5a34',y:'#ffcc4d',r:'#ff4f5a'};
+
+const BEAST=[
+"k..............k",
+".kk..........kk.",
+"..kkkkkkkkkkkk..",
+".krrrrrrrrrrrrk.",
+"krrwwrrrrrrwwrrk",
+"krrkwrrrrrrwkrrk",
+"krrrrrrrrrrrrrrk",
+"krryyyyyyyyyyrrk",
+"kryykyykyykyyrrk",
+"krryyyyyyyyyyrrk",
+"krrrrrrrrrrrrrrk",
+".krrk......krrk.",
+".kkkk......kkkk."];
+const BEAST_PAL={k:'#140d1f',r:'#b8322e',w:'#ffffff',y:'#ffcc4d'};
+
+const CASSETTE=[
+"kkkkkkkkkk",
+"kaaaaaaaak",
+"kawkaawkak",
+"kaaaaaaaak",
+"kaakkkkaak",
+".k......k."];
+const CASSETTE_PAL={k:'#140d1f',a:'#ff4f9a',w:'#ffffff'};
+
+const ICONS={
+volume:["....dd....","....dd....","..llllll..","..laaaal..","..llllll..","....dd....","....dd....","....dd....","....dd....","...dddd..."],
+drums:["..........",".llllllll.","laaaaaaaal","llllllllll","lalalalala","lalalalala","lalalalala","llllllllll",".d......d.","d........d"],
+midi:["..........","aaaaaaaaaa","ldldlldldl","ldldlldldl","ldldlldldl","llllllllll","llllllllll","llllllllll","aaaaaaaaaa",".........."],
+eq:["........ll",".......lal","......lal.",".....lal..","....lal...","d..lal....",".dlal.....","..dd......",".d.dd.....","d........."],
+comp:["..llllll..","..laaaal..","..laaaal..","..llllll..","....dd....","....dd....","....dd....","....dd....","....dd....","...dddd..."],
+reverb:["....ll....","...laal...","..laalal..",".laaalaal.",".laalaaal.","..laaaal..","...laal...","....ll....","...dddd...","..dddddd.."],
+delay:["dddddddddd",".laaaaaal.","..laaaal..","...laal...","....ll....","....ll....","...l..l...","..l.aa.l..",".laaaaaal.","dddddddddd"],
+dist:["....a.....","...aa.....","...aal....","..aall.a..","..alllaa..",".aallllaa.",".alllllla.",".allddlla.","..alddla..","...aaaa..."],
+synth:[".......aa.","......alla","......alla",".......aa.","......d...",".....d....","....d.....","...d......","..d.......",".d........"],
+auto:["l.........","l.......a.","l......a.a","l.....a...","l..a.a....","l.a.a.....","la........","l.........","llllllllll",".........."],
+limiter:["llllllllll","laaaaaaaal","laddddddal","laaaaaaaal","laaaaaaaal",".laaaaaal.",".laaaaaal.","..laaaal..","...laal...","....ll...."],
+mixer:[".l..l..l..",".l..l..l..",".a..l..l..",".a..l..a..",".l..a..a..",".l..a..l..",".l..l..l..",".l..l..l..","dddddddddd","dddddddddd"],
+home:["....l....","...lal...","..laaal..",".laaaaal.","lllllllll",".l.....l.",".l.ll..l.",".l.ll..l.",".lllllll."],
+flag:["la.......","laaaa....","laaaaaaa.","laaaaaa..","laaa.....","l........","l........","l........","lll......"],
+scroll:["lllllllll","l.......l","l.aaaaa.l","l.......l","l.aaaa..l","l.......l","l.aaaaa.l","l.......l","lllllllll"],
+chest:[".lllllll.","laaaaaaal","laaaaaaal","llllLllll","laaaLaaal","laaaaaaal","laaaaaaal","lllllllll"],
+coin:["..lll..",".laaal.","laalaal","laalaal","laalaal",".laaal.","..lll.."],
+heart:[".aa.aa.","alaaaaa","aaaaaaa",".aaaaa.","..aaa..","...a..."],
+flame:["...l...","..ll...","..lal..",".llal.l",".laaall","laaaaal","laaaaal",".lllll."],
+sword:["........ll",".......lal","......lal.",".....lal..","....lal...","d..lal....",".dlal.....","..dd......",".d.dd.....","d........."],
+star:["....l....","....l....","...lal...","lllaaalll",".laaaaal.","..laaal..",".lal.lal.",".l.....l."],
+lock:["..ddd..",".d...d.",".d...d.","aaaaaaa","aaalaaa","aaalaaa","aaaaaaa"],
+skull:[".aaaaaa.","aaaaaaaa","a..aa..a","a..aa..a","aaaaaaaa",".aaaaaa.",".a.aa.a.",".aaaaaa."]};
+const DIM_PAL={l:'#3d3166',a:'#2a2248',d:'#2a2248',L:'#3d3166'};
+function icPal(col){return{l:'#f1e7d0',a:col||'#ffb547',d:'#8a7fa8',L:'#ffb547'}}
+function icon(name,col,sc,dimmed){return sprite(ICONS[name],dimmed?DIM_PAL:icPal(col),sc)}
+const ICON_DEFAULT_COL={coin:'#ffcc4d',heart:'#ff4f9a',flame:'#ff7a3a',lock:'#6a5f9a',skull:'#ff4f9a'};
+
+/* ================= data ================= */
+const TOOLS=[
+{id:'volume',name:'Volume',weapon:'Gain Fader',lv:1,world:'Starting gear',col:'#f1e7d0',desc:'Sets how loud each sound is. Every balanced mix starts here.',daw:'Every channel in every DAW has a volume fader. Mixing starts with these.',tag:'Turn it up. Or, more often, turn it down.'},
+{id:'drums',name:'Drum Machine',weapon:'Rhythm Gauntlet',lv:2,world:'Beat Forest',col:'#ffb547',desc:'Programs rhythms on a 16-step grid: kick, snare, hats and bass.',daw:'Ableton Drum Rack, FL Studio Channel Rack and Logic Step Sequencer all use this same 16-step grid.',tag:'Program rhythms step by step.'},
+{id:'midi',name:'MIDI',weapon:'Note Scroll',lv:3,world:'Synth Caves',col:'#a98bff',desc:'Records which notes play, when, and how hard, without recording any sound.',daw:'The piano roll in any DAW is MIDI you can see and edit.',tag:'Write music as instructions.'},
+{id:'eq',name:'EQ',weapon:'Frequency Blade',lv:4,world:'EQ Desert',col:'#3ef0c8',desc:'Cuts or boosts ranges of frequencies to fix muddy or harsh sounds.',daw:'EQ Eight in Ableton, Channel EQ in Logic, Fruity Parametric EQ 2 in FL Studio.',tag:'Cut away what the sound does not need.'},
+{id:'comp',name:'Compressor',weapon:'Dynamics Hammer',lv:5,world:'Compression Volcano',col:'#ff7a3a',desc:'Tames loud peaks so a sound hits with steady punch.',daw:'Threshold, ratio, attack and release: the same four knobs on every compressor.',tag:'Control the dynamics of your sounds.'},
+{id:'reverb',name:'Reverb',weapon:'Space Crystal',lv:6,world:'Reverb Swamp',col:'#6cb8ff',desc:'Places a sound inside a room, a hall or a cave.',daw:'Room size, decay, pre-delay and wet/dry appear on almost every reverb.',tag:'Give your sound a place to live.'},
+{id:'delay',name:'Delay',weapon:'Time Spell',lv:7,world:'Reverb Swamp',col:'#6cb8ff',desc:'Repeats a sound in time, like a musical echo.',daw:'Sync the delay time to 1/8 or 1/4 notes so echoes stay in the groove.',tag:'Bend time with echoes.'},
+{id:'dist',name:'Distortion',weapon:'Ember Charm',lv:8,world:'Compression Volcano',col:'#ff4f5a',desc:'Adds grit and harmonics by pushing a sound past clean.',daw:'Saturation and overdrive plug-ins do this gently or brutally.',tag:'Add fire and grit.'},
+{id:'synth',name:'Synthesizer',weapon:'Wave Staff',lv:9,world:'Synth Caves',col:'#a98bff',desc:'Builds brand-new sounds from oscillators, filters and envelopes.',daw:'Serum, Vital, Wavetable and Alchemy are all built from the same parts.',tag:'Create sounds that never existed.'},
+{id:'auto',name:'Automation',weapon:'Motion Rune',lv:10,world:'Mixing Castle',col:'#ffcc4d',desc:'Moves any knob over time, so your mix breathes and builds.',daw:'Draw automation lanes under any track in any DAW.',tag:'Make your mix move.'},
+{id:'limiter',name:'Limiter',weapon:'Ceiling Shield',lv:11,world:'Mastering Sky',col:'#f1e7d0',desc:'Stops your track from ever going past a set level.',daw:'The last plug-in on the master channel, set just under 0 dB.',tag:'Nothing gets past the ceiling.'}];
+
+const WORLDS=[
+{id:'sky',name:'Mastering Sky',teaches:'Limiting, loudness, LUFS, stereo width, exporting',boss:'The Master',x:46,y:16},
+{id:'castle',name:'Mixing Castle',teaches:'Gain staging, panning, stereo image, automation',boss:'The Mixing Lord',x:64,y:51},
+{id:'swamp',name:'Reverb Swamp',teaches:'Room size, decay, pre-delay, wet and dry',boss:'The Echo King',x:28,y:85},
+{id:'volcano',name:'Compression Volcano',teaches:'Threshold, ratio, attack, release, punch',boss:'The Dynamic Titan',x:66,y:119},
+{id:'desert',name:'EQ Desert',teaches:'Low, mid and high frequencies, filters, masking',boss:'The Spectrum King',x:30,y:153},
+{id:'caves',name:'Synth Caves',teaches:'Oscillators, waveforms, ADSR, filters, LFO',boss:'The Synth Dragon',x:64,y:187},
+{id:'forest',name:'Beat Forest',teaches:'Rhythm, BPM, bars, drum patterns, quantize',boss:'The Rhythm Beast',x:32,y:222}];
+
+const STAGES=[
+{id:'l1',kind:'LESSON',title:'The Pulse',sub:'BPM and tempo',mins:3,icon:'flame',quest:'Learn the pulse'},
+{id:'l2',kind:'LESSON',title:'Bars & Beats',sub:'4/4 time and the 16-step grid',mins:4,icon:'scroll',quest:'Learn bars and beats'},
+{id:'l3',kind:'LESSON',title:'The Drum Trio',sub:'Kick, snare, hi-hat',mins:5,icon:'drums',quest:'Meet the drum trio'},
+{id:'slime',kind:'BATTLE',title:'Offbeat Slime',sub:'Weakness: snare placement',mins:3,icon:'sword',quest:'Defeat the Offbeat Slime'},
+{id:'metro',kind:'MINI-BOSS',title:'Broken Metronome',sub:'Tempo and quantize · drops the Drum Machine',mins:5,icon:'star',quest:'Defeat the Broken Metronome'},
+{id:'challenge',kind:'CHALLENGE',title:'First Beat',sub:'8 bars with kick, snare, hats and bass',mins:6,icon:'coin',quest:'Make your first beat'},
+{id:'boss',kind:'WORLD BOSS',title:'The Rhythm Beast',sub:'Swing, syncopation and groove',mins:6,icon:'skull',quest:'Defeat the Rhythm Beast'}];
+
+const COS=[
+{id:'hoodie-amber',slot:'hoodie',name:'Ember',col:'#d9792a',price:0},
+{id:'hoodie-moss',slot:'hoodie',name:'Moss',col:'#4f8a4a',price:0},
+{id:'hoodie-midnight',slot:'hoodie',name:'Midnight',col:'#3a4a9a',price:50},
+{id:'hoodie-magenta',slot:'hoodie',name:'Offbeat',col:'#c23a7a',price:null,how:'Daily quest: Balance three instruments'},
+{id:'hoodie-beast',slot:'hoodie',name:'Beast Hide',col:'#b8322e',price:null,how:'Defeat the Rhythm Beast'},
+{id:'phones-silver',slot:'phones',name:'Studio Silver',col:'#c9c6d8',price:0},
+{id:'phones-gold',slot:'phones',name:'Gold Monitors',col:'#ffcc4d',price:80},
+{id:'phones-leaf',slot:'phones',name:'Leaf Cans',col:'#6fd36a',price:null,how:'Finish the First Beat challenge'},
+{id:'hair-brown',slot:'hair',name:'Brown',col:'#6b3f22',price:0},
+{id:'hair-black',slot:'hair',name:'Ink',col:'#2a1f30',price:0},
+{id:'hair-teal',slot:'hair',name:'Teal',col:'#2bb3a0',price:40},
+{id:'comp-none',slot:'comp',name:'Solo',col:'#3d3166',price:0},
+{id:'comp-cassette',slot:'comp',name:'Cassette Critter',col:'#ff4f9a',price:null,how:'Defeat the Offbeat Slime'},
+{id:'kit-training',slot:'kit',name:'Training Kit',col:'#ffb547',price:0},
+{id:'kit-forest',slot:'kit',name:'Forest Lo-fi Kit',col:'#6fd36a',price:null,how:'Daily quest: Create a 4-bar drum loop'}];
+const cos=id=>COS.find(c=>c.id===id);
+
+const QUESTS=[
+{id:'lesson',title:'Finish a lesson',desc:'Any lesson in Beat Forest',goal:1,xp:30,coins:10,icon:'scroll'},
+{id:'defeat',title:'Defeat a monster',desc:'Win any battle',goal:1,xp:40,coins:20,icon:'sword'},
+{id:'ks',title:'Create a kick + snare pattern',desc:'In your studio drum machine',goal:1,xp:20,coins:10,icon:'drums',needs:'drums'},
+{id:'loop4',title:'Create a 4-bar drum loop',desc:'Play a kick + snare loop for 4 bars',goal:4,xp:40,coins:15,icon:'drums',needs:'drums',reward:'kit-forest'},
+{id:'balance',title:'Balance three instruments',desc:'Move the volume of 3 different tracks',goal:3,xp:30,coins:15,icon:'volume',needs:'drums',reward:'hoodie-magenta'}];
+
+/* ================= state ================= */
+const emptyPat=()=>({kick:Array(16).fill(0),snare:Array(16).fill(0),hat:Array(16).fill(0),bass:Array(16).fill(0)});
+function pat(spec){const p=emptyPat();for(const k in spec)spec[k].forEach(i=>{p[k][Array.isArray(i)?i[0]:i]=Array.isArray(i)?i[1]:1});return p}
+const EIGHTHS=[0,2,4,6,8,10,12,14];
+const DEF=()=>({v:1,xp:0,coins:20,streak:1,lastDay:null,done:[],lessons:0,defeated:[],tools:['volume'],mastery:{volume:5},missions:{},owned:COS.filter(c=>c.price===0).map(c=>c.id),eq:{hoodie:'hoodie-amber',phones:'phones-silver',hair:'hair-brown',comp:'comp-none'},kit:'kit-training',quests:{day:null,prog:{},claimed:[],moved:[]},music:true,pattern:pat({kick:[0,8],hat:EIGHTHS}),vols:{kick:.9,snare:.75,hat:.5,bass:.7},bpm:92,best:null});
+const SAVE_KEY='beatquest-save-v1';
+let S;
+function load(){try{S=JSON.parse(localStorage.getItem(SAVE_KEY))}catch(e){S=null}
+  if(!S||S.v!==1)S=DEF();else S=Object.assign(DEF(),S);
+  const t=todayStr();
+  if(S.lastDay!==t){const y=new Date();y.setDate(y.getDate()-1);S.streak=S.lastDay===dayStr(y)?S.streak+1:(S.lastDay?1:S.streak);S.lastDay=t}
+  if(S.quests.day!==t)S.quests={day:t,prog:{},claimed:[],moved:[]};
+  save()}
+function save(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(S))}catch(e){}}
+const cum=n=>25*(n-1)*(n+2);
+function level(){let n=1;while(cum(n+1)<=S.xp)n++;return n}
+function lvProg(){const n=level();return{n,cur:S.xp-cum(n),need:cum(n+1)-cum(n)}}
+const has=t=>S.tools.includes(t);
+function addMastery(t,n){S.mastery[t]=clamp((S.mastery[t]||0)+n,0,100)}
+function addMission(t){S.missions[t]=(S.missions[t]||0)+1}
+const nextStage=()=>STAGES.find(s=>!S.done.includes(s.id));
+function stageState(id){if(S.done.includes(id))return'done';const n=nextStage();return n&&n.id===id?'current':'locked'}
+
+/* ================= audio ================= */
+const A={ctx:null};
+function initAudio(){
+  if(A.ctx){if(A.ctx.state!=='running')A.ctx.resume();return}
+  const C=window.AudioContext||window.webkitAudioContext;if(!C)return;
+  const c=A.ctx=new C();
+  A.master=c.createGain();A.master.gain.value=.9;
+  const comp=c.createDynamicsCompressor();comp.threshold.value=-14;comp.ratio.value=4;
+  A.an=c.createAnalyser();A.an.fftSize=1024;
+  A.bus=c.createGain();A.bus.connect(A.master);
+  A.sfxBus=c.createGain();A.sfxBus.gain.value=.55;A.sfxBus.connect(A.master);
+  A.master.connect(comp);comp.connect(A.an);A.an.connect(c.destination);
+  const len=c.sampleRate;A.noise=c.createBuffer(1,len,c.sampleRate);const d=A.noise.getChannelData(0);for(let i=0;i<len;i++)d[i]=Math.random()*2-1;
+}
+const now=()=>A.ctx?A.ctx.currentTime:0;
+function tone(t,type,f,dur,v,fEnd,dest){const c=A.ctx;const o=c.createOscillator(),g=c.createGain();o.type=type;o.frequency.setValueAtTime(f,t);if(fEnd)o.frequency.exponentialRampToValueAtTime(fEnd,t+dur);g.gain.setValueAtTime(Math.max(v,.0001),t);g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g);g.connect(dest||A.bus);o.start(t);o.stop(t+dur+.03)}
+function noiseHit(t,dur,v,type,freq,q,dest){const c=A.ctx;const s=c.createBufferSource();s.buffer=A.noise;const f=c.createBiquadFilter();f.type=type;f.frequency.value=freq;f.Q.value=q||.7;const g=c.createGain();g.gain.setValueAtTime(Math.max(v,.0001),t);g.gain.exponentialRampToValueAtTime(.0001,t+dur);s.connect(f);f.connect(g);g.connect(dest||A.bus);s.start(t,Math.random()*.5);s.stop(t+dur+.03)}
+const SEMI=[0,0,3,5,7,10],NOTES=['','A','C','D','E','G'];
+const V={
+  kick(t,v=.9){if(!A.ctx)return;const f=S.kit==='kit-forest';tone(t,'sine',f?125:165,f?.46:.36,v*1.1,f?38:44);noiseHit(t,.015,v*.25,'highpass',f?1800:3000)},
+  snare(t,v=.75){if(!A.ctx)return;const f=S.kit==='kit-forest';noiseHit(t,f?.22:.17,v*.7,f?'bandpass':'highpass',f?1700:1300,f?.9:.7);tone(t,'triangle',f?165:200,.09,v*.5,110)},
+  hat(t,v=.5){if(!A.ctx)return;const f=S.kit==='kit-forest';noiseHit(t,f?.06:.045,v*.42,'highpass',f?6200:8200)},
+  bass(t,n,v=.7){if(!A.ctx||!n)return;const c=A.ctx,fr=110*Math.pow(2,SEMI[n]/12);const o=c.createOscillator(),o2=c.createOscillator(),lp=c.createBiquadFilter(),g=c.createGain();o.type='sawtooth';o2.type='sine';o.frequency.value=fr;o2.frequency.value=fr/2;lp.type='lowpass';lp.Q.value=5;lp.frequency.setValueAtTime(1600,t);lp.frequency.exponentialRampToValueAtTime(260,t+.25);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(Math.max(v*.45,.0002),t+.006);g.gain.exponentialRampToValueAtTime(.0001,t+.34);o.connect(lp);o2.connect(lp);lp.connect(g);g.connect(A.bus);o.start(t);o2.start(t);o.stop(t+.4);o2.stop(t+.4)},
+  click(t,acc){if(!A.ctx)return;tone(t,'square',acc?1760:1320,.035,acc?.28:.18)},
+  pad(t,freqs,dur,v){const c=A.ctx;freqs.forEach(fr=>{const o=c.createOscillator(),lp=c.createBiquadFilter(),g=c.createGain();o.type='triangle';o.frequency.value=fr;o.detune.value=(Math.random()-.5)*14;lp.type='lowpass';lp.frequency.value=900;g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(v,t+.9);g.gain.setValueAtTime(v,t+dur-.6);g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(lp);lp.connect(g);g.connect(A.bus);o.start(t);o.stop(t+dur+.05)})}};
+function playStep(p,s,t,vol){vol=vol||{};const i=s%16;if(p.kick&&p.kick[i])V.kick(t,vol.kick??.9);if(p.snare&&p.snare[i])V.snare(t,vol.snare??.75);if(p.hat&&p.hat[i])V.hat(t,vol.hat??.5);if(p.bass&&p.bass[i])V.bass(t,p.bass[i],vol.bass??.7)}
+function audition(tk,val){initAudio();if(!A.ctx)return;const t=now()+.01;if(tk==='bass')V.bass(t,val,S.vols.bass);else V[tk](t,S.vols[tk])}
+
+const sfx={
+  tap(){if(!A.ctx)return;tone(now(),'square',880,.04,.12,null,A.sfxBus)},
+  seq(ns,type='square',step=.07,v=.14,dur=.12){if(!A.ctx)return;const t=now();ns.forEach((f,i)=>tone(t+i*step,type,f,dur,v,null,A.sfxBus))},
+  ok(){this.seq([523,659,784])},
+  bad(){this.seq([330,247],'square',.1,.12,.16)},
+  coin(){this.seq([988,1319],'square',.08,.12,.2)},
+  hit(){if(!A.ctx)return;const t=now();noiseHit(t,.18,.6,'lowpass',2200,1,A.sfxBus);tone(t,'square',420,.2,.18,90,A.sfxBus)},
+  crit(){this.hit();this.seq([784,1047,1319,1568],'square',.05,.12,.1)},
+  miss(){if(!A.ctx)return;tone(now(),'triangle',600,.3,.2,150,A.sfxBus)},
+  hurt(){if(!A.ctx)return;noiseHit(now(),.25,.5,'bandpass',500,2,A.sfxBus);tone(now(),'sawtooth',200,.25,.12,60,A.sfxBus)},
+  level(){this.seq([523,659,784,1047,1319],'square',.09,.14,.2)},
+  unlock(){if(!A.ctx)return;this.seq([392,523,659,784,1047],'triangle',.12,.22,.5);const t=now()+.7;[1047,1319,1568].forEach(f=>tone(t,'square',f,.9,.06,null,A.sfxBus))},
+  victory(){this.seq([523,523,523,698,880,784,880,1047],'square',.11,.13,.14)},
+  start(){this.seq([262,392,523,784],'square',.06,.14,.15)}};
+
+class Looper{
+  start(o){this.stop();initAudio();if(!A.ctx)return;this.o=o;this.on=true;this.step=0;this.next=now()+.08;this.q=[];
+    this.timer=setInterval(()=>this.tick(),25);this.tick();
+    const ui=()=>{while(this.q.length&&this.q[0][1]<=now()){const s=this.q.shift()[0];o.onStep&&o.onStep(s)}if(this.on||this.q.length)this.raf=requestAnimationFrame(ui)};this.raf=requestAnimationFrame(ui)}
+  tick(){const o=this.o;while(this.on&&this.next<now()+.12){if(o.total&&this.step>=o.total){const end=this.next;this.on=false;clearInterval(this.timer);setTimeout(()=>{o.onEnd&&o.onEnd()},Math.max(0,(end-now())*1000));break}
+    o.play(this.step,this.next);this.q.push([this.step,this.next]);const bpm=typeof o.bpm==='function'?o.bpm():o.bpm;this.next+=60/bpm/4;this.step++}}
+  stop(){const was=this.on;this.on=false;clearInterval(this.timer);cancelAnimationFrame(this.raf);this.q=[];if(was&&this.o&&this.o.onStop)this.o.onStop()}}
+const seq=new Looper(),music=new Looper();
+
+const CHORDS=[[220,261.6,329.6,392],[174.6,220,261.6,329.6],[196,261.6,329.6,392],[196,246.9,293.7,392]];
+const PENTA=[440,523.3,587.3,659.3,784];
+function startMusic(){if(!S.music||!A.ctx||music.on)return;const r=rng(7);
+  music.start({bpm:78,play:(s,t)=>{const i=s%16,bar=Math.floor(s/16);
+    if(i===0)V.pad(t,CHORDS[bar%4],60/78*4,.035);
+    if(i===0||i===10)V.kick(t,.3);if(i===4||i===12)V.snare(t,.12);if(i%4===2)V.hat(t,.12);
+    if(r()<.16&&i%2===0)tone(t,'triangle',PENTA[Math.floor(r()*5)],.5,.05)}})}
+function stopMusic(){music.stop()}
+
+/* ================= animated canvases ================= */
+const live=[];let lastFrame=0;
+function addLive(cv,draw){live.push({cv,draw})}
+function frame(ts){requestAnimationFrame(frame);if(ts-lastFrame<80)return;lastFrame=ts;const t=ts/1000;
+  for(let i=live.length-1;i>=0;i--){const L=live[i];if(!L.cv.isConnected){live.splice(i,1);continue}if(L.cv.offsetParent===null)continue;L.draw(L.cv.getContext('2d'),t,L.cv)}}
+requestAnimationFrame(frame);
+
+function lowres(W,H,cls){const c=document.createElement('canvas');c.width=W;c.height=H;c.className='px'+(cls?' '+cls:'');return c}
+function px(g,x,y,w,h,c){g.fillStyle=c;g.fillRect(x|0,y|0,w|0,h|0)}
+function pine(g,cx,base,h,col,hi){for(let r=0;r<h;r++){const w=Math.floor(r*.42)+1;px(g,cx-w,base-h+r,w*2+1,1,col);if(hi&&r%4===3)px(g,cx-w,base-h+r,2,1,hi)}px(g,cx,base,1,3,'#2a1a12')}
+function drawForest(g,t,cv,opt){const W=cv.width,H=cv.height;opt=opt||{};
+  const sky=['#0d0a1c','#130f28','#1a1436','#221a44'];const hz=Math.floor(H*.62);
+  for(let y=0;y<hz;y++){const b=Math.min(3,Math.floor(y/hz*4));px(g,0,y,W,1,sky[b]);const nb=Math.min(3,Math.floor((y+2)/hz*4));if(nb!==b)for(let x=(y%2);x<W;x+=2)px(g,x,y,1,1,sky[nb])}
+  for(let y=hz;y<H;y++)px(g,0,y,W,1,y%3?'#16261b':'#1a2d1f');
+  const r=rng(opt.seed||3);for(let i=0;i<26;i++){const x=Math.floor(r()*W),y=Math.floor(r()*hz*.7);if(Math.sin(t*2+i*1.7)>-.3)px(g,x,y,1,1,i%5?'#6a5f9a':'#f1e7d0')}
+  const mx=Math.floor(W*.8),my=Math.floor(H*.17),mr=Math.max(4,Math.min(10,Math.floor(H*.07)));for(let y=-mr;y<=mr;y++)for(let x=-mr;x<=mr;x++)if(x*x+y*y<=mr*mr)px(g,mx+x,my+y,1,1,(x+2)*(x+2)+(y-1)*(y-1)<3?'#e8cf94':'#ffe7b0');
+  const r2=rng(11);for(let x=-4;x<W+6;x+=5)pine(g,x+Math.floor(r2()*3),hz+2,10+Math.floor(r2()*8),'#1a2440');
+  const r3=rng(23);for(let x=-6;x<W+8;x+=9)pine(g,x+Math.floor(r3()*4),hz+10,16+Math.floor(r3()*10),'#15301f','#1f4a2c');
+  const r4=rng(5);for(let i=0;i<W/4;i++){const x=Math.floor(r4()*W),y=hz+12+Math.floor(r4()*Math.max(1,H-hz-12));px(g,x,y,1,2,'#2f5a34');px(g,x+1,y+1,1,1,'#2f5a34')}
+  [[.12,.9],[.9,.86],[.62,.94]].forEach(([fx,fy],i)=>{const x=Math.floor(W*fx),y=Math.floor(H*fy);px(g,x,y,1,2,'#d8c9a8');const on=Math.sin(t*1.5+i)>0;px(g,x-1,y-1,3,1,on?'#ff4f9a':'#b8337a')});
+  for(let i=0;i<9;i++){const x=(W*(.1+.8*((i*.37)%1))+Math.sin(t*.7+i)*6)|0,y=(hz-6+Math.cos(t*.9+i*2)*8+(i%3)*5)|0;if(Math.sin(t*3+i*2.3)>.1){px(g,x,y,1,1,'#ffe27a');if(Math.sin(t*3+i)>.8)px(g,x-1,y,3,1,'rgba(255,226,122,.35)')}}}
+function drawArena(g,t,cv){drawForest(g,t,cv,{seed:9});const W=cv.width,H=cv.height;for(let x=0;x<W;x++){const y=Math.floor(H*.8+Math.sin(x*.2)*1.5);px(g,x,y,1,H-y,x%2?'#1b3122':'#1d3525')}}
+
+function drawMap(g){const W=96,H=238,B=34;const r=rng(42);const clear=S.done.includes('boss');
+  for(let y=0;y<B;y++)px(g,0,y,W,1,['#1b2350','#223066','#2a3a7a','#314488'][Math.floor(y/B*4)]);
+  for(let i=0;i<5;i++){const x=Math.floor(r()*80),y=4+Math.floor(r()*24);px(g,x,y,12,2,'#8e9ad6');px(g,x+3,y-1,6,1,'#b8c2f0')}
+  px(g,36,20,22,4,'#4a3f6a');px(g,38,24,18,2,'#3a3058');px(g,42,17,10,3,'#6d6590');
+  let y0=B;for(let y=y0;y<y0+B;y++)px(g,0,y,W,1,y%2?'#2a2644':'#2d2848');
+  px(g,50,y0+8,30,20,'#4a4460');for(let x=50;x<80;x+=4)px(g,x,y0+5,2,3,'#4a4460');px(g,58,y0+2,8,26,'#5a5378');px(g,58,y0,2,2,'#5a5378');px(g,64,y0,2,2,'#5a5378');px(g,61,y0+18,3,6,'#1a1426');
+  [[53,y0+12],[74,y0+12],[60,y0+8],[63,y0+8]].forEach(([x,y])=>px(g,x,y,2,2,'#ffb547'));
+  for(let i=0;i<6;i++)pine(g,6+i*6,y0+30,6+(i%3)*2,'#1e2a3a');
+  y0=2*B;for(let y=y0;y<y0+B;y++)px(g,0,y,W,1,'#1a302c');for(let i=0;i<9;i++){const x=Math.floor(r()*80),y=y0+6+Math.floor(r()*24);px(g,x,y,10+Math.floor(r()*8),2,'#2b5550')}
+  [[12,y0+10],[48,y0+6],[80,y0+14]].forEach(([x,y])=>{px(g,x,y,1,14,'#3a2e24');px(g,x-3,y+3,3,1,'#3a2e24');px(g,x+1,y+6,3,1,'#3a2e24')});
+  for(let i=0;i<5;i++)px(g,Math.floor(r()*80),y0+2+Math.floor(r()*28),14,1,'rgba(200,220,210,.18)');
+  y0=3*B;for(let y=y0;y<y0+B;y++)px(g,0,y,W,1,y%3?'#2c1818':'#301a1a');
+  for(let rr=0;rr<22;rr++){const w=Math.floor(rr*.9)+2;px(g,30-w,y0+8+rr,w*2,1,'#3f2222')}px(g,27,y0+7,6,2,'#ff5a2a');
+  for(let y=y0+9;y<y0+B;y++)px(g,31+Math.floor(Math.sin(y*.5)*2)+Math.floor((y-y0)*.4),y,2,1,'#ff5a2a');
+  for(let i=0;i<8;i++)px(g,54+Math.floor(r()*38),y0+4+Math.floor(r()*26),3,2,'#4a2626');
+  y0=4*B;for(let y=y0;y<y0+B;y++)px(g,0,y,W,1,y%4?'#7a5c32':'#86663a');
+  for(let i=0;i<7;i++){const x=Math.floor(r()*86),y=y0+4+Math.floor(r()*26);px(g,x,y,10,1,'#a8844a')}
+  [[70,y0+10],[84,y0+20],[10,y0+22]].forEach(([x,y])=>{px(g,x,y,2,8,'#3f6b3a');px(g,x-2,y+2,2,1,'#3f6b3a');px(g,x-2,y,1,2,'#3f6b3a');px(g,x+2,y+3,2,1,'#3f6b3a');px(g,x+3,y+1,1,2,'#3f6b3a')});
+  y0=5*B;for(let y=y0;y<y0+B;y++)px(g,0,y,W,1,y%2?'#221d38':'#261f3e');
+  for(let i=0;i<7;i++){const x=Math.floor(r()*86),y=y0+2+Math.floor(r()*26);px(g,x,y,8,6,'#2f2850')}px(g,74,y0+12,16,10,'#100c1e');px(g,76,y0+10,12,2,'#100c1e');
+  [[20,y0+8,'#6c5cff'],[40,y0+22,'#3ef0c8'],[88,y0+4,'#6c5cff'],[10,y0+26,'#3ef0c8']].forEach(([x,y,c])=>{px(g,x,y,2,4,c);px(g,x+2,y+1,1,3,c)});
+  y0=6*B;for(let y=y0;y<H;y++)px(g,0,y,W,1,y%3?'#16301e':'#1a3522');
+  const r5=rng(8);for(let i=0;i<22;i++){const x=Math.floor(r5()*96),yy=y0+6+Math.floor(r5()*30);if(Math.abs(x-32)<10&&Math.abs(yy-222)<9)continue;pine(g,x,yy,7+Math.floor(r5()*5),clear?'#2c6a3a':'#1f4a2c',clear?'#3f8a4a':'#2c5a36')}
+  for(let k=1;k<7;k++){const y=k*B;for(let x=0;x<W;x+=2)px(g,x+(k%2),y-1,1,2,'rgba(0,0,0,.4)')}
+  for(let k=0;k<6;k++){const yy=k*B;px(g,0,yy,W,B,'rgba(8,6,16,.35)');for(let y=yy;y<yy+B;y++)for(let x=(y%2);x<W;x+=2)px(g,x,y,1,1,'rgba(8,6,16,.4)')}
+  const pts=[...WORLDS].reverse();for(let i=0;i<pts.length-1;i++){const a=pts[i],b=pts[i+1];const d=Math.hypot(b.x-a.x,b.y-a.y);for(let s=0;s<d;s+=3){const x=a.x+(b.x-a.x)*s/d,y=a.y+(b.y-a.y)*s/d;px(g,x,y,1,1,i===0?'#ffb547':'#6a5f9a')}}
+  if(clear){px(g,44,211,1,8,'#f1e7d0');px(g,45,211,5,3,'#3ef0c8')}}
+
+function drawStudio(g,t,cv){const W=cv.width,H=cv.height,fl=44;
+  for(let y=0;y<fl;y++)px(g,0,y,W,1,y%8===7?'#1d1532':'#241a3c');for(let y=0;y<fl;y+=8)for(let x=(y/8%2)*6;x<W;x+=12)px(g,x,y,1,8,'#1d1532');
+  for(let y=fl;y<H;y++)px(g,0,y,W,1,y%4===0?'#2e2019':'#3a2a20');
+  px(g,8,8,22,18,'#0d0a1c');px(g,8,8,22,1,'#5a4a7a');px(g,8,25,22,1,'#5a4a7a');px(g,8,8,1,18,'#5a4a7a');px(g,29,8,1,18,'#5a4a7a');px(g,18,8,1,18,'#5a4a7a');px(g,24,11,3,3,'#ffe7b0');
+  [[11,12],[14,18],[21,20]].forEach(([x,y],i)=>{if(Math.sin(t*2+i)>0)px(g,x,y,1,1,'#f1e7d0')});
+  px(g,80,5,14,16,'#ff4f9a');px(g,81,6,12,14,'#2a1030');px(g,84,9,2,7,'#ffb547');px(g,86,9,4,2,'#ffb547');px(g,88,11,2,5,'#ffb547');px(g,83,15,3,2,'#ffb547');px(g,87,15,3,2,'#ffb547');
+  if(S.done.includes('challenge')){for(let y=fl+3;y<H-1;y++)px(g,20,y,68,1,y%2?'#5a2a4a':'#6a3258')}
+  px(g,28,36,54,3,'#6a4630');px(g,28,39,54,1,'#4a3020');px(g,31,40,2,10,'#4a3020');px(g,77,40,2,10,'#4a3020');
+  const glow=(Math.sin(t*6)>.6)?'#6ff8dc':'#3ef0c8';px(g,50,26,16,10,'#140d1f');px(g,51,27,14,8,glow);px(g,52,29,6,1,'#0b2a24');px(g,52,31,9,1,'#0b2a24');px(g,48,36,20,1,'#8a7fa8');
+  if(has('drums')){px(g,31,30,15,6,'#2a2248');px(g,31,30,15,1,'#5a4a7a');const pl=seq.on?Math.floor(t*6)%4:-1;['#ffb547','#ff4f9a','#3ef0c8','#a98bff'].forEach((c,i)=>px(g,32+i*3.5,32,3,3,pl===i?'#ffffff':c))}
+  if(S.done.includes('l3')){[[18,27],[84,27]].forEach(([x,y])=>{const p=seq.on&&Math.floor(t*8)%2?1:0;px(g,x,y,8,18,'#1a1426');px(g,x+1,y+3-p,6,6,'#3d3166');px(g,x+3,y+5-p,2,2,'#0d0a1c');px(g,x+2,y+11,4,4,'#3d3166')})}
+  if(S.defeated.includes('slime')){px(g,98,34,6,8,'#8a5a34');px(g,97,34,8,1,'#a8744a');px(g,99,28,2,6,'#4f8a4a');px(g,96,30,3,2,'#6fd36a');px(g,101,27,3,3,'#6fd36a');px(g,98,26,2,2,'#6fd36a')}}
+
+function scopeDraw(g,t,cv){const W=cv.width,H=cv.height;px(g,0,0,W,H,'#08060f');for(let x=0;x<W;x+=8)px(g,x,0,1,H,'#140f24');px(g,0,H/2,W,1,'#1d1736');if(!A.an)return;const d=new Uint8Array(A.an.fftSize);A.an.getByteTimeDomainData(d);for(let x=0;x<W;x++){const v=d[Math.floor(x/W*d.length)]/128-1;const y=Math.floor(H/2-v*H*.9);px(g,x,clamp(y,0,H-1),1,1,'#ffb547')}}
+function specDraw(g,t,cv){const W=cv.width,H=cv.height;px(g,0,0,W,H,'#08060f');if(!A.an)return;const d=new Uint8Array(A.an.frequencyBinCount);A.an.getByteFrequencyData(d);const n=W/3;for(let i=0;i<n;i++){const idx=Math.floor(Math.pow(i/n,2)*d.length*.6);const v=d[idx]/255;const hh=Math.floor(v*H);for(let y=0;y<hh;y+=2)px(g,i*3,H-1-y,2,1,y>H*.7?'#ff4f9a':y>H*.4?'#ffb547':'#3ef0c8')}}
+
+/* ================= hero rendering ================= */
+function heroPal(){const c=id=>cos(id).col;const ph=c(S.eq.phones);return{k:'#140d1f',h:c(S.eq.hair),p:ph,P:shade(ph,-.3),s:'#f0c08a',e:'#140d1f',c:c(S.eq.hoodie),a:'#ffe9c2',j:'#2e3160',b:'#3a2618'}}
+function heroEl(sc,cls){return sprite(HERO,heroPal(),sc,cls)}
+function pipEl(sc,cls){return sprite(PIP,PIP_PAL,sc,cls)}
+function companionEl(sc){return S.eq.comp==='comp-cassette'?sprite(CASSETTE,CASSETTE_PAL,sc,'bob'):null}
+
+/* ================= UI primitives ================= */
+function h(tag,cls,html){const e=document.createElement(tag);if(cls)e.className=cls;if(html!=null)e.innerHTML=html;return e}
+function toast(msg){const t=h('div','toast');t.textContent=msg;app.append(t);setTimeout(()=>t.remove(),2700)}
+function modal(inner,opt){opt=opt||{};const back=h('div','modal-back'+(opt.cls?' '+opt.cls:''));const m=h('div',opt.cls==='dramatic'?'modal':'modal win');
+  if(typeof inner==='string')m.innerHTML=inner;else m.append(inner);back.append(m);app.append(back);back.close=()=>back.remove();
+  if(opt.dismiss)back.addEventListener('click',e=>{if(e.target===back)back.remove()});return back}
+function coinRow(n){return`<span class="row" style="justify-content:center;gap:8px"><span data-ic="coin"></span><b>+${n}</b> COINS</span>`}
+function hydrateIcons(root){$$('[data-ic]',root).forEach(el=>{const name=el.dataset.ic;const col=el.dataset.col||ICON_DEFAULT_COL[name];const sc=+el.dataset.sc||3;const pal=el.dataset.dim?DIM_PAL:icPal(col);
+  if(el.tagName==='CANVAS')drawSprite(el,ICONS[name],pal,sc);else el.replaceWith(sprite(ICONS[name],pal,sc))})}
+
+function reward(o){return new Promise(res=>{const before=lvProg();S.xp+=o.xp||0;S.coins+=o.coins||0;(o.cosmetics||[]).forEach(id=>{if(!S.owned.includes(id))S.owned.push(id)});save();const after=lvProg();
+  const items=[];if(o.xp)items.push(`<b>+${o.xp}</b> XP`);if(o.coins)items.push(coinRow(o.coins));(o.lines||[]).forEach(l=>items.push(l));(o.cosmetics||[]).forEach(id=>items.push(`<span style="color:var(--violet)">NEW ${cos(id).slot==='kit'?'SOUND':'COSMETIC'}: ${cos(id).name.toUpperCase()}</span>`));
+  const m=modal(`<p class="eyebrow">${o.eyebrow||'REWARD'}</p><h2 class="rw-t">${o.title}</h2>${o.sub?`<p class="muted">${o.sub}</p>`:''}<div class="rw-list">${items.map((x,i)=>`<div class="rw-i" style="animation-delay:${i*.15}s">${x}</div>`).join('')}</div>
+  <div style="width:100%" class="stack"><div class="row" style="justify-content:space-between"><span class="eyebrow">PRODUCER LV <span class="rw-lv">${before.n}</span></span><span class="num muted rw-xp" style="font-size:18px">${before.cur}/${before.need} XP</span></div><div class="bar"><i class="rw-bar" style="width:${before.cur/before.need*100}%"></i></div><p class="lvup" hidden></p></div>
+  <button class="btn block rw-go">${o.btn||'CONTINUE'}</button>`);
+  hydrateIcons(m);sfx.coin();
+  setTimeout(()=>{const bar=$('.rw-bar',m);if(!bar)return;if(after.n>before.n){bar.style.width='100%';setTimeout(()=>{bar.style.transition='none';bar.style.width='0%';void bar.offsetWidth;bar.style.transition='';bar.style.width=after.cur/after.need*100+'%';$('.rw-lv',m).textContent=after.n;const up=$('.lvup',m);up.hidden=false;up.textContent='LEVEL UP! PRODUCER LV '+after.n;sfx.level();haptic([30,40,30])},650)}else bar.style.width=after.cur/after.need*100+'%';$('.rw-xp',m).textContent=after.cur+'/'+after.need+' XP'},450);
+  $('.rw-go',m).onclick=()=>{sfx.tap();m.close();res()}})}
+
+function unlockTool(id){if(!S.tools.includes(id))S.tools.push(id);save();const t=TOOLS.find(x=>x.id===id);
+  return new Promise(res=>{const m=modal(`<div class="unlock"><div class="rays"></div><p class="eyebrow" style="color:var(--amber);position:relative">NEW ABILITY UNLOCKED</p><div class="ul-icon"></div><h2>${t.name.toUpperCase()}</h2><p class="weapon">WEAPON FORM · ${t.weapon.toUpperCase()}</p><p style="font-size:18px">“${t.tag}”</p><p class="muted" style="max-width:32ch">${t.daw}</p><button class="btn block big ul-try">TRY IT NOW</button><button class="btn ghost block ul-later">LATER</button></div>`,{cls:'dramatic'});
+    $('.ul-icon',m).append(icon(id,t.col,10));sfx.unlock();haptic([20,60,20,60,80]);
+    $('.ul-try',m).onclick=()=>{m.close();res('try')};$('.ul-later',m).onclick=()=>{m.close();res('later')}})}
+
+function bump(id,n,set){const q=QUESTS.find(x=>x.id===id);if(!q||S.quests.claimed.includes(id))return;if(q.needs&&!has(q.needs))return;const p=S.quests.prog;const before=p[id]||0;p[id]=clamp(set!=null?set:before+(n||1),0,q.goal);if(before<q.goal&&p[id]>=q.goal){toast('QUEST COMPLETE · '+q.title.toUpperCase());sfx.coin()}save()}
+
+/* ================= typewriter ================= */
+let typing=null;
+function typeText(el,text){if(typing)typing.finish();return new Promise(res=>{el.textContent='';let i=0;
+  const fin=()=>{clearInterval(tm);el.textContent=text;typing=null;res()};
+  const tm=setInterval(()=>{i+=2;el.textContent=text.slice(0,i);if(i%8===0&&A.ctx)tone(now(),'square',1100+Math.random()*300,.015,.03,null,A.sfxBus);if(i>=text.length)fin()},20);
+  typing={finish:fin}})}
+
+/* ================= sequencer grid widget ================= */
+const TR={kick:{n:'KICK',c:'#ffb547'},snare:{n:'SNARE',c:'#ff4f9a'},hat:{n:'HI-HAT',c:'#3ef0c8'},bass:{n:'BASS',c:'#a98bff'}};
+function grid(host,o){host.innerHTML='';host.classList.add('seq');const cells={};
+  const br=h('div','beatrow');for(let i=0;i<16;i++)br.append(h('span',i%4?'':'b',i%4?['','e','&amp;','a'][i%4]:String(i/4+1)));host.append(br);
+  o.tracks.forEach(tk=>{const row=h('div','trk');const hd=h('div','trk-h',`<span class="dot" style="background:${TR[tk].c}"></span><span>${TR[tk].n}</span>`);
+    if(o.faders){const f=h('input');f.type='range';f.min=0;f.max=100;f.value=Math.round(S.vols[tk]*100);f.id='vol-'+tk;f.setAttribute('aria-label',TR[tk].n+' volume');const vv=h('span','vv',f.value);
+      f.oninput=()=>{S.vols[tk]=f.value/100;vv.textContent=f.value};f.onchange=()=>{addMastery('volume',2);if(!S.quests.moved.includes(tk)){S.quests.moved.push(tk);bump('balance',0,S.quests.moved.length)}save()};hd.append(f,vv)}
+    row.append(hd);const cs=h('div','cells');cells[tk]=[];const ed=o.edit===true||!!(o.edit&&o.edit[tk]);
+    for(let i=0;i<16;i++){const b=h('button','cell'+(i%4===0?' beat':''));b.style.setProperty('--c',TR[tk].c);b.setAttribute('aria-label',`${TR[tk].n} step ${i+1}`);if(!ed)b.classList.add('lockc');
+      b.onclick=()=>{if(!ed)return;if(tk==='bass')o.pat.bass[i]=(o.pat.bass[i]+1)%6;else o.pat[tk][i]=o.pat[tk][i]?0:1;paint();if(o.pat[tk][i])audition(tk,o.pat[tk][i]);haptic(6);o.onChange&&o.onChange(tk,i)};
+      cells[tk].push(b);cs.append(b)}
+    row.append(cs);host.append(row)});
+  let lastCol=-1;
+  function paint(){o.tracks.forEach(tk=>cells[tk].forEach((b,i)=>{const v=o.pat[tk][i];b.classList.toggle('on',!!v);b.textContent=tk==='bass'&&v?NOTES[v]:''}))}
+  paint();
+  return{paint,step(i){if(lastCol>=0)o.tracks.forEach(tk=>cells[tk][lastCol].classList.remove('ph'));lastCol=i;if(i>=0)o.tracks.forEach(tk=>cells[tk][i].classList.add('ph'))},setPat(p){if(o.pat!==p){o.pat=p;paint()}}}}
+
+/* ================= tap-along widget ================= */
+function tapWidget(host,o,onResult){const taps=o.taps||8;
+  host.innerHTML=`<div class="tapw"><div class="tapdots">${'<i></i>'.repeat(taps)}</div><button class="pad" aria-label="Tap pad">TAP</button><p class="tapmsg">${o.intro||'Press START. Four clicks count you in, then tap on every click.'}</p><button class="btn" data-a="start">START · ${o.bpm} BPM</button></div>`;
+  const pad=$('.pad',host),msg=$('.tapmsg',host),dots=$$('.tapdots i',host),startB=$('[data-a=start]',host);let beats=[],active=false;const timers=[];
+  const hit=e=>{if(e)e.preventDefault();if(!active||!A.ctx)return;pad.classList.add('pressed');setTimeout(()=>pad.classList.remove('pressed'),90);haptic(10);
+    const lat=(A.ctx.outputLatency||A.ctx.baseLatency||0);const tt=now()-lat;let best=-1,bd=9;beats.forEach((b,i)=>{const d=Math.abs(tt-b.t);if(!b.hit&&d<bd){bd=d;best=i}});
+    if(best>=0&&bd<(o.tol||.13)){beats[best].hit=true;dots[best].className='hit';msg.textContent=bd<.05?'PERFECT!':(tt<beats[best].t?'Good (a little early)':'Good (a little late)')}else if(best>=0){const d=tt-beats[best].t;msg.textContent=d<0?'Too early. Wait for the click.':'Too late. Tap with the click, not after it.'}};
+  pad.addEventListener('pointerdown',hit);
+  const key=e=>{if(!host.isConnected){document.removeEventListener('keydown',key);return}if(e.code==='Space'&&active)hit(e)};document.addEventListener('keydown',key);
+  startB.onclick=()=>{initAudio();if(!A.ctx)return;stopMusic();startB.disabled=true;dots.forEach(d=>d.className='');const spb=60/o.bpm;const t0=now()+.35;beats=[];
+    for(let k=0;k<4+taps;k++){const t=t0+k*spb;V.click(t,k%4===0);if(o.groove)V.hat(t,.25);if(k>=4)beats.push({t,hit:false});
+      timers.push(setTimeout(()=>{if(!host.isConnected)return;pad.classList.add('flash');setTimeout(()=>pad.classList.remove('flash'),110);if(k<4){msg.textContent='Count-in… '+(k+1);if(k===3)setTimeout(()=>{active=true;msg.textContent='TAP!'},spb*500)}else{dots.forEach(d=>d.classList.remove('now'));if(!dots[k-4].className)dots[k-4].classList.add('now')}},(t-now())*1000))}
+    const endT=t0+(4+taps)*spb;timers.push(setTimeout(()=>{if(!host.isConnected)return;active=false;dots.forEach((d,i)=>{if(!beats[i].hit)d.className='miss'});const n=beats.filter(b=>b.hit).length;const pass=n>=o.need;startB.disabled=false;startB.textContent='TRY AGAIN';
+      msg.textContent=pass?`${n}/${taps} on the beat. Locked in!`:`${n}/${taps} on the beat. You need ${o.need}. Count “1, 2, 3, 4” out loud and tap on each number.`;onResult({pass,n})},(endT-now())*1000+250))};
+  return{stop(){timers.forEach(clearTimeout);active=false}}}
+
+/* ================= A/B listen widget ================= */
+function abWidget(host,items,onBoth){host.innerHTML='';const wrap=h('div','ab');const heard=new Set();const scope=lowres(96,24,'scope');addLive(scope,scopeDraw);
+  items.forEach((it,i)=>{const b=h('button','abbtn',`<span class="L">${'AB'[i]}</span><b style="font-family:var(--f-disp);font-size:12px">${it.label}</b><small>${it.note}</small>`);
+    b.onclick=()=>{stopMusic();const was=b.classList.contains('playing')&&seq.on;$$('.abbtn',wrap).forEach(x=>x.classList.remove('playing'));if(was){seq.stop();return}b.classList.add('playing');
+      seq.start({bpm:it.bpm,total:32,play:(s,t)=>it.play(s,t),onStep:s=>{it.onStep&&it.onStep(s);if(s===8){b.classList.add('heard');heard.add(i);if(heard.size===items.length&&onBoth)onBoth()}},onEnd:()=>b.classList.remove('playing')})};
+    wrap.append(b)});
+  host.append(wrap,scope)}
+
+/* ================= screens ================= */
+const RENDER={};let cur='title';
+const NAVSCREENS=['home','map','region','studio','quests','bag'];
+let booted=false;
+function go(name,arg){seq.stop();if(typing)typing.finish();$$('.modal-back,.sheet').forEach(m=>m.remove());
+  $$('.screen').forEach(s=>{s.hidden=s.id!=='s-'+name});const scr=$('#s-'+name);scr.scrollTop=0;scr.classList.remove('enter','puzzle');
+  $('#nav').hidden=!NAVSCREENS.includes(name);$$('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.go===name||(name==='region'&&b.dataset.go==='map')));
+  if(booted){void scr.offsetWidth;scr.classList.add('enter');const w=$('#wipe');w.classList.remove('go');void w.offsetWidth;w.classList.add('go')}booted=true;
+  cur=name;RENDER[name](scr,arg);
+  if(['home','map','region','quests','bag'].includes(name))startMusic();else stopMusic()}
+
+function topbar(title,back){return`<div class="topbar">${back?`<button class="iconbtn" data-back="${back}" aria-label="Back">◀</button>`:''}<div class="title">${title}</div><span class="chip amber" title="Coins"><span data-ic="coin" data-sc="2"></span><span class="num" style="font-size:18px">${S.coins}</span></span><span class="chip pink" title="Day streak"><span data-ic="flame" data-sc="2"></span><span class="num" style="font-size:18px">${S.streak}</span></span></div>`}
+function wireBack(scr){$$('[data-back]',scr).forEach(b=>b.onclick=()=>{sfx.tap();go(b.dataset.back)})}
+
+/* ---------- title ---------- */
+RENDER.title=scr=>{scr.innerHTML=`<div class="title-scene"></div><div class="title-ui"><div class="logo">BEAT<span>QUEST</span></div><p class="tagline">Learn music production. Earn your tools. Beat the monsters with real skills.</p><div class="title-hero"></div><button class="btn big block" id="start">${S.xp||S.done.length?'CONTINUE':'PRESS START'}</button><p class="eyebrow blink">HEADPHONES RECOMMENDED</p></div>`;
+  const cv=lowres(108,200,'bg');$('.title-scene',scr).append(cv);addLive(cv,(g,t,c)=>drawForest(g,t,c,{seed:4}));
+  const th=$('.title-hero',scr);th.append(heroEl(6,'bob'),pipEl(3,'float'));
+  $('#start',scr).onclick=()=>{initAudio();sfx.start();haptic(20);go('home')}};
+
+/* ---------- home ---------- */
+RENDER.home=scr=>{const lp=lvProg();const n=nextStage();
+  scr.innerHTML=topbar('BEAT QUEST')+`<div class="stack">
+  <div class="win hero-card"><div class="scene"></div><div class="plate"><div class="row" style="justify-content:space-between"><span class="lvl">PRODUCER LV ${lp.n}</span><span class="num muted" style="font-size:20px">${lp.cur} / ${lp.need} XP</span></div><div class="bar"><i style="width:${lp.cur/lp.need*100}%"></i></div></div></div>
+  <div class="win raised stack" style="border-color:#6a4718"><p class="eyebrow" style="color:var(--amber)">CURRENT QUEST</p>
+   ${n?`<h2>${n.quest}</h2><p class="muted">Beat Forest · ${n.kind.toLowerCase()} · about ${n.mins} min</p>`:`<h2>Beat Forest cleared</h2><p class="muted">The Synth Caves open in the full adventure. Keep producing in your studio.</p>`}
+   <button class="btn big block" id="cont">CONTINUE ADVENTURE ▶</button></div>
+  <p class="eyebrow">TODAY'S PROGRESS</p>
+  <div class="statgrid"><div class="stat"><span data-ic="flame" data-sc="3"></span><b>${S.streak}</b><span>day streak</span></div><div class="stat"><span data-ic="scroll" data-sc="3"></span><b>${S.lessons}</b><span>lessons</span></div><div class="stat"><span data-ic="sword" data-sc="3" data-col="#ff4f9a"></span><b>${S.defeated.length}</b><span>monsters</span></div><div class="stat"><span data-ic="chest" data-sc="3"></span><b>${S.tools.length}</b><span>tools</span></div></div>
+  <div class="menugrid"><button class="menubtn" data-to="studio"><canvas class="px" data-ic="drums"></canvas>MY STUDIO</button><button class="menubtn" data-to="quests"><canvas class="px" data-ic="scroll"></canvas>QUESTS</button><button class="menubtn" data-to="bag"><canvas class="px" data-ic="chest"></canvas>INVENTORY</button><button class="menubtn" data-to="map"><canvas class="px" data-ic="flag"></canvas>WORLD MAP</button></div>
+  <button class="pip-cta" id="askpip"><span class="pipslot"></span><span class="stack" style="gap:2px"><b>ASK PIP</b><span class="muted" style="font-size:14px">Your producer mentor. Ask anything, like “why does my mix sound quiet?”</span></span></button>
+  <div class="row" style="justify-content:center;gap:8px"><button class="btn ghost sm" id="musicT">MUSIC ${S.music?'ON':'OFF'}</button><button class="btn ghost sm" id="settings">SETTINGS</button></div>
+  </div>`;
+  hydrateIcons(scr);
+  const sc=$('.scene',scr);const cv=lowres(108,60,'bg');sc.append(cv);addLive(cv,(g,t,c)=>drawForest(g,t,c,{seed:2}));
+  const hero=heroEl(4,'sprite bob');hero.style.left='calc(50% - 32px)';sc.append(hero);
+  const pip=pipEl(3,'sprite float');pip.style.left='calc(50% + 44px)';pip.style.bottom='96px';sc.append(pip);
+  const cp=companionEl(3);if(cp){cp.classList.add('sprite');cp.style.left='calc(50% - 80px)';sc.append(cp)}
+  $('.pipslot',scr).append(pipEl(3,'float'));
+  $('#cont',scr).onclick=()=>{sfx.tap();continueAdventure()};
+  $$('[data-to]',scr).forEach(b=>b.onclick=()=>{sfx.tap();go(b.dataset.to)});
+  $('#askpip',scr).onclick=()=>{sfx.tap();openCoach()};
+  $('#musicT',scr).onclick=e=>{S.music=!S.music;save();e.currentTarget.textContent='MUSIC '+(S.music?'ON':'OFF');if(S.music)startMusic();else stopMusic()};
+  $('#settings',scr).onclick=openSettings};
+function continueAdventure(){const n=nextStage();if(!n){go('region');return}openStage(n.id)}
+function openStage(id){const s=STAGES.find(x=>x.id===id);if(stageState(id)==='locked'){toast('FINISH THE STAGE BEFORE THIS ONE FIRST');return}if(s.kind==='LESSON')go('lesson',id);else if(s.kind==='CHALLENGE')go('studio',{challenge:true});else go('battle',id)}
+function openSettings(){const m=modal(`<h2>Settings</h2><p class="muted">Your progress is saved on this device only.</p><button class="btn ghost block st-rs">RESET PROGRESS</button><button class="btn block st-cl">CLOSE</button>`,{dismiss:true});
+  let armed=false;$('.st-rs',m).onclick=e=>{const b=e.currentTarget;if(!armed){armed=true;b.textContent='TAP AGAIN TO ERASE EVERYTHING';b.classList.remove('ghost');b.classList.add('pink');return}try{localStorage.removeItem(SAVE_KEY)}catch(err){}S=DEF();S.lastDay=todayStr();S.quests.day=todayStr();save();stopMusic();m.close();go('title')};$('.st-cl',m).onclick=()=>m.close()}
+
+/* ---------- map ---------- */
+RENDER.map=scr=>{scr.innerHTML=topbar('WORLD MAP')+`<p class="muted" style="margin-bottom:10px">Seven worlds, one skill each. Start at the bottom in Beat Forest and climb toward the Mastering Sky.</p><div class="mapwrap"></div>`;hydrateIcons(scr);
+  const w=$('.mapwrap',scr);const cv=lowres(96,238);w.append(cv);drawMap(cv.getContext('2d'));
+  WORLDS.forEach(W=>{const open=W.id==='forest';const clear=open&&S.done.includes('boss');const b=h('button','mnode '+(clear?'clear':open?'open':'locked'),`<span class="pin">${clear?'<span data-ic="star" data-sc="3" data-col="#3ef0c8"></span>':open?'!':'<span data-ic="lock" data-sc="3"></span>'}</span><span class="lab">${W.name.toUpperCase()}</span>${open?'':'<span class="tag">FULL ADVENTURE</span>'}`);
+    b.setAttribute('aria-label',W.name+(open?'':' (locked)'));b.style.left=W.x/96*100+'%';b.style.top=W.y/238*100+'%';b.onclick=()=>{sfx.tap();if(open)go('region');else worldInfo(W)};w.append(b)});
+  hydrateIcons(w);
+  const f=WORLDS.find(x=>x.id==='forest');const hr=heroEl(2,'maphero bob');hr.style.left=(f.x+14)/96*100+'%';hr.style.top=(f.y+6)/238*100+'%';w.append(hr);
+  requestAnimationFrame(()=>{scr.scrollTop=scr.scrollHeight})};
+function worldInfo(W){const m=modal(`<p class="eyebrow">LOCKED WORLD</p><h2>${W.name}</h2><p>Teaches: ${W.teaches}.</p><p class="muted">Boss: ${W.boss}</p><div class="win raised" style="text-align:left"><p style="font-size:15px">Beat Forest is free. The full adventure opens all seven worlds, the complete studio, advanced lessons, more sounds and unlimited coaching from PIP.</p><p style="font-size:15px;margin-top:8px;color:var(--neon)">You pay for lessons, never for power. Every tool is earned by learning it.</p></div><button class="btn block wi-ok">BACK TO THE FOREST</button>`,{dismiss:true});$('.wi-ok',m).onclick=()=>m.close()}
+
+/* ---------- region ---------- */
+RENDER.region=scr=>{scr.innerHTML=topbar('BEAT FOREST','map')+`<div class="stack"><div class="win region-banner"><div class="scene"></div><div class="over"><p class="eyebrow" style="color:var(--leaf)">WORLD 1 · FREE</p><h2 style="text-shadow:0 2px 0 #000">Beat Forest</h2><p style="font-size:15px;text-shadow:0 2px 0 #000">Rhythm, BPM, bars, drum patterns and quantize.</p></div></div><div class="path"></div></div>`;wireBack(scr);
+  const cv=lowres(108,44,'bg');$('.scene',scr).prepend(cv);addLive(cv,(g,t,c)=>drawForest(g,t,c,{seed:6}));
+  const p=$('.path',scr);STAGES.forEach(s=>{const st=stageState(s.id);const b=h('button','stage '+st,`<span class="ic"><span data-ic="${s.icon}" data-sc="3" data-col="${s.kind==='LESSON'?'#ffb547':s.kind==='CHALLENGE'?'#ffcc4d':'#ff4f9a'}"${st==='locked'?' data-dim="1"':''}></span></span><span class="grow"><span class="k">${s.kind} · ${s.mins} MIN</span><br><span class="t">${s.title}</span><br><span class="s">${s.sub}</span></span><span class="st">${st==='done'?'<span style="color:var(--neon)">CLEAR<br>REPLAY</span>':st==='current'?'<span style="color:var(--amber)">▶ GO</span>':'LOCKED'}</span>`);
+    b.onclick=()=>{sfx.tap();openStage(s.id)};p.append(b)});
+  hydrateIcons(scr)};
+
+/* ---------- lessons ---------- */
+const bt=(p,s,t,v)=>playStep(p,s,t,v);
+const LESSONS={
+l1:{title:'The Pulse',xp:50,coins:10,steps:[
+ {k:'DISCOVER',render(b,done){b.innerHTML=`<div class="big-title">Every song has a pulse</div><div class="pip-say"><span class="pipc"></span><div class="bubble">Tap your foot to any song and you've found its <b>beat</b>. Producers measure how fast beats come in <b>BPM</b>: beats per minute.<br><br>At <b>60 BPM</b> you get one beat every second. At 120 BPM, two.</div></div><div class="lamp go" style="--dur:1s"></div><p class="muted" style="text-align:center">This lamp is pulsing at 60 BPM.</p><button class="btn ghost block" data-a="hear">▶ HEAR 60 BPM</button>`;
+   $('[data-a=hear]',b).onclick=()=>seq.start({bpm:60,total:32,play:(s,t)=>{if(s%4===0)V.click(t,s%16===0)}});done()}},
+ {k:'LISTEN',render(b,done){b.innerHTML=`<div class="big-title">Same drums, different speed</div><p>Play both. The pattern is identical. Only the tempo changes, and the whole mood changes with it.</p><div class="abhost"></div>`;
+   const p=pat({kick:[0,8,10],snare:[4,12],hat:EIGHTHS});abWidget($('.abhost',b),[{label:'80 BPM',note:'Lo-fi hip-hop pace. Laid back.',bpm:80,play:(s,t)=>bt(p,s,t)},{label:'140 BPM',note:'Trap and dubstep pace. Urgent.',bpm:140,play:(s,t)=>bt(p,s,t)}],done)}},
+ {k:'EXPERIMENT',render(b,done){const genres=[[60,95,'Hip-hop · Lo-fi'],[96,115,'Pop · R&B'],[116,132,'House · Techno'],[133,160,'Trap · Dubstep'],[161,180,'Drum & bass']];
+   b.innerHTML=`<div class="big-title">Drive the tempo</div><p>Drag the slider while the beat plays. Notice where each genre usually lives. Visit three genre zones to continue.</p><div class="bpmread num">100</div><p class="eyebrow" style="text-align:center">BPM</p><input type="range" id="lesson-bpm" min="60" max="180" value="100" aria-label="Tempo in BPM"><div class="ruler">${genres.map(g=>`<div data-lo="${g[0]}" data-hi="${g[1]}"><span>${g[2]}</span><span class="num">${g[0]}–${g[1]}</span></div>`).join('')}</div>`;
+   let bpm=100;const seen=new Set();const sl=$('#lesson-bpm',b);const p=pat({kick:[0,8],snare:[4,12],hat:EIGHTHS});
+   const mark=()=>{$('.bpmread',b).textContent=bpm;$$('.ruler div',b).forEach(d=>{const on=bpm>=+d.dataset.lo&&bpm<=+d.dataset.hi;d.classList.toggle('on',on);if(on){seen.add(d.dataset.lo);d.classList.add('seen')}});if(seen.size>=3)done()};
+   sl.oninput=()=>{bpm=+sl.value;mark()};mark();seq.start({bpm:()=>bpm,play:(s,t)=>bt(p,s,t)})}},
+ {k:'CHALLENGE',render(b,done){b.innerHTML=`<div class="big-title">Lock into the pulse</div><p>Four clicks count you in at 100 BPM. Then tap the pad on every click. Land <b>6 of 8</b> to pass.</p><div class="taph"></div>`;
+   tapWidget($('.taph',b),{bpm:100,taps:8,need:6},r=>{if(r.pass){sfx.ok();done()}else sfx.bad()})}}]},
+l2:{title:'Bars & Beats',xp:50,coins:10,steps:[
+ {k:'DISCOVER',render(b,done){b.innerHTML=`<div class="big-title">Beats come in bars</div><div class="pip-say"><span class="pipc"></span><div class="bubble">Music counts in groups. Almost all electronic music is in <b>4/4</b>: four beats make one <b>bar</b>. Count along: <b>ONE</b> two three four, <b>ONE</b> two three four.<br><br>A step sequencer slices each beat into 4 steps, so one bar is <b>16 steps</b>.</div></div><div class="gh"></div><button class="btn ghost block" data-a="count">▶ HEAR THE COUNT</button>`;
+   const g=grid($('.gh',b),{tracks:['kick'],pat:pat({kick:[0,4,8,12]}),edit:false});
+   $('[data-a=count]',b).onclick=()=>seq.start({bpm:96,total:32,play:(s,t)=>{if(s%4===0)V.click(t,s%16===0)},onStep:s=>g.step(s%16),onStop:()=>g.step(-1),onEnd:()=>g.step(-1)});done()}},
+ {k:'LISTEN',render(b,done){const pA=pat({kick:[0,4,8,12],hat:[2,6,10,14]}),pB=pat({kick:[0,8],hat:[2,6,10,14]});
+   b.innerHTML=`<div class="big-title">Where the kick lands</div><p>Watch the grid while each one plays.</p><div class="abhost"></div><div class="gh"></div>`;const g=grid($('.gh',b),{tracks:['kick','hat'],pat:pA,edit:false});
+   abWidget($('.abhost',b),[{label:'Four on the floor',note:'Kick on every beat. House and techno.',bpm:122,play:(s,t)=>bt(pA,s,t),onStep:s=>{g.setPat(pA);g.step(s%16)}},{label:'Kick on 1 and 3',note:'Half as busy. Hip-hop and rock feel.',bpm:92,play:(s,t)=>bt(pB,s,t),onStep:s=>{g.setPat(pB);g.step(s%16)}}],done)}},
+ {k:'EXPERIMENT',render(b,done){const p=emptyPat();let n=0;b.innerHTML=`<div class="big-title">Place some kicks</div><p>Tap cells to place kicks while the loop plays. The outlined columns are the beats (1, 2, 3, 4).</p><div class="gh"></div><p class="muted ex-note">Make at least 3 changes.</p>`;
+   const g=grid($('.gh',b),{tracks:['kick'],pat:p,edit:true,onChange:()=>{n++;if(n>=3){$('.ex-note',b).textContent='Nice. Every change you hear is a new groove.';done()}}});
+   seq.start({bpm:110,play:(s,t)=>{bt(p,s,t);if(s%4===0)V.hat(t,.25)},onStep:s=>g.step(s%16)})}},
+ {k:'CHALLENGE',render(b,done){const p=emptyPat();b.innerHTML=`<div class="big-title">Four on the floor</div><p>Put a kick on <b>every beat</b> of the bar, and nothing in between. Then press CHECK.</p><div class="gh"></div><div class="fbh"></div><button class="btn neon block" data-a="chk">CHECK</button>`;
+   const g=grid($('.gh',b),{tracks:['kick'],pat:p,edit:true});seq.start({bpm:120,play:(s,t)=>{bt(p,s,t);if(s%2===0)V.hat(t,.2)},onStep:s=>g.step(s%16)});
+   $('[data-a=chk]',b).onclick=()=>{const want=[0,4,8,12];const miss=want.filter(i=>!p.kick[i]).map(i=>i/4+1);const extra=p.kick.map((v,i)=>v&&!want.includes(i)?i+1:0).filter(Boolean);const fb=$('.fbh',b);
+     if(!miss.length&&!extra.length){fb.innerHTML='<p class="fb good">Four on the floor. That is the heartbeat of house music.</p>';sfx.ok();done()}else{sfx.bad();fb.innerHTML=`<p class="fb">${miss.length?`Missing a kick on beat ${miss.join(', ')}. `:''}${extra.length?`Extra kick on step ${extra.join(', ')}: that is between beats. `:''}Beats sit on steps 1, 5, 9 and 13, the outlined columns.</p>`}}}}]},
+l3:{title:'The Drum Trio',xp:50,coins:10,steps:[
+ {k:'DISCOVER',render(b,done){b.innerHTML=`<div class="big-title">Meet the drum trio</div><p>Most beats are built from three drums. Tap each one to hear it.</p><div class="trio">
+   <button data-v="kick"><span data-ic="drums" data-col="#ffb547" data-sc="4"></span><span><b style="color:var(--amber)">KICK</b><p>The low thump. The floor your track stands on.</p></span></button>
+   <button data-v="snare"><span data-ic="drums" data-col="#ff4f9a" data-sc="4"></span><span><b style="color:var(--magenta)">SNARE</b><p>The crack. On beats 2 and 4 it becomes the backbeat: the part people clap to.</p></span></button>
+   <button data-v="hat"><span data-ic="drums" data-col="#3ef0c8" data-sc="4"></span><span><b style="color:var(--neon)">HI-HAT</b><p>The tick. Quiet, fast hits that fill the space between.</p></span></button></div><p class="muted trio-note">Hear all three to continue.</p>`;hydrateIcons(b);
+   const heard=new Set();$$('[data-v]',b).forEach(x=>x.onclick=()=>{initAudio();if(!A.ctx)return;const tk=x.dataset.v;const t=now()+.02;V[tk](t,S.vols[tk]);V[tk](t+.3,S.vols[tk]);haptic(8);heard.add(tk);if(heard.size===3){$('.trio-note',b).textContent='Kick, snare, hat. That is the whole drum kit most beats need.';done()}})}},
+ {k:'LISTEN',render(b,done){const pA=pat({kick:[0,8],snare:[4,12]}),pB=pat({kick:[0,8],snare:[4,12],hat:EIGHTHS});b.innerHTML=`<div class="big-title">Add the hats</div><p>A has kick and snare only. B adds hi-hats on every 8th note. Hear how B feels like it's moving.</p><div class="abhost"></div><div class="gh"></div>`;
+   const g=grid($('.gh',b),{tracks:['kick','snare','hat'],pat:pA,edit:false});abWidget($('.abhost',b),[{label:'Kick + snare',note:'The skeleton.',bpm:96,play:(s,t)=>bt(pA,s,t),onStep:s=>{g.setPat(pA);g.step(s%16)}},{label:'+ hi-hats',note:'The skeleton starts walking.',bpm:96,play:(s,t)=>bt(pB,s,t),onStep:s=>{g.setPat(pB);g.step(s%16)}}],done)}},
+ {k:'EXPERIMENT',render(b,done){const p=pat({kick:[0,8]});let n=0;b.innerHTML=`<div class="big-title">Jam with three rows</div><p>Kicks are already down. Add snares and hats anywhere and listen to what changes. Make 3 changes to continue.</p><div class="gh"></div>`;
+   const g=grid($('.gh',b),{tracks:['kick','snare','hat'],pat:p,edit:true,onChange:()=>{if(++n>=3)done()}});seq.start({bpm:96,play:(s,t)=>bt(p,s,t),onStep:s=>g.step(s%16)})}},
+ {k:'CHALLENGE',render(b,done){const p=pat({});b.innerHTML=`<div class="big-title">Build a backbeat</div><p>This rhythm is in thousands of songs. Build it, then press CHECK.</p><div class="check"><div data-c="1">Kick on beats 1 and 3 (steps 1 and 9)</div><div data-c="2">Snare on beats 2 and 4 (steps 5 and 13), and nowhere else</div><div data-c="3">Hi-hat on every 8th note (all 8 odd-numbered steps)</div></div><div class="gh"></div><div class="fbh"></div><button class="btn neon block" data-a="chk">CHECK</button>`;
+   const test=()=>{const a=!!(p.kick[0]&&p.kick[8]&&!p.kick[4]&&!p.kick[12]),s2=p.snare.every((v,i)=>!!v===(i===4||i===12)),c=EIGHTHS.every(i=>p.hat[i]);$('[data-c="1"]',b).classList.toggle('ok',a);$('[data-c="2"]',b).classList.toggle('ok',s2);$('[data-c="3"]',b).classList.toggle('ok',c);return[a,s2,c]};
+   const g=grid($('.gh',b),{tracks:['kick','snare','hat'],pat:p,edit:true,onChange:test});seq.start({bpm:96,play:(s,t)=>bt(p,s,t),onStep:s=>g.step(s%16)});
+   $('[data-a=chk]',b).onclick=()=>{const [a,s2,c]=test();const fb=$('.fbh',b);if(a&&s2&&c){sfx.ok();fb.innerHTML='<p class="fb good">That is the backbeat. You just programmed the most common drum pattern in pop music.</p>';done()}else{sfx.bad();fb.innerHTML=`<p class="fb">${!a?'Kicks go on steps 1 and 9 (beats 1 and 3). Keep steps 5 and 13 free for the snare. ':''}${!s2?'Snares only on steps 5 and 13. ':''}${!c?'Hats need every odd step: 1, 3, 5, 7, 9, 11, 13, 15.':''}</p>`}}}}]}};
+
+RENDER.lesson=(scr,id)=>{const L=LESSONS[id];let i=0,ok=false;
+  scr.innerHTML=`<div class="lhead"><div class="row"><button class="iconbtn" data-a="leave" aria-label="Leave lesson">✕</button><div class="grow"><p class="eyebrow">BEAT FOREST · LESSON</p><h3>${L.title}</h3></div><button class="iconbtn" data-a="pip" aria-label="Ask PIP"></button></div><div class="stepper">${L.steps.map(s=>`<span>${s.k}</span>`).join('')}</div></div><div class="lbody"></div><div class="lfoot"><button class="btn big block" data-a="next" disabled>NEXT ▶</button></div>`;
+  $('[data-a=pip]',scr).append(pipEl(2));$('[data-a=pip]',scr).onclick=()=>openCoach();$('[data-a=leave]',scr).onclick=()=>{sfx.tap();go('region')};
+  const body=$('.lbody',scr),nx=$('[data-a=next]',scr);
+  const show=()=>{seq.stop();ok=false;nx.disabled=true;$$('.stepper span',scr).forEach((s,k)=>{s.className=k<i?'ok':k===i?'on':''});body.innerHTML='';body.classList.remove('enter');void body.offsetWidth;body.classList.add('enter');
+    L.steps[i].render(body,()=>{if(!ok){ok=true;nx.disabled=false}});$$('.pipc',body).forEach(p=>p.append(pipEl(3,'float')));nx.textContent=i===L.steps.length-1?'FINISH LESSON ★':'NEXT ▶';scr.scrollTop=0};
+  nx.onclick=async()=>{sfx.tap();if(i<L.steps.length-1){i++;show();return}seq.stop();nx.disabled=true;const first=!S.done.includes(id);
+    if(first){S.done.push(id);S.lessons++;addMastery('drums',10);addMission('drums')}bump('lesson');save();
+    await reward({eyebrow:'LESSON COMPLETE',title:L.title.toUpperCase(),xp:first?L.xp:10,coins:first?L.coins:0,lines:first?['RHYTHM MASTERY +10%']:['PRACTICE BONUS'],btn:id==='l3'&&first?'SOMETHING STIRS IN THE FERNS…':'ONWARD'});
+    if(id==='l3'&&first)go('battle','slime');else go('region')};
+  show()};
+
+/* ---------- battles ---------- */
+const SLIME_PAT=()=>pat({kick:[0,8],snare:[5,13],hat:EIGHTHS});
+const SWORD='<span data-ic="sword" data-sc="2" data-col="#ffe9c2"></span>';
+const BATTLES={
+slime:{name:'OFFBEAT SLIME',lv:2,hp:100,weak:'Snare placement',sprite:SLIME,pal:SLIME_PAL,sc:7,cls:'slime',xp:100,coins:30,cosmetics:['comp-cassette'],
+ intro:'An OFFBEAT SLIME oozes out of the ferns! Its wobble never lands on the beat.',
+ attack:'The slime wobbles off-tempo at you. Your groove shakes!',
+ hint:'Its snare lands one step late. On a real backbeat the snare hits beats 2 and 4, which are steps 5 and 13.',
+ listen:()=>{const p=SLIME_PAT();seq.start({bpm:96,total:32,play:(s,t)=>bt(p,s,t)})},
+ rounds:[
+  {label:'FIND THE OFFBEAT',run(area,api){area.innerHTML=`<p class="muted">Listen to the slime's groove. Which drum is off the beat?</p><button class="btn ghost block" data-a="pl">▶ PLAY THE GROOVE</button><div class="opts"><button class="btn sm" data-o="kick">KICK</button><button class="btn sm pink" data-o="snare">SNARE</button><button class="btn sm neon" data-o="hat">HI-HAT</button></div>`;
+   const p=SLIME_PAT();const play=()=>seq.start({bpm:96,total:32,play:(s,t)=>bt(p,s,t)});$('[data-a=pl]',area).onclick=play;play();
+   $$('[data-o]',area).forEach(x=>x.onclick=()=>{seq.stop();const o=x.dataset.o;if(o==='snare')api.hit(30,false,'Right! The snare crack lands a step late, so the groove limps. You found its weakness.');else api.miss(o==='kick'?'Not the kick. The kick sits right on beats 1 and 3. Listen for the sharp crack that feels late.':'Not the hats. They tick evenly on every 8th note. The crack that feels late is the snare.')})}},
+  {label:'FIX THE GROOVE',run(area,api){const p=SLIME_PAT();area.innerHTML=`<p class="muted">Move the snare back onto beats 2 and 4. Tap to remove the late snares and add the right ones. Then strike.</p><div class="gh"></div><button class="btn pink block big" data-a="strike">${SWORD} STRIKE</button>`;hydrateIcons(area);
+   const g=grid($('.gh',area),{tracks:['kick','snare','hat'],pat:p,edit:{snare:true}});seq.start({bpm:96,play:(s,t)=>bt(p,s,t),onStep:s=>g.step(s%16)});
+   $('[data-a=strike]',area).onclick=()=>{seq.stop();const exact=p.snare.every((v,i)=>!!v===(i===4||i===12));const has412=p.snare[4]&&p.snare[12];if(exact)api.hit(45,true,'CRITICAL HIT! Snare on 2 and 4: the backbeat snaps into place and the slime loses its wobble.');else if(has412)api.hit(15,false,'Hit, but the leftover late snares still wobble. Next time remove every snare except steps 5 and 13.');else api.miss('The snare needs to be on steps 5 and 13, the outlined columns labelled 2 and 4.')}}},
+  {label:'PIN IT DOWN',run(area,api){area.innerHTML='<div class="taph"></div>';tapWidget($('.taph',area),{bpm:110,taps:6,need:4,groove:true,intro:'Finisher! Tap on the beat to pin the slime down. Land 4 of 6 taps on the click.'},r=>{setTimeout(()=>{if(r.pass)api.hit(25,true,'CRITICAL HIT! Your taps nail it to the grid. The slime is steady at last…');else api.miss('Close, but it slipped away. Tap with the click, not after it. Counting 1, 2, 3, 4 out loud helps.')},500)})}}]},
+metro:{name:'BROKEN METRONOME',lv:3,hp:150,weak:'Tempo and timing',sprite:METRO,pal:METRO_PAL,sc:7,cls:'',xp:150,coins:50,
+ intro:'The BROKEN METRONOME creaks into the clearing. Its pendulum is bent and its tempo keeps drifting!',
+ attack:'The metronome swings its bent pendulum. Tick-tock-CLANG!',
+ hint:'120 BPM is exactly two clicks per second. Count the clicks against the seconds in your head.',
+ listen:()=>{const t0=now()+.1;for(let k=0;k<10;k++)V.click(t0+k*.5+(Math.random()-.5)*.12,k%4===0)},
+ rounds:[
+  {label:'READ THE TEMPO',run(area,api){const bpm=[90,120,150][Math.floor(Math.random()*3)];area.innerHTML=`<p class="muted">For a moment the metronome ticks at a steady tempo. What BPM is it?</p><button class="btn ghost block" data-a="pl">▶ LISTEN AGAIN</button><div class="opts">${[90,120,150].map(v=>`<button class="btn sm" data-o="${v}">${v}</button>`).join('')}</div><p class="muted" style="font-size:14px">Reference: 60 BPM is 1 click per second. 120 BPM is 2 per second.</p>`;
+   const play=()=>seq.start({bpm,total:32,play:(s,t)=>{if(s%4===0)V.click(t,s%16===0)}});$('[data-a=pl]',area).onclick=play;play();
+   $$('[data-o]',area).forEach(x=>x.onclick=()=>{seq.stop();const v=+x.dataset.o;if(v===bpm)api.hit(35,false,`Right! ${bpm} BPM. Knowing the tempo by ear is a producer superpower.`);else api.miss(`It was ${bpm} BPM, ${v>bpm?'slower':'faster'} than ${v}. ${bpm===120?'120 is exactly two clicks per second.':bpm===90?'90 is a relaxed hip-hop pace: one and a half clicks per second.':'150 is fast: two and a half clicks per second.'}`)})}},
+  {label:'QUANTIZE',run(area,api){const off=[.6,-.7,.3,.8,-.5,.9,-.4,.2];const pos=EIGHTHS.map((p,i)=>p+off[i]);const X=p=>(3+p/16*94)+'%';
+   area.innerHTML=`<p class="muted">Its hi-hats drift off the grid. <b style="color:var(--ink)">Quantize</b> snaps every note to the nearest grid line. Which grid brings them home?</p><div class="lane"></div><button class="btn ghost block" data-a="pl">▶ HEAR THE DRIFT</button><div class="qbtns"><button class="btn sm" data-g="4">1/4</button><button class="btn sm" data-g="2">1/8</button><button class="btn sm" data-g="1">1/16</button></div>`;
+   const lane=$('.lane',area);for(let i=0;i<16;i++){const l=h('i','gl'+(i%4===0?' b':''));l.style.left=X(i);lane.append(l)}
+   [0,8].forEach(p=>{const k=h('i','nt k');k.style.left=X(p);lane.append(k)});const nts=pos.map(p=>{const n=h('i','nt');n.style.left=X(p);lane.append(n);return n});
+   const playPos=ps=>{initAudio();if(!A.ctx)return;const spb=60/100/4;const t0=now()+.1;for(let bar=0;bar<2;bar++){[0,8].forEach(k=>V.kick(t0+(bar*16+k)*spb,.8));ps.forEach(p=>V.hat(t0+(bar*16+Math.max(0,p))*spb,.6))}};
+   $('[data-a=pl]',area).onclick=()=>playPos(pos);
+   $$('[data-g]',area).forEach(x=>x.onclick=()=>{const gsz=+x.dataset.g;const snapped=pos.map(p=>Math.round(p/gsz)*gsz);nts.forEach((n,i)=>n.style.left=X(snapped[i]));$$('.gl',lane).forEach((l,i)=>l.classList.toggle('g',i%gsz===0));playPos(snapped);$$('[data-g]',area).forEach(q=>q.disabled=true);
+     setTimeout(()=>{if(gsz===2)api.hit(60,true,'CRITICAL HIT! Every hat snaps onto an 8th note. The rhythm was 8ths, so a 1/8 grid is the perfect fit.');else if(gsz===4)api.miss('Too coarse. A 1/4 grid only has 4 slots per bar, so 8 hats got squashed into 4 and piled up. The rhythm was 8th notes: choose 1/8.');else api.miss('Too fine. Notes that drifted past halfway snapped to the wrong 16th. The rhythm was 8th notes, so a 1/8 grid snaps each one home.')},1400)})}},
+  {label:'HOLD THE GROOVE',run(area,api){const p=pat({hat:EIGHTHS});area.innerHTML=`<p class="muted">Final blow! Build a steady backbeat to hold it still: kick on 1 and 3, snare on 2 and 4. The hats are already there.</p><div class="gh"></div><button class="btn pink block big" data-a="strike">${SWORD} STRIKE</button>`;hydrateIcons(area);
+   const g=grid($('.gh',area),{tracks:['kick','snare','hat'],pat:p,edit:{kick:true,snare:true}});seq.start({bpm:100,play:(s,t)=>bt(p,s,t),onStep:s=>g.step(s%16)});
+   $('[data-a=strike]',area).onclick=()=>{seq.stop();const k=p.kick[0]&&p.kick[8];const s2=p.snare[4]&&p.snare[12]&&p.snare.filter(Boolean).length===2;if(k&&s2)api.hit(55,true,'CRITICAL HIT! A rock-solid backbeat. The pendulum stops swinging…');else api.miss(`${!k?'Kicks go on steps 1 and 9. ':''}${!s2?'Snares go on steps 5 and 13 only. ':''}You built this exact pattern in The Drum Trio.`)}}}]}};
+
+BATTLES.boss={name:'THE RHYTHM BEAST',lv:4,hp:200,weak:'Groove',sprite:BEAST,pal:BEAST_PAL,sc:7,cls:'',xp:250,coins:80,cosmetics:['hoodie-beast'],
+ intro:'The ground shakes. THE RHYTHM BEAST stomps out of the forest, its drum-belly booming. Only real groove can move it!',
+ attack:'The Rhythm Beast pounds its drum-belly. BOOM-BOOM! Your groove stumbles!',
+ hint:'Groove lives between the beats. Swing, syncopation and tempo give every genre its feel.',
+ listen:()=>{const p=pat({kick:[0,8],snare:[4,12],hat:EIGHTHS});seq.start({bpm:96,total:32,play:(s,t)=>swingStep(p,s,t,96,.6)})},
+ rounds:[
+  {label:'FEEL THE SWING',run(area,api){const sw=Math.random()<.5?0:1;const p=pat({kick:[0,8],snare:[4,12],hat:EIGHTHS});
+   area.innerHTML=`<p class="muted">One of these grooves <b style="color:var(--ink)">swings</b>: its off-beat hi-hats arrive a little late, which makes it bounce. Which one?</p><div class="opts" style="grid-template-columns:1fr 1fr"><button class="btn ghost" data-p="0">▶ PLAY A</button><button class="btn ghost" data-p="1">▶ PLAY B</button></div><div class="opts" style="grid-template-columns:1fr 1fr"><button class="btn sm" data-o="0">A SWINGS</button><button class="btn sm" data-o="1">B SWINGS</button></div>`;
+   $$('[data-p]',area).forEach(b=>b.onclick=()=>{const v=+b.dataset.p;seq.start({bpm:96,total:32,play:(s,t)=>swingStep(p,s,t,96,v===sw?.6:0)})});
+   $$('[data-o]',area).forEach(b=>b.onclick=()=>{seq.stop();if(+b.dataset.o===sw)api.hit(40,false,'Right! Swing delays every second hi-hat, so the beat bounces instead of marching. Hip-hop, jazz and lo-fi live on it.');else api.miss(`It was ${'AB'[sw]}. Listen to the hats: in a swung groove they go long-short, long-short, like a heartbeat with a limp.`)})}},
+  {label:'SYNCOPATE',run(area,api){const p=pat({kick:[0,8],snare:[4,12],hat:EIGHTHS});
+   area.innerHTML=`<p class="muted">Its armor is too square: every hit lands on a beat. Keep the kick on 1, then add a kick on an <b style="color:var(--ink)">in-between step</b> (an even-numbered step like 8, 11 or 16). Then strike.</p><div class="gh"></div><button class="btn pink block big" data-a="strike">${SWORD} STRIKE</button>`;hydrateIcons(area);
+   const g=grid($('.gh',area),{tracks:['kick','snare','hat'],pat:p,edit:{kick:true}});seq.start({bpm:96,play:(s,t)=>bt(p,s,t),onStep:s=>g.step(s%16)});
+   $('[data-a=strike]',area).onclick=()=>{seq.stop();const sync=p.kick.some((v,i)=>v&&i%2===1);if(p.kick[0]&&sync)api.hit(50,true,'CRITICAL HIT! That off-beat kick is syncopation: a hit where the ear does not expect it. The Beast\u2019s armor cracks!');else if(!p.kick[0])api.miss('Keep a kick on step 1. Syncopation only surprises when the listener still knows where beat 1 is.');else api.miss('All your kicks are still on odd steps. Put one on an even-numbered step, like 8, 11 or 16.')}}},
+  {label:'NAME THE GROOVE',run(area,api){const G=[{g:'House',bpm:124,p:pat({kick:[0,4,8,12],snare:[4,12],hat:[2,6,10,14]}),why:'Four kicks on the floor around 120 to 128 BPM, hats on the off-beats: that is house.'},{g:'Hip-hop',bpm:88,p:pat({kick:[0,7,10],snare:[4,12],hat:EIGHTHS}),why:'A slow tempo around 85 to 95 BPM with a lazy, broken kick pattern: that is hip-hop.'},{g:'Drum & bass',bpm:172,p:pat({kick:[0,10],snare:[4,12],hat:EIGHTHS}),why:'Very fast, around 170 BPM, with a kick-snare pattern that rolls: that is drum & bass.'}];const pick=G[Math.floor(Math.random()*3)];
+   area.innerHTML=`<p class="muted">The Beast drums a groove. Use the tempo and the kick pattern to name the genre.</p><button class="btn ghost block" data-a="pl">▶ LISTEN AGAIN</button><div class="opts">${G.map(x=>`<button class="btn sm" data-o="${x.g}">${x.g.toUpperCase()}</button>`).join('')}</div>`;
+   const play=()=>seq.start({bpm:pick.bpm,total:32,play:(s,t)=>bt(pick.p,s,t)});$('[data-a=pl]',area).onclick=play;play();
+   $$('[data-o]',area).forEach(b=>b.onclick=()=>{seq.stop();if(b.dataset.o===pick.g)api.hit(40,false,'Right! '+pick.why);else api.miss(`It was ${pick.g}. ${pick.why}`)})}},
+  {label:'FINAL GROOVE',run(area,api){area.innerHTML='<div class="taph"></div>';tapWidget($('.taph',area),{bpm:120,taps:8,need:6,groove:true,intro:'Final blow! Lock onto the Beast\u2019s pulse at 120 BPM. Land 6 of 8 taps.'},r=>{setTimeout(()=>{if(r.pass)api.hit(70,true,'CRITICAL HIT! Your groove is steadier than the Beast\u2019s. It sits down and starts nodding along…');else api.miss('It shook you off the beat. Breathe, count 1, 2, 3, 4 with the clicks, and tap on each number.')},500)})}}]};
+function swingStep(p,s,t,bpm,amt){const i=s%16;playStep(p,s,i%4===2?t+amt*60/bpm/4:t)}
+
+RENDER.battle=(scr,id)=>{const B=BATTLES[id];const st={hp:B.hp,hearts:5,round:0,busy:false};
+  scr.innerHTML=`<div class="bt-top"><div class="bt-name"><h2>${B.name}</h2><span class="chip">LV ${B.lv}</span></div><div class="bar hpbar"><i style="width:100%"></i></div><div class="row" style="justify-content:space-between"><span class="eyebrow">HP <span class="num hpn" style="font-size:18px">${B.hp}/${B.hp}</span></span><span class="eyebrow">WEAKNESS: ${B.weak.toUpperCase()}</span></div></div>
+  <div class="arena"><div class="enemy ${B.cls}"></div><div class="bhero"></div><div class="flashred"></div></div>
+  <div class="hearts"><span class="eyebrow">GROOVE</span><span class="hh row" style="gap:4px"></span></div>
+  <div class="win dialog"><p class="who">NARRATOR</p><p class="dtext"></p></div><div class="bt-act"></div>`;
+  const arena=$('.arena',scr);const cv=lowres(108,64,'bg');arena.prepend(cv);addLive(cv,drawArena);
+  const en=$('.enemy',scr);en.append(sprite(B.sprite,B.pal,B.sc));const bh=$('.bhero',scr);bh.append(heroEl(4,'bob'));const cp=companionEl(3);if(cp){cp.style.position='absolute';cp.style.left='70px';cp.style.bottom='0';bh.append(cp)}
+  const act=$('.bt-act',scr),dt=$('.dtext',scr),who=$('.who',scr);$('.dialog',scr).onclick=()=>typing&&typing.finish();
+  const hearts=()=>{const hh=$('.hh',scr);hh.innerHTML='';for(let i=0;i<5;i++)hh.append(icon('heart','#ff4f9a',3,i>=st.hearts))};hearts();
+  const say=(t,w)=>{who.textContent=w||'NARRATOR';return typeText(dt,t)};
+  const pop=(html,cls)=>{const p=h('div','pop '+(cls||''),html);arena.append(p);setTimeout(()=>p.remove(),1200)};
+  const sparks=()=>{for(let i=0;i<14;i++){const s=h('i','spark');const a=Math.random()*Math.PI*2,d=40+Math.random()*50;s.style.setProperty('--dx',Math.cos(a)*d+'px');s.style.setProperty('--dy',Math.sin(a)*d+'px');s.style.background=i%2?'#3ef0c8':'#ffb547';arena.append(s);setTimeout(()=>s.remove(),800)}};
+  const setHp=()=>{$('.hpbar i',scr).style.width=Math.max(0,st.hp)/B.hp*100+'%';$('.hpn',scr).textContent=Math.max(0,st.hp)+'/'+B.hp};
+  const curRound=()=>B.rounds[Math.min(st.round,B.rounds.length-1)];
+  const menu=()=>{if(!scr.isConnected||cur!=='battle')return;st.busy=false;scr.classList.remove('puzzle');const r=curRound();act.innerHTML=`<div class="actgrid"><button class="btn big pink" data-a="atk">${SWORD} ATTACK · ${r.label}</button><button class="btn ghost" data-a="lis">▶ LISTEN</button><button class="btn ghost" data-a="ask">ASK PIP</button></div><button class="btn ghost sm" data-a="run" style="align-self:center">RETREAT</button>`;hydrateIcons(act);
+    $('[data-a=atk]',act).onclick=()=>{sfx.tap();act.innerHTML='';scr.classList.add('puzzle');r.run(act,api);requestAnimationFrame(()=>act.scrollIntoView({block:'start',behavior:'smooth'}))};
+    $('[data-a=lis]',act).onclick=()=>{initAudio();if(!A.ctx)return;B.listen();say('You listen closely to the '+B.name.toLowerCase()+'…')};
+    $('[data-a=ask]',act).onclick=()=>{sfx.tap();say(B.hint,'PIP')};$('[data-a=run]',act).onclick=()=>go('region')};
+  const api={
+    async hit(dmg,crit,msg){if(st.busy)return;st.busy=true;seq.stop();act.innerHTML='';if(st.round>=B.rounds.length-1)dmg=Math.max(dmg,st.hp);scr.classList.remove('puzzle');scr.scrollTop=0;
+      crit?sfx.crit():sfx.hit();haptic(crit?[30,30,60]:30);en.classList.remove('hurt');void en.offsetWidth;en.classList.add('hurt');pop(crit?'CRITICAL HIT!<br>-'+dmg:'-'+dmg,crit?'crit':'');if(crit)sparks();st.hp-=dmg;setHp();
+      await say(msg,'PIP');await wait(900);if(cur!=='battle')return;if(st.hp<=0){victory();return}st.round++;menu()},
+    async miss(msg){if(st.busy)return;st.busy=true;seq.stop();act.innerHTML='';scr.classList.remove('puzzle');scr.scrollTop=0;sfx.miss();pop('MISS','miss');await say(msg,'PIP');await wait(1100);if(cur!=='battle')return;
+      await say(B.attack);sfx.hurt();haptic(80);arena.classList.remove('shake');void arena.offsetWidth;arena.classList.add('shake');const fr=$('.flashred',arena);fr.classList.remove('go');void fr.offsetWidth;fr.classList.add('go');st.hearts--;hearts();await wait(700);
+      if(st.hearts<=0){await say('Out of groove? Deep breath. Every producer misses, and that is how ears get trained. PIP restores 3 hearts.','PIP');st.hearts=3;hearts();sfx.ok()}
+      menu()}};
+  async function victory(){act.innerHTML='';en.classList.add('dead');sfx.victory();haptic([40,40,40,40,120]);await say(`${B.name} defeated!`);await wait(700);
+    const first=!S.defeated.includes(id);if(first){S.defeated.push(id);if(!S.done.includes(id))S.done.push(id);addMastery('drums',15);addMission('drums');if(id==='slime'&&S.eq.comp==='comp-none')S.eq.comp='comp-cassette'}bump('defeat');save();
+    await reward({eyebrow:id==='boss'?'WORLD BOSS DEFEATED':id==='metro'?'MINI-BOSS DEFEATED':'MONSTER DEFEATED',title:B.name,xp:first?B.xp:20,coins:first?B.coins:5,cosmetics:first?(B.cosmetics||[]):[],lines:first?['DRUM MASTERY +15%'].concat(id==='slime'?['A CASSETTE CRITTER JOINS YOU']:[]):['REMATCH BONUS']});
+    if(id==='metro'&&first){const r=await unlockTool('drums');if(r==='try'){go('studio');return}}if(id==='boss'){go('victory');return}go('region')}
+  say(B.intro).then(menu)};
+
+/* ---------- studio ---------- */
+function scoreBeat(p,v){const n=k=>p[k].filter(Boolean).length;const used=['kick','snare','hat','bass'].filter(k=>n(k)>0);const tips=[];
+  let rhythm=40;if(p.kick[0])rhythm+=20;else tips.push('Try a kick on step 1. It tells the listener where the bar starts.');if(p.snare[4]||p.snare[12])rhythm+=20;else tips.push('A snare on beat 2 or 4 (step 5 or 13) gives people something to nod to.');if(n('hat')>=4)rhythm+=20;else tips.push('A few more hi-hats would keep time between the big hits.');
+  let structure=0;if(used.some(k=>p[k][0]))structure+=34;const halves=['kick','bass'].some(k=>p[k].slice(0,8).some(Boolean)&&p[k].slice(8).some(Boolean));if(halves)structure+=33;else tips.push('Spread the low end across both halves of the bar so it doesn’t feel lopsided.');const tot=used.reduce((a,k)=>a+n(k),0);if(tot>=10&&tot<=40)structure+=33;else tips.push(tot<10?'The groove is very sparse. That can work, but try a few more hits.':'Lots of hits. Leaving some gaps lets the groove breathe.');
+  let balance=100;if(v.hat>v.kick){balance-=25;tips.push('Your hi-hats are louder than your kick. Hats usually sit quieter.')}if(used.some(k=>v[k]<.15)){balance-=20;tips.push('One track is almost silent. Bring it up or remove it.')}if(used.length&&used.every(k=>v[k]>=.95)){balance-=20;tips.push('Every fader is maxed out. Pulling some down makes room for the rest.')}balance=Math.max(40,balance);
+  let creativity=40;const notes=new Set(p.bass.filter(Boolean));if(notes.size>=2)creativity+=20;else tips.push('Tap a bass cell again to change its note. Two or three different notes make a bassline.');if(used.some(k=>p[k].some((x,i)=>x&&i%2===1)))creativity+=20;else tips.push('Hits on the in-between steps (2, 4, 6…) add syncopation, that bouncy feeling.');const bb=pat({kick:[0,8],snare:[4,12],hat:EIGHTHS});if(['kick','snare','hat'].some(k=>p[k].some((x,i)=>!!x!==!!bb[k][i])))creativity+=20;
+  const completion=used.length*25;const overall=Math.round((rhythm+structure+balance+creativity+completion)/5);return{rhythm,structure,balance,creativity,completion,overall,tips:tips.slice(0,3),used}}
+
+RENDER.studio=(scr,arg)=>{const ch=!!(arg&&arg.challenge);const P=S.pattern;
+  scr.innerHTML=topbar(ch?'CHALLENGE':'MY STUDIO',ch?'region':null)+`<div class="stack">
+   ${ch?`<div class="win cbanner stack"><p class="eyebrow" style="color:var(--amber)">WORLD 1 CHALLENGE · FIRST BEAT</p><h2>Create an 8-bar beat</h2><p style="font-size:15px">Program a 1-bar groove below. It loops for 8 bars. Use all four instruments, then submit. There's no wrong answer, only feedback.</p><div class="check"><div data-r="kick">Kick</div><div data-r="snare">Snare</div><div data-r="hat">Hi-hat</div><div data-r="bass">Bass (tap a bass cell again to change its note)</div></div></div>`:''}
+   <div class="win room"><div class="scene"></div></div>
+   <div class="gear"></div>
+   <div class="daw stack"></div></div>`;hydrateIcons(scr);wireBack(scr);
+  const sc=$('.scene',scr);const cv=lowres(108,56,'bg');sc.append(cv);addLive(cv,drawStudio);const hr=heroEl(3,'sprite bob');hr.style.left='36%';hr.style.bottom='8px';sc.append(hr);
+  const G=[['drums','DRUMS',has('drums')],['synth','SYNTH',0],['midi','SAMPLER',0],['eq','EQ',0],['comp','COMP',0],['reverb','REVERB',0],['delay','DELAY',0],['limiter','LIMITER',0],['mixer','MIXER',0],['volume','VOLUME',1]];
+  const ge=$('.gear',scr);G.forEach(([ic,n,hv])=>{const d=h('div',hv?'have':'');d.append(icon(ic,hv?'#ffb547':null,2,!hv));d.append(document.createTextNode(n));ge.append(d)});
+  const daw=$('.daw',scr);
+  if(!has('drums')){daw.innerHTML=`<div class="win raised stack"><p class="eyebrow">JAM PADS · TRAINING GEAR</p><p style="font-size:15px">Your studio is almost empty. Defeat the <b style="color:var(--amber)">Broken Metronome</b> in Beat Forest to install the Drum Machine and start programming beats.</p><div class="pads">${['kick','snare','hat','bass'].map(k=>`<button class="jam" data-k="${k}" style="--c:${TR[k].c}"><span style="color:${TR[k].c}">■</span>${TR[k].n}</button>`).join('')}</div><button class="btn block" data-a="forest">GO TO BEAT FOREST</button></div>`;
+    $$('.jam',daw).forEach(b=>b.addEventListener('pointerdown',()=>{audition(b.dataset.k,1);b.classList.add('hit');setTimeout(()=>b.classList.remove('hit'),120);haptic(8)}));$('[data-a=forest]',daw).onclick=()=>go('region');return}
+  daw.innerHTML=`<div class="win stack"><div class="row" style="justify-content:space-between"><p class="eyebrow">DRUM MACHINE · ${cos(S.kit).name.toUpperCase()}</p><button class="chip" data-a="kit" style="min-height:36px">SWAP KIT</button></div>
+    <div class="transport"><button class="btn neon" data-a="play">▶ PLAY</button><div class="bpmbox"><button data-a="slower" aria-label="Slower">−</button><span class="num bpmv">${S.bpm}</span><button data-a="faster" aria-label="Faster">+</button></div><span class="barc num">BAR –</span></div>
+    <div class="gh"></div><canvas class="px spec" width="96" height="16"></canvas>
+    <div class="row wrap"><button class="btn ghost sm" data-a="clr">CLEAR</button><button class="btn ghost sm" data-a="bb">LOAD BACKBEAT</button><button class="btn ghost sm" data-a="pip">ASK PIP</button></div></div>
+    ${ch?'<button class="btn big block" data-a="submit" disabled>SUBMIT BEAT ★</button>':''}`;
+  addLive($('.spec',daw),specDraw);
+  const reqs=()=>{if(!ch)return;const used=['kick','snare','hat','bass'].map(k=>P[k].some(Boolean));$$('[data-r]',scr).forEach((d,i)=>d.classList.toggle('ok',used[i]));$('[data-a=submit]',daw).disabled=!used.every(Boolean)};
+  const onChange=()=>{save();reqs();if(P.kick.some(Boolean)&&P.snare.some(Boolean))bump('ks',0,1)};
+  const g=grid($('.gh',daw),{tracks:['kick','snare','hat','bass'],pat:P,edit:true,faders:true,onChange});reqs();
+  const playB=$('[data-a=play]',daw),barc=$('.barc',daw);let bars=0;
+  const stopUI=()=>{playB.textContent='▶ PLAY';g.step(-1);barc.textContent='BAR –'};
+  const start=total=>{bars=0;playB.textContent='■ STOP';seq.start({bpm:()=>S.bpm,total,play:(s,t)=>playStep(P,s,t,S.vols),onStep:s=>{g.step(s%16);if(s%16===0){bars++;barc.textContent='BAR '+bars+(total?'/8':'');if(bars>1&&P.kick.some(Boolean)&&P.snare.some(Boolean)){bump('loop4');addMastery('drums',1);save()}}},onStop:stopUI,onEnd:stopUI})};
+  playB.onclick=()=>{if(seq.on){seq.stop();return}start(ch?128:0)};
+  const setBpm=d=>{S.bpm=clamp(S.bpm+d,60,180);$('.bpmv',daw).textContent=S.bpm;save()};$('[data-a=slower]',daw).onclick=()=>setBpm(-2);$('[data-a=faster]',daw).onclick=()=>setBpm(2);
+  $('[data-a=clr]',daw).onclick=()=>{['kick','snare','hat','bass'].forEach(k=>P[k].fill(0));g.paint();onChange()};
+  $('[data-a=bb]',daw).onclick=()=>{const b=pat({kick:[0,8],snare:[4,12],hat:EIGHTHS,bass:[[0,1],[3,1],[8,3],[11,5]]});['kick','snare','hat','bass'].forEach(k=>{for(let i=0;i<16;i++)P[k][i]=b[k][i]});g.paint();onChange()};
+  $('[data-a=pip]',daw).onclick=()=>openCoach();
+  $('[data-a=kit]',daw).onclick=()=>{const kits=COS.filter(c=>c.slot==='kit');const m=modal(`<h2>Drum kits</h2><div class="stack" style="width:100%">${kits.map(k=>{const own=S.owned.includes(k.id);return`<button class="sw ${S.kit===k.id?'on':''} ${own?'':'lock'}" data-k="${k.id}" style="width:100%"><i style="background:${k.col}"></i><span class="grow" style="text-align:left">${k.name}${own?'':`<br><small class="muted">${k.how}</small>`}</span></button>`}).join('')}</div><button class="btn block kit-done">DONE</button>`,{dismiss:true});
+    $$('[data-k]',m).forEach(b=>b.onclick=()=>{if(!S.owned.includes(b.dataset.k)){toast('LOCKED · '+cos(b.dataset.k).how.toUpperCase());return}S.kit=b.dataset.k;save();initAudio();if(A.ctx){V.kick(now()+.02,.9);V.snare(now()+.3,.8)}$$('[data-k]',m).forEach(x=>x.classList.toggle('on',x===b))});$('.kit-done',m).onclick=()=>{m.close();seq.stop();RENDER.studio(scr,arg)}};
+  if(ch)$('[data-a=submit]',daw).onclick=()=>{seq.stop();submitBeat()}};
+
+function submitBeat(){const r=scoreBeat(S.pattern,S.vols);const label=r.overall>=90?'LEGENDARY LOOP':r.overall>=75?'FRESH GROOVE':r.overall>=55?'SOLID START':'ROUGH DEMO';
+  const rows=[['Rhythm',r.rhythm],['Structure',r.structure],['Balance',r.balance],['Creativity',r.creativity],['Completion',r.completion]];
+  const m=modal(`<p class="eyebrow">FIRST BEAT · RESULTS</p><h2 class="rw-t">${label}</h2><p class="num" style="font-size:52px;line-height:.9;color:var(--neon)">${r.overall}</p>
+   <div class="scorebars">${rows.map(([n,v])=>`<div><span>${n}</span><span class="bar"><i style="width:${v}%;--c:${v>=80?'var(--neon)':'var(--amber)'}"></i></span><span class="num">${v}</span></div>`).join('')}</div>
+   ${r.tips.length?`<div class="tips"><p class="eyebrow" style="padding:0">PIP'S NOTES FOR NEXT TIME</p>${r.tips.map(t=>`<p>${t}</p>`).join('')}</div>`:'<p style="color:var(--neon)">PIP: I have nothing to add. That groove is ready for a real track.</p>'}
+   <button class="btn block big sb-ok">CLAIM REWARD</button><button class="btn ghost block sb-again">KEEP TWEAKING</button>`);
+  sfx.victory();$('.sb-again',m).onclick=()=>m.close();
+  $('.sb-ok',m).onclick=async()=>{m.close();const first=!S.done.includes('challenge');S.best=Math.max(S.best||0,r.overall);if(first){S.done.push('challenge');addMastery('drums',25);addMission('drums');addMastery('volume',10);addMission('volume')}save();
+    await reward({eyebrow:'CHALLENGE COMPLETE',title:'FIRST BEAT',xp:first?200:20,coins:first?60:5,cosmetics:first?['phones-leaf']:[],lines:[`SCORE ${r.overall} · ${label}`]});if(first)toast('THE RHYTHM BEAST AWAKENS…');go('region')}}
+
+/* ---------- victory ---------- */
+RENDER.victory=scr=>{scr.innerHTML=`<div class="stack" style="padding-top:24px;text-align:center"><p class="eyebrow" style="color:var(--leaf)">WORLD 1 · BEAT FOREST</p><h1 class="logo" style="font-size:40px">FOREST<span>CLEARED</span></h1><div class="victory-hero"></div>
+  <div class="statgrid"><div class="stat"><b>${S.lessons}</b><span>lessons</span></div><div class="stat"><b>${S.defeated.length}</b><span>monsters</span></div><div class="stat"><b>${S.tools.length}</b><span>tools</span></div><div class="stat"><b>${S.best||0}</b><span>best beat</span></div></div>
+  <div class="win stack" style="text-align:left"><p class="eyebrow">WHAT YOU CAN DO NOW</p><div class="learned"><span>Hear and set BPM</span><span>Count bars in 4/4</span><span>Read a 16-step grid</span><span>Kick, snare, hat roles</span><span>Program a backbeat</span><span>Quantize to a grid</span><span>Hear swing</span><span>Add syncopation</span></div>
+  <p style="font-size:15px">Open Ableton's Drum Rack, FL Studio's Channel Rack or Logic's Step Sequencer and you'll find this same grid. You already know how to use it.</p></div>
+  <div class="win raised stack" style="text-align:left"><p class="eyebrow" style="color:var(--magenta)">NEXT</p><h3>The Synth Caves await</h3><p class="muted" style="font-size:15px">Oscillators, filters and envelopes. The Synth Dragon guards the Synthesizer there. Coming in the full adventure.</p></div>
+  <button class="btn big block" data-a="studio">OPEN MY STUDIO</button><button class="btn ghost block" data-a="home">BACK HOME</button></div>`;
+  const v=$('.victory-hero',scr);v.append(heroEl(6,'bob'),pipEl(4,'float'));const cp=companionEl(4);if(cp)v.append(cp);
+  $('[data-a=studio]',scr).onclick=()=>go('studio');$('[data-a=home]',scr).onclick=()=>go('home')};
+
+/* ---------- quests ---------- */
+RENDER.quests=scr=>{const d=new Date(),mid=new Date(d);mid.setHours(24,0,0,0);const ms=mid-d;const hh=Math.floor(ms/3.6e6),mm=Math.floor(ms%3.6e6/6e4);
+  scr.innerHTML=topbar('DAILY QUESTS')+`<p class="muted">New quests in <span class="num" style="font-size:19px;color:var(--ink)">${hh}h ${mm}m</span>. Quests reward XP, coins, sounds and cosmetics.</p><div class="stack ql" style="margin-top:12px"></div>`;
+  const ql=$('.ql',scr);QUESTS.forEach(q=>{const pr=S.quests.prog[q.id]||0,claimed=S.quests.claimed.includes(q.id),lock=q.needs&&!has(q.needs),done=pr>=q.goal;
+    const c=h('div','win quest'+(claimed?' claimed':''));c.innerHTML=`<canvas class="px" data-ic="${q.icon}" data-sc="4"${lock?' data-dim="1"':''}></canvas><div class="grow stack" style="gap:4px"><span class="t">${q.title}</span><span class="d">${lock?'Unlocks with the Drum Machine':q.desc}</span><div class="bar" style="height:9px"><i style="width:${pr/q.goal*100}%;--c:var(--neon)"></i></div><span class="rw">+${q.xp} XP · +${q.coins} COINS${q.reward?' · '+cos(q.reward).name.toUpperCase():''}</span></div>${claimed?'<span class="chip neon">DONE</span>':done?'<button class="btn sm neon">CLAIM</button>':`<span class="num muted" style="font-size:20px">${pr}/${q.goal}</span>`}`;
+    const b=$('button',c);if(b)b.onclick=async()=>{b.disabled=true;S.quests.claimed.push(q.id);save();await reward({eyebrow:'QUEST REWARD',title:q.title.toUpperCase(),xp:q.xp,coins:q.coins,cosmetics:q.reward?[q.reward]:[]});RENDER.quests(scr)};ql.append(c)});hydrateIcons(scr)};
+
+/* ---------- inventory ---------- */
+let bagTab='tools';
+RENDER.bag=scr=>{scr.innerHTML=topbar('INVENTORY')+`<div class="tabs"><button data-t="tools" class="${bagTab==='tools'?'on':''}">TOOLS</button><button data-t="style" class="${bagTab==='style'?'on':''}">STYLE</button></div><div class="stack bagc" style="margin-top:12px"></div>`;hydrateIcons(scr);
+  $$('[data-t]',scr).forEach(b=>b.onclick=()=>{bagTab=b.dataset.t;sfx.tap();RENDER.bag(scr)});const c=$('.bagc',scr);
+  if(bagTab==='tools'){c.innerHTML=`<p class="muted">Every production tool is a weapon. You earn each one by learning it. ${S.tools.length} of ${TOOLS.length} unlocked.</p><div class="tools"></div>`;const tg=$('.tools',c);
+    TOOLS.forEach(t=>{const hv=has(t.id);const ms=S.mastery[t.id]||0;const b=h('button','tool '+(hv?'have':'locked'));b.append(icon(t.id,t.col,4,!hv));b.insertAdjacentHTML('beforeend',`<span class="n">${t.name}</span><span class="w">${hv?t.weapon:'???'}</span><span class="r">LV ${t.lv} · ${t.world.toUpperCase()}</span>${hv?`<div class="bar"><i style="width:${ms}%"></i></div><span class="r">MASTERY ${ms}% · ${S.missions[t.id]||0} MISSIONS${ms>=100?' · MASTERED':''}</span>`:'<span class="r">LOCKED</span>'}`);
+      b.onclick=()=>{sfx.tap();toolInfo(t)};tg.append(b)})}
+  else{const slots=[['hoodie','HOODIE'],['phones','HEADPHONES'],['hair','HAIR'],['comp','COMPANION']];c.innerHTML=`<div class="win dressing"></div><p class="muted" style="font-size:14px">Cosmetics are just for style. They never change combat or scores. You have ${S.coins} coins.</p>${slots.map(([s,n])=>`<div class="stack" style="gap:8px"><p class="eyebrow">${n}</p><div class="swatches">${COS.filter(x=>x.slot===s).map(x=>{const own=S.owned.includes(x.id);return`<button class="sw ${S.eq[s]===x.id?'on':''} ${own?'':'lock'}" data-c="${x.id}"><i style="background:${x.col}"></i>${x.name}${own?'':x.price?` · <span style="color:var(--amber)">${x.price}c</span>`:' · LOCKED'}</button>`}).join('')}</div></div>`).join('')}`;
+    const dr=$('.dressing',c);dr.append(heroEl(6,'bob'));const cp=companionEl(4);if(cp)dr.append(cp);
+    $$('[data-c]',c).forEach(b=>b.onclick=()=>{const x=cos(b.dataset.c);if(!S.owned.includes(x.id)){if(x.price){if(b.dataset.arm){if(S.coins>=x.price){S.coins-=x.price;S.owned.push(x.id);S.eq[x.slot]=x.id;save();sfx.coin();RENDER.bag(scr)}else{toast('NOT ENOUGH COINS · QUESTS AND BATTLES EARN MORE');sfx.bad()}}else{b.dataset.arm=1;b.innerHTML=`<i style="background:${x.col}"></i>TAP TO BUY · ${x.price}c`}}else toast('LOCKED · '+x.how.toUpperCase());return}S.eq[x.slot]=x.id;save();sfx.tap();RENDER.bag(scr)})}};
+function toolInfo(t){const hv=has(t.id);const m=modal(`<div class="ti-ic"></div><p class="eyebrow">${hv?'WEAPON FORM · '+t.weapon.toUpperCase():'LOCKED · LV '+t.lv+' · '+t.world.toUpperCase()}</p><h2>${t.name}</h2><p>${t.desc}</p><div class="win raised" style="text-align:left;width:100%"><p class="eyebrow" style="margin-bottom:6px">IN A REAL DAW</p><p style="font-size:15px">${t.daw}</p></div>${hv?`<p class="muted">Mastery ${S.mastery[t.id]||0}% · ${S.missions[t.id]||0} missions completed</p>`:''}<button class="btn block ti-x">${hv?'USE IN STUDIO':'CLOSE'}</button>`,{dismiss:true});
+  $('.ti-ic',m).append(icon(t.id,t.col,8,!hv));$('.ti-x',m).onclick=()=>{m.close();if(hv)go('studio')}}
+
+/* ---------- AI coach ---------- */
+let samplePromise=null;
+function getSample(){if(!samplePromise)samplePromise=(window.claude&&window.claude.use?Promise.resolve(window.claude.use('sample')):Promise.resolve(null)).catch(()=>null);return samplePromise}
+const CANNED={
+'Why does my bass sound muddy?':'Muddy bass usually means too many sounds are fighting in the low frequencies. Often it is the kick and the bass hitting at the same moment with the same weight.\n\nQuick fixes: let the kick and bass take turns (put bass notes between kicks), or turn one of them down a little.\n\nTry it: in your studio, move a bass note off step 1 so it lands just after the kick. In the EQ Desert you will learn to carve the lows with an EQ.',
+'How do I make my kick punchier?':'Punch is mostly about contrast. A kick feels punchy when it has room around it.\n\nGive it space: keep other drums off the exact same step, and turn the hats and bass down a touch so the kick stands out.\n\nTry it: in your studio set the kick fader around 90 and the hats around 45. Later, the Compressor in Compression Volcano adds even more snap.',
+'What does attack mean on a compressor?':'A compressor turns loud moments down. Attack is how fast it reacts.\n\nFast attack grabs the very start of a sound and flattens it. Slow attack lets the first hit through before clamping down, which makes drums sound punchier.\n\nYou will earn the Compressor in Compression Volcano. For now, remember: slow attack = more punch.',
+'Why does my mix sound quiet?':'Usually one of two things: everything is turned down, or one sound is so loud it forces everything else down with it.\n\nBalance first. Find your loudest element (often the kick) and make everything else sit around it. Loudness comes at the very end, with a Limiter in the Mastering Sky.\n\nTry it: bring every studio fader to about 70, then nudge each one until nothing hides.',
+'How do I make a synth sound darker?':'Dark means less high frequency. The main tool is a low-pass filter: it lets the lows through and cuts the highs.\n\nTurn the filter cutoff down and the synth gets warmer and darker. A softer waveform (sine or triangle instead of saw) helps too.\n\nYou will learn this hands-on in the Synth Caves.',
+'What is BPM?':'BPM means beats per minute: how many beats happen in one minute. It sets the speed of a song.\n\n60 BPM is one beat per second, 120 BPM is two. Lo-fi hip-hop often sits around 70 to 90, house around 120 to 128, drum & bass around 170.\n\nTry it: in your studio, press play and tap + or − on the tempo. Same pattern, different mood.',
+'What does quantize do?':'Quantize snaps notes onto a grid so they land exactly in time.\n\nWhen you play notes by hand, some are a little early or late. Quantize moves each one to the nearest grid line. Pick the grid that matches your rhythm: 1/8 for eighth notes, 1/16 for faster sixteenths.\n\nYou used it against the Broken Metronome. In a real DAW, select the notes and use the Quantize command.',
+'Why are there 16 steps?':'One bar of 4/4 has 4 beats. A step sequencer splits each beat into 4 smaller steps, so 4 × 4 = 16 steps.\n\nSteps 1, 5, 9 and 13 are the beats. The steps in between are where hi-hats, extra kicks and syncopation live.\n\nTry it: put a hi-hat on every odd step, then add one on step 16 and hear the little push into the next bar.',
+'How do I make my beat groove more?':'Groove comes from contrast and small surprises.\n\n- Add a hit on an in-between step (like step 11 or 16) for syncopation.\n- Keep the hi-hats quieter than the kick and snare.\n- Leave some gaps. Silence makes the hits feel bigger.\n\nTry it: in your studio, move one kick from step 9 to step 11 and listen to the bounce.',
+'What is the difference between kick and snare?':'The kick is the low thump you feel in your chest. It usually lands on beats 1 and 3 and anchors the groove.\n\nThe snare is the bright crack. On beats 2 and 4 it becomes the backbeat, the part people clap to.\n\nTry it: put the kick on steps 1 and 9 and the snare on steps 5 and 13. That is the backbeat.'};
+function openCoach(){const sh=h('div','sheet');const turns=[];let ctl=null;
+  sh.innerHTML=`<div class="sheet-in"><div class="sheet-h"><span class="pipbox"></span><div class="grow"><h3>PIP</h3><p class="muted" style="font-size:14px">Producer mentor · explains at your level (LV ${level()})</p></div><button class="iconbtn" data-a="close" aria-label="Close">✕</button></div><div class="msgs"></div><div class="chips">${Object.keys(CANNED).map(q=>`<button>${q}</button>`).join('')}</div><form class="composer"><input id="coach-in" placeholder="Ask about beats, mixing, sound…" autocomplete="off" aria-label="Ask PIP a question"><button class="btn sm" type="submit">ASK</button></form></div>`;
+  app.append(sh);$('.pipbox',sh).append(pipEl(3,'float'));const msgs=$('.msgs',sh);
+  const add=(txt,who)=>{const m=h('div','msg '+who);m.textContent=txt;msgs.append(m);msgs.scrollTop=msgs.scrollHeight;return m};
+  add('Hey producer! I’m PIP. Ask me anything about making music. I’ll keep it simple and tell you where in the adventure you’ll master it.','pip');
+  getSample().then(s=>{if(s||!sh.isConnected)return;$('.composer',sh).hidden=true;$('.chips',sh).classList.add('wrap');add('Offline coach: tap a question below.','note')});
+  const close=()=>{ctl&&ctl.abort();sh.remove()};$('[data-a=close]',sh).onclick=close;sh.addEventListener('click',e=>{if(e.target===sh)close()});
+  const RULES=()=>`You are PIP, a small amber speaker-robot who mentors players in BEAT QUEST, a pixel-art RPG that teaches music production. Talk like a friendly, encouraging producer. The player is Producer Level ${level()} and has explored Beat Forest (rhythm, BPM, bars, kick/snare/hi-hat, quantize). Unlocked tools: ${S.tools.join(', ')}. Rules: plain language for a beginner; define any technical word the first time you use it; at most about 110 words; give one concrete example; end with one small thing to try (in the game's studio drum machine if it fits, otherwise in any DAW). Plain text only: no markdown headings, no asterisks, at most 3 short bullet lines. If the topic is beyond their level, give the simple version and name the world that teaches it: Synth Caves (synths, ADSR, filters, LFO), EQ Desert (EQ, frequencies, masking), Compression Volcano (compression, distortion), Reverb Swamp (reverb, delay), Mixing Castle (gain staging, panning, automation), Mastering Sky (limiting, LUFS, export).`;
+  let busy=false;
+  const ask=async q=>{q=q.trim();if(!q||busy)return;busy=true;add(q,'me');$('#coach-in',sh).value='';const bub=add('Thinking…','pip');const sample=await getSample();
+    const fallback=()=>{const k=Object.keys(CANNED).find(x=>x.toLowerCase()===q.toLowerCase());bub.textContent=k?CANNED[k]:'Live answers aren’t available in this view, so I can only answer the suggested questions right now. Tap one of the chips below.'};
+    if(!sample){fallback();busy=false;return}
+    turns.push({role:'user',content:q});ctl=new AbortController();
+    try{const {text}=await sample([{role:'user',content:RULES()},...turns.slice(-8)],{cache:false,modelTier:'quick',signal:ctl.signal,onText:({text})=>{bub.textContent=text;msgs.scrollTop=msgs.scrollHeight}});turns.push({role:'assistant',content:text})}
+    catch(e){turns.pop();const code=e&&e.code;if(code==='cancelled'){}else if(e&&e.text)bub.textContent=e.text;else if(['not_granted','sampling_disabled','not_declared','capability_disabled','capability_removed'].includes(code))fallback();else if(code==='rate_limited')bub.textContent='I need a short break. Ask me again in a minute.';else if(code==='refused')bub.textContent='I can’t help with that one. Ask me something about making music.';else bub.textContent='My signal dropped. Ask again in a moment.'}
+    finally{busy=false}};
+  $$('.chips button',sh).forEach(b=>b.onclick=()=>ask(b.textContent));$('.composer',sh).onsubmit=e=>{e.preventDefault();ask($('#coach-in',sh).value)}}
+
+/* ================= platform hooks: Android back button, app pause ================= */
+window.bqBack=()=>{const sh=$('.sheet');if(sh){const c=$('[data-a=close]',sh);if(c)c.click();else sh.remove();return'ok'}
+  const mods=$$('.modal-back');if(mods.length){const m=mods[mods.length-1];const b=$('.rw-go,.ul-later,.sb-again,.kit-done,.st-cl,.wi-ok',m);if(b)b.click();else m.remove();return'ok'}
+  const up={lesson:'region',battle:'region',region:'map',studio:$('#s-studio [data-back]')?'region':'home',map:'home',quests:'home',bag:'home',victory:'home'}[cur];
+  if(up){sfx.tap();go(up);return'ok'}return'exit'};
+window.bqPause=()=>{seq.stop();stopMusic();if(A.ctx&&A.ctx.state==='running')A.ctx.suspend()};
+window.bqResume=()=>{if(!A.ctx)return;const p=A.ctx.resume();if(p&&p.catch)p.catch(()=>{});if(['home','map','region','quests','bag'].includes(cur))startMusic()};
+document.addEventListener('visibilitychange',()=>{if(document.hidden)bqPause();else bqResume()});
+
+/* ================= boot ================= */
+$$('#nav button').forEach(b=>b.onclick=()=>{sfx.tap();go(b.dataset.go)});
+hydrateIcons($('#nav'));
+load();getSample();go('title');
+</script>
