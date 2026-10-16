@@ -1,14 +1,3 @@
-# Beat Quest
-
-Un RPG en pixel art qui apprend la production musicale : 7 mondes (rythme, synthèse, EQ, compression, reverb et delay, mixage, mastering), des plugins inspirés des vrais (synthé wavetable, EQ 6 bandes, compresseur, reverb, delay, table de mixage, limiteur avec mesure LUFS) et un Final Track : un petit DAW où l'on produit un morceau complet pour devenir **PRODUCER CERTIFIED**.
-
-Tout le son est synthétisé en direct avec la Web Audio API : il n'y a aucun fichier audio.
-
-## Jouer
-
-Ouvre `beat-quest.html` dans Chrome, Edge ou Firefox. Le jeu tient dans ce seul fichier.
-
-L'appli Android est `BeatQuest-2.0.apk`.
 
 ## Structure
 
