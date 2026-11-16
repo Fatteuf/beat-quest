@@ -1,4 +1,4 @@
-const VERSION='2.2';
+const VERSION='2.2.1';
 /* ================= helpers ================= */
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const app=$('#app');
@@ -526,7 +526,14 @@ function drawStudio(g,t,cv){const W=cv.width,H=cv.height,fl=44;
   if(has('comp')){px(g,67,31,10,5,'#2a1a1a');px(g,67,31,10,1,'#8a5a34');const m=seq.on?Math.floor((Math.sin(t*9)+1)*3):1;px(g,68,33,m+1,2,'#ff5a2a')}
   if(S.done.includes('l3')){[[18,27],[84,27]].forEach(([x,y])=>{const p=seq.on&&Math.floor(t*8)%2?1:0;px(g,x,y,8,18,'#1a1426');px(g,x+1,y+3-p,6,6,'#3d3166');px(g,x+3,y+5-p,2,2,'#0d0a1c');px(g,x+2,y+11,4,4,'#3d3166')})}
   if(S.defeated.includes('slime')){px(g,98,34,6,8,'#8a5a34');px(g,97,34,8,1,'#a8744a');px(g,99,28,2,6,'#4f8a4a');px(g,96,30,3,2,'#6fd36a');px(g,101,27,3,3,'#6fd36a');px(g,98,26,2,2,'#6fd36a')}
-  if(S.done.includes('trial')){px(g,36,10,10,12,'#ffcc4d');px(g,37,11,8,10,'#2a1a06');px(g,40,13,2,6,'#ffcc4d');px(g,38,14,6,1,'#ffcc4d')}}
+  if(S.done.includes('trial')){px(g,36,10,10,12,'#ffcc4d');px(g,37,11,8,10,'#2a1a06');px(g,40,13,2,6,'#ffcc4d');px(g,38,14,6,1,'#ffcc4d')}
+  /* Techno Bunker gear: the groovebox on its stand + a strobe, the rumble sub, the Club Trial record */
+  if(has('groovebox')){const pl=seq.on?Math.floor(t*8)%7:-1;px(g,4,39,1,5,'#4a3020');px(g,14,39,1,5,'#4a3020');px(g,4,41,11,1,'#4a3020');
+    px(g,2,33,15,6,'#2a2440');px(g,2,33,15,1,'#4d4373');px(g,2,34,15,1,'#ff7a3a');[4,7,10,13].forEach(x=>px(g,x,35,1,1,'#c9c6d8'));
+    for(let k=0;k<7;k++)px(g,3+k*2,37,1,1,pl===k?'#ffffff':['#ff4f5a','#ff7a3a','#ffcc4d','#f1e7d0'][k>>1]);
+    const fs=seq.on&&Math.floor(t*12)%4===0;px(g,57,0,6,2,'#3a3450');px(g,59,2,2,1,fs?'#ffffff':'#6a5f9a');if(fs){px(g,57,3,1,1,'#f1e7d0');px(g,62,3,1,1,'#f1e7d0');px(g,59,4,2,1,'#f1e7d0')}}
+  if(hasAb('rumblecraft')){const pu=seq.on&&Math.floor(t*S.bpm/30)%2;px(g,60,41,12,9,'#1a1426');px(g,60,41,12,1,'#3d3166');px(g,pu?62:63,pu?42:43,pu?8:6,pu?7:5,'#3d3166');px(g,64,44,4,3,'#241c40');px(g,65,45,2,1,'#0d0a1c')}
+  if(S.owned.includes('kit-bunker')){px(g,63,7,14,14,'#ff7a3a');px(g,64,8,12,12,'#140d1f');px(g,66,9,8,10,'#2a2440');px(g,65,10,10,8,'#2a2440');px(g,69,13,2,2,'#ff7a3a')}}
 function scopeDraw(g,t,cv){const W=cv.width,H=cv.height;px(g,0,0,W,H,'#08060f');for(let x=0;x<W;x+=8)px(g,x,0,1,H,'#140f24');px(g,0,H/2,W,1,'#1d1736');if(!A.an)return;const d=new Uint8Array(A.an.fftSize);A.an.getByteTimeDomainData(d);for(let x=0;x<W;x++){const v=d[Math.floor(x/W*d.length)]/128-1;const y=Math.floor(H/2-v*H*.9);px(g,x,clamp(y,0,H-1),1,1,'#ffb547')}}
 function specDraw(g,t,cv){const W=cv.width,H=cv.height;px(g,0,0,W,H,'#08060f');if(!A.an)return;const d=new Uint8Array(A.an.frequencyBinCount);A.an.getByteFrequencyData(d);const n=W/3;for(let i=0;i<n;i++){const idx=Math.floor(Math.pow(i/n,2)*d.length*.6);const v=d[idx]/255;const hh=Math.floor(v*H);for(let y=0;y<hh;y+=2)px(g,i*3,H-1-y,2,1,y>H*.7?'#ff4f9a':y>H*.4?'#ffb547':'#3ef0c8')}}
 

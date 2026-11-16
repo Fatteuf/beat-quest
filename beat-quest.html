@@ -633,7 +633,7 @@ input[type=range]::-moz-range-thumb{width:18px;height:22px;background:var(--ambe
 
 <script>
 "use strict";
-const VERSION='2.2';
+const VERSION='2.2.1';
 /* ================= helpers ================= */
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const app=$('#app');
@@ -1161,7 +1161,14 @@ function drawStudio(g,t,cv){const W=cv.width,H=cv.height,fl=44;
   if(has('comp')){px(g,67,31,10,5,'#2a1a1a');px(g,67,31,10,1,'#8a5a34');const m=seq.on?Math.floor((Math.sin(t*9)+1)*3):1;px(g,68,33,m+1,2,'#ff5a2a')}
   if(S.done.includes('l3')){[[18,27],[84,27]].forEach(([x,y])=>{const p=seq.on&&Math.floor(t*8)%2?1:0;px(g,x,y,8,18,'#1a1426');px(g,x+1,y+3-p,6,6,'#3d3166');px(g,x+3,y+5-p,2,2,'#0d0a1c');px(g,x+2,y+11,4,4,'#3d3166')})}
   if(S.defeated.includes('slime')){px(g,98,34,6,8,'#8a5a34');px(g,97,34,8,1,'#a8744a');px(g,99,28,2,6,'#4f8a4a');px(g,96,30,3,2,'#6fd36a');px(g,101,27,3,3,'#6fd36a');px(g,98,26,2,2,'#6fd36a')}
-  if(S.done.includes('trial')){px(g,36,10,10,12,'#ffcc4d');px(g,37,11,8,10,'#2a1a06');px(g,40,13,2,6,'#ffcc4d');px(g,38,14,6,1,'#ffcc4d')}}
+  if(S.done.includes('trial')){px(g,36,10,10,12,'#ffcc4d');px(g,37,11,8,10,'#2a1a06');px(g,40,13,2,6,'#ffcc4d');px(g,38,14,6,1,'#ffcc4d')}
+  /* Techno Bunker gear: the groovebox on its stand + a strobe, the rumble sub, the Club Trial record */
+  if(has('groovebox')){const pl=seq.on?Math.floor(t*8)%7:-1;px(g,4,39,1,5,'#4a3020');px(g,14,39,1,5,'#4a3020');px(g,4,41,11,1,'#4a3020');
+    px(g,2,33,15,6,'#2a2440');px(g,2,33,15,1,'#4d4373');px(g,2,34,15,1,'#ff7a3a');[4,7,10,13].forEach(x=>px(g,x,35,1,1,'#c9c6d8'));
+    for(let k=0;k<7;k++)px(g,3+k*2,37,1,1,pl===k?'#ffffff':['#ff4f5a','#ff7a3a','#ffcc4d','#f1e7d0'][k>>1]);
+    const fs=seq.on&&Math.floor(t*12)%4===0;px(g,57,0,6,2,'#3a3450');px(g,59,2,2,1,fs?'#ffffff':'#6a5f9a');if(fs){px(g,57,3,1,1,'#f1e7d0');px(g,62,3,1,1,'#f1e7d0');px(g,59,4,2,1,'#f1e7d0')}}
+  if(hasAb('rumblecraft')){const pu=seq.on&&Math.floor(t*S.bpm/30)%2;px(g,60,41,12,9,'#1a1426');px(g,60,41,12,1,'#3d3166');px(g,pu?62:63,pu?42:43,pu?8:6,pu?7:5,'#3d3166');px(g,64,44,4,3,'#241c40');px(g,65,45,2,1,'#0d0a1c')}
+  if(S.owned.includes('kit-bunker')){px(g,63,7,14,14,'#ff7a3a');px(g,64,8,12,12,'#140d1f');px(g,66,9,8,10,'#2a2440');px(g,65,10,10,8,'#2a2440');px(g,69,13,2,2,'#ff7a3a')}}
 function scopeDraw(g,t,cv){const W=cv.width,H=cv.height;px(g,0,0,W,H,'#08060f');for(let x=0;x<W;x+=8)px(g,x,0,1,H,'#140f24');px(g,0,H/2,W,1,'#1d1736');if(!A.an)return;const d=new Uint8Array(A.an.fftSize);A.an.getByteTimeDomainData(d);for(let x=0;x<W;x++){const v=d[Math.floor(x/W*d.length)]/128-1;const y=Math.floor(H/2-v*H*.9);px(g,x,clamp(y,0,H-1),1,1,'#ffb547')}}
 function specDraw(g,t,cv){const W=cv.width,H=cv.height;px(g,0,0,W,H,'#08060f');if(!A.an)return;const d=new Uint8Array(A.an.frequencyBinCount);A.an.getByteFrequencyData(d);const n=W/3;for(let i=0;i<n;i++){const idx=Math.floor(Math.pow(i/n,2)*d.length*.6);const v=d[idx]/255;const hh=Math.floor(v*H);for(let y=0;y<hh;y+=2)px(g,i*3,H-1-y,2,1,y>H*.7?'#ff4f9a':y>H*.4?'#ffb547':'#3ef0c8')}}
 
@@ -1867,7 +1874,7 @@ RENDER.lesson=(scr,id)=>{const L=LESSONS[id];let i=0,ok=false,hl=0,leave=[];
     if(first&&L.ability)await unlockAbility(L.ability);
     if(first&&L.game){const gm=GAMES.find(x=>x.id===L.game);toast('EAR GYM · '+gm.name.toUpperCase()+' UNLOCKED')}
     if(first&&L.after&&await L.after())return;
-    if(first&&L.tool&&!has(L.tool)){const r=await unlockTool(L.tool);if(r==='try'){markSeg('new');S.daily.active=null;save();go('studio');return}}
+    if(first&&L.tool&&!has(L.tool)){const r=await unlockTool(L.tool);if(r==='try'){markSeg('new');S.daily.active=null;save();go('studio',L.tool==='groovebox'?{bbox:1}:undefined);return}}
     finishActivity('new',id==='l3'&&first?['battle','slime']:'region')};
   show()};
 
@@ -2045,8 +2052,8 @@ RENDER.studio=(scr,arg)=>{const ch=!!(arg&&arg.challenge);const P=S.pattern;let 
    ${ch?`<div class="win cbanner stack"><p class="eyebrow" style="color:var(--amber)">WORLD 1 CHALLENGE · FIRST BEAT</p><h2>Create an 8-bar beat</h2><p style="font-size:15px">Program a 1-bar groove below. It loops for 8 bars. Use all four instruments, then submit. There's no wrong answer, only feedback.</p><div class="check"><div data-r="kick">Kick</div><div data-r="snare">Snare</div><div data-r="hat">Hi-hat</div><div data-r="bass">Bass (tap a bass cell again to change its note)</div></div><div class="hints"></div></div>`:''}
    <div class="win room"><div class="scene"></div></div><div class="gear"></div><div class="daw stack"></div></div>`;hydrateIcons(scr);wireBack(scr);
   const sc=$('.scene',scr);const cv=lowres(108,56,'bg');sc.append(cv);addLive(cv,drawStudio);const hr=heroEl(3,'sprite bob');hr.style.left='36%';hr.style.bottom='8px';sc.append(hr);
-  const G=[['drums','DRUMS',has('drums')],['synth','SYNTH',has('synth')],['midi','MIDI',has('midi')],['eq','EQ',has('eq')],['comp','COMP',has('comp')],['reverb','REVERB',has('reverb')],['delay','DELAY',has('delay')],['limiter','LIMITER',has('limiter')],['mixer','PAN',hasAb('stereosight')],['volume','VOLUME',1]];
-  const ge=$('.gear',scr);G.forEach(([ic,n,hv])=>{const d=h('div',hv?'have':'');d.append(icon(ic,null,2,!hv));d.append(document.createTextNode(hv?n:'???'));ge.append(d)});
+  const G=[['drums','DRUMS',has('drums')],['synth','SYNTH',has('synth')],['midi','MIDI',has('midi')],['eq','EQ',has('eq')],['comp','COMP',has('comp')],['reverb','REVERB',has('reverb')],['delay','DELAY',has('delay')],['limiter','LIMITER',has('limiter')],['mixer','PAN',hasAb('stereosight')],['volume','VOLUME',1],['dist','DRIVE',has('dist')],['auto','AUTO',has('auto')],['groovebox','GROOVEBOX',has('groovebox')],['subwoofer','RUMBLE',hasAb('rumblecraft')],['drums','909 KIT',S.owned.includes('kit-bunker'),'#ff7a3a']];
+  const ge=$('.gear',scr);G.forEach(([ic,n,hv,col])=>{const d=h('div',hv?'have':'');d.append(icon(ic,col,2,!hv));d.append(document.createTextNode(hv?n:'???'));ge.append(d)});
   const daw=$('.daw',scr);
   if(!has('drums')){daw.innerHTML=`<div class="win raised stack"><p class="eyebrow">JAM PADS · TRAINING GEAR</p><p style="font-size:15px">Your studio is almost empty. Defeat the <b style="color:var(--amber)">Broken Metronome</b> in Beat Forest to install the Drum Machine and start programming beats.</p><div class="pads">${['kick','snare','hat','bass'].map(k=>`<button class="jam" data-k="${k}" style="--c:${TR[k].c}"><span style="color:${TR[k].c}">■</span>${TR[k].n}</button>`).join('')}</div><button class="btn block" data-a="forest">GO TO BEAT FOREST</button></div>`;
     $$('.jam',daw).forEach(b=>b.addEventListener('pointerdown',()=>{audition(b.dataset.k,1);b.classList.add('hit');setTimeout(()=>b.classList.remove('hit'),120);haptic(8)}));$('[data-a=forest]',daw).onclick=()=>go('region');return}
@@ -2056,7 +2063,8 @@ RENDER.studio=(scr,arg)=>{const ch=!!(arg&&arg.challenge);const P=S.pattern;let 
     <div class="gh"></div><canvas class="px spec" width="96" height="16"></canvas>
     ${has('comp')?`<div class="win raised stack"><div class="row sp"><p class="eyebrow" style="color:var(--amber)">MASTER COMPRESSOR · DYNAMICS HAMMER</p><button class="chip" data-a="mc">${S.mcomp.on?'ON':'OFF'}</button></div><div class="knobrow"><span>THRESH</span><input type="range" id="mc-thr" min="-40" max="0" value="${S.mcomp.thr}" aria-label="Master threshold"><span class="num">${S.mcomp.thr} dB</span></div><div class="knobrow"><span>RATIO</span><input type="range" id="mc-ratio" min="1" max="12" step=".5" value="${S.mcomp.ratio}" aria-label="Master ratio"><span class="num">${S.mcomp.ratio}:1</span></div><div class="grm"><span>GAIN REDUCTION</span><div class="bar"><i style="width:0%;--c:var(--magenta)"></i></div><span class="num">0.0 dB</span></div></div>`:''}
     <div class="fxh"></div>
-    <div class="row wrap"><button class="btn ghost sm" data-a="clr">CLEAR</button><button class="btn ghost sm" data-a="bb">LOAD BACKBEAT</button>${has('synth')?'<button class="btn ghost sm" data-a="lead">EDIT LEAD SOUND</button>':''}${has('groovebox')?'<button class="btn ghost sm" data-a="bbox">BUNKER BOX</button>':''}<button class="btn ghost sm" data-a="pip">ASK PIP</button></div></div>
+    <div class="row wrap"><button class="btn ghost sm" data-a="clr">CLEAR</button><button class="btn ghost sm" data-a="bb">LOAD BACKBEAT</button>${has('synth')?'<button class="btn ghost sm" data-a="lead">EDIT LEAD SOUND</button>':''}<button class="btn ghost sm" data-a="pip">ASK PIP</button></div></div>
+    ${!ch&&has('groovebox')?bunkerCard():''}
     ${ch?'<button class="btn big block" data-a="submit" disabled>SUBMIT BEAT ★</button>':''}`;
   addLive($('.spec',daw),specDraw);
   const reqs=()=>{if(!ch)return;const used=['kick','snare','hat','bass'].map(k=>P[k].some(Boolean));$$('[data-r]',scr).forEach((d,i)=>d.classList.toggle('ok',used[i]));$('[data-a=submit]',daw).disabled=!used.every(Boolean)};
@@ -2078,7 +2086,8 @@ RENDER.studio=(scr,arg)=>{const ch=!!(arg&&arg.challenge);const P=S.pattern;let 
   $('[data-a=pip]',daw).onclick=()=>openCoach();
   $('[data-a=kit]',daw).onclick=()=>{const kits=COS.filter(c=>c.slot==='kit');const m=modal(`<h2>Drum kits</h2><div class="stack" style="width:100%">${kits.map(k=>{const own=S.owned.includes(k.id);return`<button class="sw ${S.kit===k.id?'on':''} ${own?'':'lock'}" data-k="${k.id}" style="width:100%"><i style="background:${k.col}"></i><span class="grow" style="text-align:left">${k.name}${own?'':`<br><small class="muted">${k.how}</small>`}</span></button>`}).join('')}</div><button class="btn block kit-done">DONE</button>`,{dismiss:true});
     $$('[data-k]',m).forEach(b=>b.onclick=()=>{if(!S.owned.includes(b.dataset.k)){toast('LOCKED · '+cos(b.dataset.k).how.toUpperCase());return}S.kit=b.dataset.k;save();initAudio();if(A.ctx){V.kick(now()+.02,.9);V.snare(now()+.3,.8)}$$('[data-k]',m).forEach(x=>x.classList.toggle('on',x===b))});$('.kit-done',m).onclick=()=>{m.close();seq.stop();RENDER.studio(scr,arg)}};
-  if(ch){hintBar($('.hints',scr),{hints:['Start with the backbone: a kick on step 1 and a snare on steps 5 and 13.','Add hats on the 8th notes. Then tap bass cells, and tap again to change the note.'],onLevel:l=>{hl=l},reveal:loadBB});$('[data-a=submit]',daw).onclick=()=>{seq.stop();submitBeat(hl)}}};
+  if(ch){hintBar($('.hints',scr),{hints:['Start with the backbone: a kick on step 1 and a snare on steps 5 and 13.','Add hats on the 8th notes. Then tap bass cells, and tap again to change the note.'],onLevel:l=>{hl=l},reveal:loadBB});$('[data-a=submit]',daw).onclick=()=>{seq.stop();submitBeat(hl)}}
+  if(arg&&arg.bbox&&has('groovebox')){arg.bbox=0;openBunkerBox()}};
 function submitBeat(hl){const r=scoreBeat(S.pattern,S.vols);const label=r.overall>=90?'LEGENDARY LOOP':r.overall>=75?'FRESH GROOVE':r.overall>=55?'SOLID START':'ROUGH DEMO';
   const rows=[['Rhythm',r.rhythm],['Structure',r.structure],['Balance',r.balance],['Creativity',r.creativity],['Completion',r.completion]];
   const m=modal(`<p class="eyebrow">FIRST BEAT · RESULTS</p><h2 class="rw-t">${label}</h2><p class="num" style="font-size:52px;line-height:.9;color:var(--neon)">${r.overall}</p>
@@ -3608,8 +3617,24 @@ function bassShapeViz(host){const d=display(host,92,(g,W,H)=>{gridLines(g,W,H,{c
   g.fillStyle='#ff4f9a';g.fillText('REVERSE = SWELLS INTO THE KICK',8,12);g.fillStyle='#3ef0c8';g.fillText('PLUCK = SHORT, DIES AWAY',8,24)});
   host.append(h('div','dispcap','<span>WHITE = KICK · 2 BEATS · BASS ON EVERY OFFBEAT</span>'));return d}
 function rulesFeedback(fb,rows,okMsg){const bad=rows.filter(r=>!r.ok);fb.innerHTML=bad.length?`<p class="fb">${bad.map(r=>r.bad).join(' ')}</p>`:`<p class="fb good">${okMsg}</p>`;return!bad.length}
-function openBunkerBox(){const m=modal('<p class="eyebrow" style="color:#ff7a3a">STUDIO · FREE JAM</p><div class="bbx-h" style="width:100%"></div><button class="btn block fx-close">DONE</button>');
-  const rig=bunkerRig($('.bbx-h',m),{presets:true,show:['swing','rumble','drive','bass','len','stop'],init:{bpm:132,pat:{kick:BEATS}}});$('.fx-close',m).onclick=()=>{rig.stop();m.close()}}
+/* ---- the studio's Bunker Box: the jam is kept in S.bbox (saved like the rest of the game) ---- */
+const BB_KEYS=['bpm','swing','rumble','drive','kdrive','bassMode','root'];
+function packBB(st){const o={pat:{},len:{},vol:Object.assign({},st.vol)};BB_KEYS.forEach(k=>o[k]=st[k]);TT_ORDER.forEach(k=>{o.pat[k]=st.pat[k].slice();o.len[k]=st.len[k]||16});o.acid=st.acid?JSON.parse(JSON.stringify(st.acid)):null;return o}
+function unpackBB(o){if(!o||!o.pat)return null;const st=mkSt({});BB_KEYS.forEach(k=>{if(o[k]!=null)st[k]=o[k]});
+  TT_ORDER.forEach(k=>{const a=o.pat[k];if(Array.isArray(a)&&a.length===16)st.pat[k]=a.map(v=>+v||0);if(o.len&&BB_LEN.includes(o.len[k]))st.len[k]=o.len[k]});
+  Object.assign(st.vol,o.vol||{});if(o.acid)st.acid=JSON.parse(JSON.stringify(o.acid));return st}
+function bbSummary(){const st=unpackBB(S.bbox);if(!st)return'NO JAM SAVED YET';const n=TT_ORDER.filter(k=>st.pat[k].some(Boolean)).length;return`YOUR JAM · ${st.bpm} BPM · ${n} TRACK${n===1?'':'S'}`}
+function openBunkerBox(){const m=modal('<p class="eyebrow" style="color:#ff7a3a">STUDIO · FREE JAM · AUTO-SAVED</p><div class="bbx-h" style="width:100%"></div><button class="btn block fx-close">DONE</button>');
+  const keep=st=>{S.bbox=packBB(st);save();const s=$('.bbx-sum');if(s)s.textContent=bbSummary()};
+  const rig=bunkerRig($('.bbx-h',m),{presets:true,show:['swing','rumble','drive','bass','len','stop'],state:unpackBB(S.bbox)||mkSt({bpm:132,pat:{kick:BEATS}}),onChange:keep});
+  $('.fx-close',m).onclick=()=>{rig.stop();keep(rig.st);m.close()}}
+/* what the Bunker gives you, and where it shows up */
+const BUNKER_LOOT=[['GROOVEBOX · BUNKER BOX','#ff7a3a',()=>has('groovebox'),'Finish “The Techno Engine”','this panel'],['STROBE CANS','#ff3d7f',()=>S.owned.includes('phones-strobe'),'Defeat The Bouncer','your wardrobe'],
+  ['RUMBLE KNOB','#a98bff',()=>hasAb('rumblecraft'),'Defeat The Headliner','the Mix Rack'],['RAVE NEON HOODIE','#3ef0c8',()=>S.owned.includes('hoodie-rave'),'Defeat The Headliner','your wardrobe'],['BUNKER 909 KIT','#ff7a3a',()=>S.owned.includes('kit-bunker'),'Pass the Club Trial','SWAP KIT']];
+function bunkerCard(){return`<div class="win raised stack bbx-card"><div class="row sp"><p class="eyebrow" style="color:#ff7a3a">GROOVEBOX · BUNKER BOX</p><span class="chip" style="color:#ff7a3a">TECHNO BUNKER</span></div>
+  <p style="font-size:15px">The techno drum machine you won in the Bunker: 14 tracks, MPC swing, loop lengths, rumble, drive and an offbeat bass. Load a style with ◀ ▶ and make it yours.</p>
+  <p class="num bbx-sum" style="font-size:18px;color:#ff7a3a">${bbSummary()}</p><button class="btn block" data-a="bbox" style="background:#ff7a3a">▶ OPEN THE BUNKER BOX</button>
+  <p class="eyebrow" style="padding:0">BUNKER REWARDS</p><div class="stack bbx-loot" style="gap:6px">${BUNKER_LOOT.map(([n,col,got,how,where])=>{const g=got();return`<div class="sw ${g?'on':'lock'}"><i style="background:${col}"></i><span class="grow">${n}<br><small class="muted">${g?'✓ IN '+where.toUpperCase():how+' · then in '+where}</small></span></div>`}).join('')}</div></div>`}
 const FLAT_ACID={acc:new Array(16).fill(0),sl:new Array(16).fill(0),reso:.2,env:.25};
 const kitHear=(row,list,done)=>{const heard=new Set();list.forEach(([l,fn],k)=>{const x=h('button','btn ghost sm',l);x.onclick=()=>{fn();heard.add(k);if(heard.size>=list.length)done()};row.append(x)})};
 
