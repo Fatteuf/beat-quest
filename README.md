@@ -12,8 +12,10 @@ Le code source est dans `src/`. Les fichiers sont assemblés dans l'ordre de leu
 | `30-screens.js` | Écrans : accueil, carte, régions, studio, Beat Forest, combats |
 | `40-rigs.js` | Plugins : synthé, EQ, compresseur, reverb, delay, mixeur, automation, limiteur |
 | `45-questions2.js` | Questions des mondes 2 à 7 |
+| `47-techno.js` | Moteur techno : sons 909, rumble, swing, styles, Bunker Box, Rumble Forge, Acid Box, questions techno |
 | `48-worldkit.js` | Briques communes aux mondes 2 à 7 (manches de combat, Master Trials) |
 | `50-caves.js` à `55-sky.js` | Un fichier par monde : leçons, boss, Master Trial |
+| `56-bunker.js` | Le Techno Bunker : leçons, The Bouncer, The Headliner, Club Trial |
 | `60-final.js` | Le Final Track et le certificat |
 | `90-boot.js` | Démarrage |
 

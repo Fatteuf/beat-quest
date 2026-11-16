@@ -2,7 +2,7 @@
    THE FINAL TRACK — a small DAW (Ableton-style arrangement, piano rolls,
    mixer, drum-bus compressor, reverb, automation, limiter, LUFS render)
    ===================================================================== */
-const GENRES=[{id:'hiphop',n:'HIP-HOP',lo:80,hi:100},{id:'pop',n:'POP',lo:95,hi:125},{id:'house',n:'HOUSE',lo:118,hi:130},{id:'trap',n:'TRAP',lo:130,hi:150},{id:'dnb',n:'DRUM & BASS',lo:165,hi:178}];
+const GENRES=[{id:'hiphop',n:'HIP-HOP',lo:80,hi:100},{id:'pop',n:'POP',lo:95,hi:125},{id:'house',n:'HOUSE',lo:118,hi:130},{id:'trap',n:'TRAP',lo:130,hi:150},{id:'dnb',n:'DRUM & BASS',lo:165,hi:178},{id:'techno',n:'TECHNO',lo:125,hi:135},{id:'hardgroove',n:'HARDGROOVE',lo:135,hi:145},{id:'hardtechno',n:'HARD TECHNO',lo:145,hi:160},{id:'hardbounce',n:'HARD BOUNCE',lo:158,hi:172}];
 const FKEYS=[['A MINOR',0],['B MINOR',2],['C MINOR',3],['D MINOR',5],['E MINOR',-5],['F MINOR',-4],['G MINOR',-2]];
 const PROGS=[{n:'i – VI – III – VII',mood:'Epic and emotional',ch:[[57,60,64],[53,57,60],[48,52,55],[55,59,62]],bass:[45,41,36,43]},
  {n:'i – iv – v – i',mood:'Dark, classic minor',ch:[[57,60,64],[50,53,57],[52,55,59],[57,60,64]],bass:[45,38,40,45]},
@@ -138,7 +138,7 @@ function submitFinal(F,meas,buf){const C=evalFinal(F,meas);const n=C.filter(c=>c
 RENDER.cert=(scr,arg)=>{arg=arg||{};const c=S.cert||{score:arg.score||0,date:todayStr()};const C=arg.C||[];
   scr.innerHTML=`<div class="stack" style="padding-top:20px"><div class="cert"><p class="eyebrow" style="color:var(--amber)">BEAT QUEST · CERTIFICATE</p><h1 class="logo" style="font-size:34px">PRODUCER<span>CERTIFIED</span></h1><div class="victory-hero"></div>
    <p style="font-size:17px">This certifies that you produced a complete track: tempo, drums, bass, harmony, melody, sound design, arrangement, EQ, compression, space, automation and mastering.</p>
-   <div class="statgrid" style="width:100%"><div class="stat"><b>${c.score}%</b><span>final track score</span></div><div class="stat"><b>LV ${level()}</b><span>producer level</span></div><div class="stat"><b>${learnedSkills().length}/43</b><span>skills learned</span></div><div class="stat"><b>${S.defeated.length}</b><span>monsters</span></div></div>
+   <div class="statgrid" style="width:100%"><div class="stat"><b>${c.score}%</b><span>final track score</span></div><div class="stat"><b>LV ${level()}</b><span>producer level</span></div><div class="stat"><b>${learnedSkills().length}/${SKILLS.length}</b><span>skills learned</span></div><div class="stat"><b>${S.defeated.length}</b><span>monsters</span></div></div>
    <div class="row wrap" style="justify-content:center;gap:6px">${WORLDS.slice().reverse().map(W=>`<span class="chip ${worldDone(W.id)?'neon':''}">${W.name.toUpperCase()}</span>`).join('')}</div>
    <p class="muted">Issued ${c.date} · “${RANKS[RANKS.length-1][1]}”</p></div>
    ${C.length?`<div class="win stack" style="text-align:left"><p class="eyebrow">YOUR TRACK</p><div class="critl">${C.map(x=>`<div class="${x.ok?'ok':'no'}"><b>${x.ok?'✓':'✗'}</b><span>${x.k}<small>${x.ok?x.good:x.bad}</small></span></div>`).join('')}</div></div>`:''}

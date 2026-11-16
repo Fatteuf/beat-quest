@@ -1,4 +1,4 @@
-const VERSION='2.1';
+const VERSION='2.2';
 /* ================= helpers ================= */
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const app=$('#app');
@@ -70,10 +70,15 @@ star:['.......k........','......kbk.......','......kbk.......','.....kAabk......
 lock:['......kkkk......','.....kGGGGk.....','....kGGkkGnk....','...kGGk..kgnk...','...kGgk..kgnk...','..kkGgkkkkgnkk..','.kAAAAAAAAAAAak.','.kAaaaaaaaaaabk.','.kAaaaakkaaaabk.','.kAaaaakkaaaabk.','.kAaaaakkaaaabk.','.kAaaaaaaaaaabk.','.kAaaaaaaaaaabk.','.kbbbbbbbbbbbbk.','..kkkkkkkkkkkk..','................'],
 skull:['................','.....kkkkkk.....','...kkLLLLLLkk...','..kLLLLlllllmk..','.kLLllllllllmmk.','.kLllllllllllmk.','.kLlkkkllkkklmk.','.kLlkakllkaklmk.','.kLlkkkllkkklmk.','.kLlllllkklllmk.','..klllllllllmk..','...kLkLkLkLmk...','...kmmmmmmmmk...','....kkkkkkkk....','................','................'],
 bolt:['.........kkkk...','........kAAAak..','.......kAAabk...','......kAAabk....','.....kAAabk.....','....kAAabkkk....','...kAAaaaaabk...','....kkkAaabk....','.....kAaabk.....','....kAaabk......','....kAabk.......','...kAabk........','...kAbk.........','..kAbk..........','..kbk...........','...k............'],
-chest:['................','....kkkkkkkk....','...kWWWWWWWWk...','..kWWgwwwwgwvk..','.kWwwgwwwwgwwvk.','.kWwwgwwwwgwwvk.','.kGGGGGYyGGGGnk.','.kWwwgYyyogwwvk.','.kWwwgyeeogwwvk.','.kWwwgoooogwwvk.','.kWwwgwwwwgwwvk.','.kWwwgwwwwgwwvk.','.kvvvnvvvvnvvvk.','..kkkkkkkkkkkk..','................','................']};
+chest:['................','....kkkkkkkk....','...kWWWWWWWWk...','..kWWgwwwwgwvk..','.kWwwgwwwwgwwvk.','.kWwwgwwwwgwwvk.','.kGGGGGYyGGGGnk.','.kWwwgYyyogwwvk.','.kWwwgyeeogwwvk.','.kWwwgoooogwwvk.','.kWwwgwwwwgwwvk.','.kWwwgwwwwgwwvk.','.kvvvnvvvvnvvvk.','..kkkkkkkkkkkk..','................','................'],
+groovebox:['................','................','.kkkkkkkkkkkkkk.','kGGGGGGGGGGGGGnk','kGgLgLgLgLgttgnk','kGgngngngnggggnk','kGggggggggggggnk','kGAAgnngAAgnngnk','kGaageegaageegnk','kGggggggggggggnk','knnnnnnnnnnnnnnk','.kkkkkkkkkkkkkk.','................','................','................','................'],
+subwoofer:['..kkkkkkkkkkkk..','.knnnnnnnnnnnnk.','.kneeeGgggeeeek.','.kneeeeeeeeeeek.','.kneeeeGGeeeeek.','.kneeGGggGGeeek.','.kneGgggggggeek.','.knGggggggnnnek.','.knGggAAAannnek.','.knGggAAaannnek.','.knGggAaaannnek.','.knGggnnnnnnnek.','.knegnnnnnnneek.','.kneegnnnnneeek.','.kneeeenneeeeek.','..kkkkkkkkkkkk..'],
+conga:['.....kkkkkk.....','....kLLLLLLk....','...kLllllllLk...','...kmllllllmk...','...kGGGGGGGnk...','...kWwGwwGwvk...','..kWwwGwwGwwvk..','..kAaaaaaaaAbk..','..kWwwGwwGwwvk..','..kWwwGwwGwwvk..','...kWwGwwGwvk...','...kAaaaaaabk...','....kWwwwwvk....','....kWwwwwvk....','....knnnnnnk....','.....kkkkkk.....'],
+smiley:['................','.....kkkkkk.....','....kYYYYYYk....','...kYYYyyyyyk...','..kYYkyyyykyyk..','.kYYYkyyyykyyok.','.kYYykyyyykyyok.','.kYyyyyyyyyyyok.','.kYkyyyyyyyykok.','.kYykyyyyyykyok.','.kYyykkkkkkyyok.','..kyyyyyyyyyok..','...kyyyyyyyok...','....kooooook....','.....kkkkkk.....','................'],
+bounce:['......kkkk......','.....kAAAAk.....','....kLLAAaak....','...kALAAaaaak...','...kAAAaaaabk...','..kAAAaaaabbbk..','..kAAaaaabbbbk..','...kaaaabbbbk...','...kaaabbbbbk...','....kabbbbbk....','.....kkkkkk.....','.....T....T.....','......kTTk......','.....knnnnk.....','....knnnnnnk....','.....kkkkkk.....']};
 function icPal(col){col=col||'#ffb547';return{k:'#140d1f',a:col,A:shade(col,.45),b:shade(col,-.38),T:col,l:'#f1e7d0',L:'#ffffff',m:'#b9aacf',S:'#ffffff',g:'#7d72a3',G:'#b0a6d2',n:'#4d4373',y:'#ffcc4d',Y:'#fff1a6',o:'#c9821c',w:'#9a5a2e',W:'#c98a4e',v:'#5e321a',e:'#241c40',r:'#ff4f5a',t:'#3ef0c8'}}
 const DIM_PAL=(()=>{const p={k:'#140d1f'};'ALGYWSlt'.split('').forEach(c=>p[c]='#3d3166');'agywmTr'.split('').forEach(c=>p[c]='#322a57');'bnove'.split('').forEach(c=>p[c]='#262040');return p})();
-const ICON_DEFAULT_COL={'home': '#ffb547', 'drums': '#ffb547', 'midi': '#ffb547', 'eq': '#3ef0c8', 'comp': '#ff7a3a', 'volume': '#ffb547', 'dist': '#ff4f5a', 'mixer': '#ffb547', 'auto': '#ffcc4d', 'limiter': '#6cb8ff', 'phones': '#3ef0c8', 'path': '#a98bff', 'flag': '#ff4f9a', 'scroll': '#ff4f9a', 'chest': '#ffcc4d', 'heart': '#ff4f9a', 'lock': '#a98bff', 'skull': '#ff4f9a', 'bolt': '#a98bff', 'sword': '#ff4f9a', 'reverb': '#6cb8ff', 'delay': '#6cb8ff', 'coin': '#ffcc4d', 'wave': '#3ef0c8', 'flame': '#ff7a3a', 'star': '#ffcc4d', 'synth': '#a98bff'};
+const ICON_DEFAULT_COL={'home': '#ffb547', 'drums': '#ffb547', 'midi': '#ffb547', 'eq': '#3ef0c8', 'comp': '#ff7a3a', 'volume': '#ffb547', 'dist': '#ff4f5a', 'mixer': '#ffb547', 'auto': '#ffcc4d', 'limiter': '#6cb8ff', 'phones': '#3ef0c8', 'path': '#a98bff', 'flag': '#ff4f9a', 'scroll': '#ff4f9a', 'chest': '#ffcc4d', 'heart': '#ff4f9a', 'lock': '#a98bff', 'skull': '#ff4f9a', 'bolt': '#a98bff', 'sword': '#ff4f9a', 'reverb': '#6cb8ff', 'delay': '#6cb8ff', 'coin': '#ffcc4d', 'wave': '#3ef0c8', 'flame': '#ff7a3a', 'star': '#ffcc4d', 'synth': '#a98bff', 'groovebox': '#ff7a3a', 'subwoofer': '#a98bff', 'conga': '#ff4f5a', 'smiley': '#ffcc4d', 'bounce': '#ff4f9a'};
 const iconScale=sc=>Math.max(1,Math.round((sc||3)*.625));
 function icon(name,col,sc,dimmed){return sprite(ICONS[name],dimmed?DIM_PAL:icPal(col||ICON_DEFAULT_COL[name]),iconScale(sc))}
 
@@ -89,8 +94,9 @@ const TOOLS=[
 {id:'dist',name:'Distortion',weapon:'Ember Charm',lv:8,world:'Compression Volcano',col:'#ff4f5a',desc:'Adds grit and harmonics by pushing a sound past clean.',daw:'Saturation and overdrive plug-ins do this gently or brutally.',tag:'Add fire and grit.'},
 {id:'synth',name:'Synthesizer',weapon:'Wave Staff',lv:9,world:'Synth Caves',col:'#a98bff',desc:'Builds brand-new sounds from oscillators, filters and envelopes.',daw:'Serum, Vital, Wavetable and Alchemy are all built from the same parts.',tag:'Create sounds that never existed.'},
 {id:'auto',name:'Automation',weapon:'Motion Rune',lv:10,world:'Mixing Castle',col:'#ffcc4d',desc:'Moves any knob over time, so your mix breathes and builds.',daw:'Draw automation lanes under any track in any DAW.',tag:'Make your mix move.'},
-{id:'limiter',name:'Limiter',weapon:'Ceiling Shield',lv:11,world:'Mastering Sky',col:'#f1e7d0',desc:'Stops your track from ever going past a set level.',daw:'The last plug-in on the master channel, set just under 0 dB.',tag:'Nothing gets past the ceiling.'}];
-const TOOL_SKILLS={volume:['volume'],drums:['kick','snare','hihat','patterns','quantize'],midi:['midi','notes'],eq:['eq','frequency','masking'],comp:['compression','threshold','ratio','attack','release'],reverb:['reverb'],delay:['delay'],dist:['synthesis'],synth:['oscillators','waveforms','adsr','filters'],auto:['automation'],limiter:['limiting','loudness']};
+{id:'limiter',name:'Limiter',weapon:'Ceiling Shield',lv:11,world:'Mastering Sky',col:'#f1e7d0',desc:'Stops your track from ever going past a set level.',daw:'The last plug-in on the master channel, set just under 0 dB.',tag:'Nothing gets past the ceiling.'},
+{id:'groovebox',name:'Groovebox',weapon:'Strobe Gauntlet',lv:12,world:'Techno Bunker',col:'#ff7a3a',desc:'A techno drum machine: a 909-style kit, MPC swing, polymeter loops, a rumble kick and an offbeat bass.',daw:'An Ableton Drum Rack with the Groove Pool, a Roland TR-909 or TR-8S, an Elektron Digitakt: same steps, same swing.',tag:'Build the groove that moves the floor.'}];
+const TOOL_SKILLS={volume:['volume'],drums:['kick','snare','hihat','patterns','quantize'],midi:['midi','notes'],eq:['eq','frequency','masking'],comp:['compression','threshold','ratio','attack','release'],reverb:['reverb'],delay:['delay'],dist:['synthesis'],synth:['oscillators','waveforms','adsr','filters'],auto:['automation'],limiter:['limiting','loudness'],groovebox:['groove','polyrhythm','bounce','technogenres','rumble','acid']};
 
 const WORLDS=[
 {id:'sky',name:'Mastering Sky',teaches:'Limiting, loudness, LUFS, headroom, exporting',boss:'The Master',x:46,y:16},
@@ -99,10 +105,11 @@ const WORLDS=[
 {id:'volcano',name:'Compression Volcano',teaches:'Threshold, ratio, attack, release, punch',boss:'The Dynamic Titan',x:66,y:119},
 {id:'desert',name:'EQ Desert',teaches:'Frequency, EQ, filters, masking',boss:'The Spectrum King',x:30,y:153},
 {id:'caves',name:'Synth Caves',teaches:'MIDI, notes, scales, chords, oscillators, ADSR, filters, LFO',boss:'The Synth Dragon',x:64,y:187},
-{id:'forest',name:'Beat Forest',teaches:'Sound, rhythm, BPM, bars, drum patterns, quantize',boss:'The Rhythm Beast',x:32,y:222}];
+{id:'forest',name:'Beat Forest',teaches:'Sound, rhythm, BPM, bars, drum patterns, quantize',boss:'The Rhythm Beast',x:32,y:222},
+{id:'bunker',name:'Techno Bunker',teaches:'Techno grooves: the rumble kick, hardgroove swing, tribal polyrhythms, hard bounce and acid',boss:'The Headliner',x:72,y:213}];
 const WNAME=Object.fromEntries(WORLDS.map(w=>[w.id,w.name]));
 
-const WORDER=['forest','caves','desert','volcano','swamp','castle','sky'];
+const WORDER=['forest','caves','desert','volcano','swamp','castle','sky','bunker'];
 const WSTAGES={forest:[
 {id:'s0',kind:'LESSON',title:'What is Sound?',sub:'Vibration, pitch, low · mid · high',mins:4,icon:'wave',quest:'Discover what sound is'},
 {id:'l1',kind:'LESSON',title:'The Pulse',sub:'BPM and tempo',mins:4,icon:'flame',quest:'Learn the pulse'},
@@ -155,7 +162,17 @@ sky:[
 {id:'a4',kind:'LESSON',title:'Ship It',sub:'Export formats and final checks',mins:5,icon:'scroll',quest:'Export your music',xp:300},
 {id:'golem',kind:'MINI-BOSS',title:'The Loudness Golem',sub:'Tests: clipping, over-limiting',mins:6,icon:'skull',quest:'Defeat the Loudness Golem',xp:350},
 {id:'master',kind:'WORLD BOSS',title:'The Master',sub:'Tests: every world',mins:10,icon:'skull',quest:'Defeat The Master',xp:500},
-{id:'final',kind:'FINAL',title:'The Final Track',sub:'Produce a complete song. Get certified.',mins:30,icon:'star',quest:'Produce the Final Track',xp:2050}]};
+{id:'final',kind:'FINAL',title:'The Final Track',sub:'Produce a complete song. Get certified.',mins:30,icon:'star',quest:'Produce the Final Track',xp:2050}],
+bunker:[
+{id:'t1',kind:'LESSON',title:'The Techno Engine',sub:'Four on the floor, 909 kit, tempo zones',mins:6,icon:'groovebox',quest:'Learn the techno engine',xp:100},
+{id:'t2',kind:'LESSON',title:'The Rumble',sub:'Kick, dark reverb, low-pass, duck, drive',mins:6,icon:'subwoofer',quest:'Make the floor rumble',xp:100},
+{id:'t3',kind:'LESSON',title:'Hardgroove',sub:'Swing and percussion, the Ben Sims sound',mins:7,icon:'conga',quest:'Learn hardgroove',xp:100},
+{id:'t4',kind:'LESSON',title:'Tribal',sub:'Polyrhythms, toms and hand drums',mins:7,icon:'conga',quest:'Learn tribal techno',xp:100},
+{id:'t5',kind:'LESSON',title:'Hard Bounce',sub:'160+ BPM, reverse bass, hits on the grid',mins:7,icon:'bounce',quest:'Learn hard bounce',xp:100},
+{id:'bouncer',kind:'MINI-BOSS',title:'The Bouncer',sub:'Tests: styles, bass shapes, offbeats, hits',mins:6,icon:'skull',quest:'Get past The Bouncer',xp:200},
+{id:'t6',kind:'LESSON',title:'Acid & Hard Techno',sub:'303 accents and slides, distortion',mins:7,icon:'smiley',quest:'Make it squelch',xp:100},
+{id:'headliner',kind:'WORLD BOSS',title:'The Headliner',sub:'Tests: every techno groove',mins:9,icon:'skull',quest:'Outplay The Headliner',xp:300},
+{id:'btrial',kind:'MASTER TRIAL',title:'The Club Trial',sub:'Three rooms, three styles, one night',mins:10,icon:'bolt',quest:'Pass the Club Trial',xp:300}]};
 const STAGES=[];WORDER.forEach(w=>WSTAGES[w].forEach(st=>{st.w=w;STAGES.push(st)}));
 const stageById=id=>STAGES.find(x=>x.id===id);
 
@@ -185,7 +202,7 @@ const QUESTS=[
 {id:'loop4',title:'Create a 4-bar drum loop',desc:'Play a kick + snare loop for 4 bars',goal:4,xp:40,coins:15,icon:'drums',needs:'drums',reward:'kit-forest'},
 {id:'balance',title:'Balance three instruments',desc:'Move the volume of 3 different tracks',goal:3,xp:30,coins:15,icon:'volume',needs:'drums',reward:'hoodie-magenta'}];
 
-const TIERS=[{id:'beg',name:'Beginner',sub:'Sound, rhythm and harmony'},{id:'sd',name:'Sound Design',sub:'Build sounds from scratch'},{id:'mix',name:'Mixing',sub:'Make every sound fit'},{id:'mas',name:'Mastering',sub:'Loud, clean and ready to release'}];
+const TIERS=[{id:'beg',name:'Beginner',sub:'Sound, rhythm and harmony'},{id:'sd',name:'Sound Design',sub:'Build sounds from scratch'},{id:'mix',name:'Mixing',sub:'Make every sound fit'},{id:'mas',name:'Mastering',sub:'Loud, clean and ready to release'},{id:'club',name:'Club Techno',sub:'Groove, rumble and the styles of the underground'}];
 const SKILLS=[
 ['sound','Sound','beg','forest','Sound is air vibrating. Faster vibration means a higher pitch.'],
 ['rhythm','Rhythm','beg','forest','The pattern of hits and gaps in time.'],
@@ -229,7 +246,13 @@ const SKILLS=[
 ['limiting','Limiting','mas','sky','A hard ceiling that stops peaks.'],
 ['clipping','Clipping','mas','sky','What happens when audio goes past 0 dB.'],
 ['headroom','Headroom','mas','sky','The safety space below 0 dB.'],
-['export','Final export','mas','sky','Rendering the finished song to a file.']];
+['export','Final export','mas','sky','Rendering the finished song to a file.'],
+['groove','Swing & groove','club','bunker','Pushing every second 16th late so the beat bounces.'],
+['rumble','Rumble kick','club','bunker','A dark, ducked reverb tail under the techno kick.'],
+['polyrhythm','Polyrhythm','club','bunker','Loops of different lengths playing against each other.'],
+['bounce','Offbeat bass','club','bunker','A bass between the kicks: pluck, reverse or rolling.'],
+['acid','Acid line','club','bunker','A 303-style bass with resonance, accents and slides.'],
+['technogenres','Techno styles','club','bunker','Detroit, hardgroove, tribal, hard techno, hard bounce, acid.']];
 const SK=Object.fromEntries(SKILLS.map(s=>[s[0],{id:s[0],n:s[1],t:s[2],w:s[3],d:s[4]}]));
 
 const ABILITIES=[
@@ -244,7 +267,8 @@ const ABILITIES=[
 {id:'dynamic',name:'Dynamic Control',from:'Taming Peaks',desc:'You understand dynamics. Your studio gains a master compressor.'},
 {id:'space',name:'Space Sense',from:'The Echo King',desc:'You hear the size of any space. Your studio lead delay now locks to your tempo (a dotted 8th).'},
 {id:'stereosight',name:'Stereo Sight',from:'The Mixing Lord',desc:'You see where every sound sits. Your studio gains pan knobs on every track.'},
-{id:'ceiling',name:'Ceiling Guard',from:'The Master',desc:'No peak can break your ceiling. Your studio master gains a live loudness meter.'}];
+{id:'ceiling',name:'Ceiling Guard',from:'The Master',desc:'No peak can break your ceiling. Your studio master gains a live loudness meter.'},
+{id:'rumblecraft',name:'Rumble Craft',from:'The Headliner',desc:'You can make a floor shake. Your studio kick gains a RUMBLE knob.'}];
 const hasAb=id=>S.abilities.includes(id);
 
 const MONS={
@@ -311,7 +335,9 @@ const has=t=>S.tools.includes(t);
 function addMission(t){S.missions[t]=(S.missions[t]||0)+1}
 const nextStage=()=>STAGES.find(x=>!S.done.includes(x.id));
 function worldDone(w){return WSTAGES[w||'forest'].every(x=>S.done.includes(x.id))}
-function worldOpen(w){const i=WORDER.indexOf(w);return i<=0||worldDone(WORDER[i-1])}
+/* the Techno Bunker is a side world: it opens as soon as Beat Forest is cleared */
+const WPREV={bunker:'forest'};
+function worldOpen(w){if(WPREV[w])return worldDone(WPREV[w]);const i=WORDER.indexOf(w);return i<=0||worldDone(WORDER[i-1])}
 const curWorldId=()=>{const n=nextStage();return n?n.w:'sky'};
 function stageState(id){if(S.done.includes(id))return'done';const st=stageById(id);if(!st||!worldOpen(st.w))return'locked';const n=WSTAGES[st.w].find(x=>!S.done.includes(x.id));return n&&n.id===id?'current':'locked'}
 
@@ -369,9 +395,9 @@ function tone(t,type,f,dur,v,fEnd,dest){const c=AC();const o=c.createOscillator(
 function noiseHit(t,dur,v,type,freq,q,dest){const c=AC();const s=c.createBufferSource();s.buffer=A.noise;const f=c.createBiquadFilter();f.type=type;f.frequency.value=freq;f.Q.value=q||.7;const g=c.createGain();g.gain.setValueAtTime(Math.max(v,.0001),t);g.gain.exponentialRampToValueAtTime(.0001,t+dur);s.connect(f);f.connect(g);g.connect(dest||OUT());s.start(t,Math.random()*.5);s.stop(t+dur+.03)}
 const SEMI=[0,0,3,5,7,10],NOTES=['','A','C','D','E','G'];
 const V={
-  kick(t,v=.9){if(!A.ctx)return;const k=S.kit,f=k==='kit-forest',b=k==='kit-boom';tone(t,'sine',b?110:f?125:165,b?.8:f?.46:.36,v*1.1,b?34:f?38:44);noiseHit(t,.015,v*.25,'highpass',f?1800:3000)},
-  snare(t,v=.75){if(!A.ctx)return;const k=S.kit,f=k==='kit-forest',b=k==='kit-boom';if(b){noiseHit(t,.12,v*.75,'highpass',1600,.7);tone(t,'triangle',230,.07,v*.5,130);return}noiseHit(t,f?.22:.17,v*.7,f?'bandpass':'highpass',f?1700:1300,f?.9:.7);tone(t,'triangle',f?165:200,.09,v*.5,110)},
-  hat(t,v=.5){if(!A.ctx)return;const k=S.kit;noiseHit(t,k==='kit-forest'?.06:k==='kit-boom'?.03:.045,v*.42,'highpass',k==='kit-forest'?6200:k==='kit-boom'?9500:8200)},
+  kick(t,v=.9){if(!A.ctx)return;if(S.kit==='kit-bunker'){TV.kick(t,v,OUT());return}const k=S.kit,f=k==='kit-forest',b=k==='kit-boom';tone(t,'sine',b?110:f?125:165,b?.8:f?.46:.36,v*1.1,b?34:f?38:44);noiseHit(t,.015,v*.25,'highpass',f?1800:3000)},
+  snare(t,v=.75){if(!A.ctx)return;if(S.kit==='kit-bunker'){TV.clap(t,v*.8,OUT());return}const k=S.kit,f=k==='kit-forest',b=k==='kit-boom';if(b){noiseHit(t,.12,v*.75,'highpass',1600,.7);tone(t,'triangle',230,.07,v*.5,130);return}noiseHit(t,f?.22:.17,v*.7,f?'bandpass':'highpass',f?1700:1300,f?.9:.7);tone(t,'triangle',f?165:200,.09,v*.5,110)},
+  hat(t,v=.5){if(!A.ctx)return;if(S.kit==='kit-bunker'){TV.chat(t,v*1.2,OUT());return}const k=S.kit;noiseHit(t,k==='kit-forest'?.06:k==='kit-boom'?.03:.045,v*.42,'highpass',k==='kit-forest'?6200:k==='kit-boom'?9500:8200)},
   bass(t,n,v=.7){if(!A.ctx||!n)return;const c=AC(),fr=110*Math.pow(2,SEMI[n]/12);const o=c.createOscillator(),o2=c.createOscillator(),lp=c.createBiquadFilter(),g=c.createGain();o.type='sawtooth';o2.type='sine';o.frequency.value=fr;o2.frequency.value=fr/2;lp.type='lowpass';lp.Q.value=5;lp.frequency.setValueAtTime(1600,t);lp.frequency.exponentialRampToValueAtTime(260,t+.25);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(Math.max(v*.45,.0002),t+.006);g.gain.exponentialRampToValueAtTime(.0001,t+.34);o.connect(lp);o2.connect(lp);lp.connect(g);g.connect(OUT());o.start(t);o2.start(t);o.stop(t+.4);o2.stop(t+.4)},
   click(t,acc){if(!A.ctx)return;tone(t,'square',acc?1760:1320,.035,acc?.28:.18)},
   sine(t,f,dur,v){if(!A.ctx)return;const c=AC();const o=c.createOscillator(),g=c.createGain();o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(Math.max(v,.0002),t+.03);g.gain.setValueAtTime(Math.max(v,.0002),t+Math.max(.05,dur-.1));g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g);g.connect(OUT());o.start(t);o.stop(t+dur+.05)},
@@ -480,7 +506,8 @@ function drawMap(g){const W=96,H=238,B=34;const r=rng(42);const clear=worldDone(
   for(let i=0;i<7;i++){const x=Math.floor(r()*86),y=y0+2+Math.floor(r()*26);px(g,x,y,8,6,'#2f2850')}px(g,74,y0+12,16,10,'#100c1e');px(g,76,y0+10,12,2,'#100c1e');
   [[20,y0+8,'#6c5cff'],[40,y0+22,'#3ef0c8'],[88,y0+4,'#6c5cff'],[10,y0+26,'#3ef0c8']].forEach(([x,y,c])=>{px(g,x,y,2,4,c);px(g,x+2,y+1,1,3,c)});
   y0=6*B;for(let y=y0;y<H;y++)px(g,0,y,W,1,y%3?'#16301e':'#1a3522');
-  const r5=rng(8);for(let i=0;i<22;i++){const x=Math.floor(r5()*96),yy=y0+6+Math.floor(r5()*30);if(Math.abs(x-32)<10&&Math.abs(yy-222)<9)continue;pine(g,x,yy,7+Math.floor(r5()*5),clear?'#2c6a3a':'#1f4a2c',clear?'#3f8a4a':'#2c5a36')}
+  const r5=rng(8);for(let i=0;i<22;i++){const x=Math.floor(r5()*96),yy=y0+6+Math.floor(r5()*30);if(Math.abs(x-32)<10&&Math.abs(yy-222)<9||Math.abs(x-72)<15&&Math.abs(yy-213)<11)continue;pine(g,x,yy,7+Math.floor(r5()*5),clear?'#2c6a3a':'#1f4a2c',clear?'#3f8a4a':'#2c5a36')}
+  drawBunkerMap(g,worldOpen('bunker'));
   for(let k=1;k<7;k++){const y=k*B;for(let x=0;x<W;x+=2)px(g,x+(k%2),y-1,1,2,'rgba(0,0,0,.4)')}
   for(let k=0;k<6;k++){const yy=k*B;px(g,0,yy,W,B,'rgba(8,6,16,.35)');for(let y=yy;y<yy+B;y++)for(let x=(y%2);x<W;x+=2)px(g,x,y,1,1,'rgba(8,6,16,.4)')}
   const pts=[...WORLDS].reverse();for(let i=0;i<pts.length-1;i++){const a=pts[i],b=pts[i+1];const d=Math.hypot(b.x-a.x,b.y-a.y);for(let s=0;s<d;s+=3){const x=a.x+(b.x-a.x)*s/d,y=a.y+(b.y-a.y)*s/d;px(g,x,y,1,1,i===0?'#ffb547':'#6a5f9a')}}

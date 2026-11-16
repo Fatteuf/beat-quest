@@ -585,6 +585,21 @@ input[type=range]::-moz-range-thumb{width:18px;height:22px;background:var(--ambe
 .sw.on{border-color:var(--amber)}
 .sw.lock{opacity:.55}
 .dressing{display:flex;justify-content:center;align-items:flex-end;gap:10px;padding:16px;background:radial-gradient(circle at 50% 70%,#2a1f4a,var(--panel) 70%)}
+/* Bunker Box groovebox */
+.bb{display:flex;flex-direction:column;gap:2px;overflow-x:auto;padding-bottom:2px}
+.bb-row{display:grid;grid-template-columns:60px repeat(16,minmax(13px,1fr));gap:2px;align-items:stretch;min-width:290px}
+.bb-hd span{font-family:var(--f-disp);font-size:7.5px;color:var(--dim);text-align:center;line-height:16px}
+.bb-hd span.b{color:var(--ink)}
+.bb-nm{display:flex;align-items:center;justify-content:space-between;gap:2px;font-family:var(--f-disp);font-size:7.5px;letter-spacing:.02em;min-width:0;overflow:hidden}
+.bb-nm b{white-space:nowrap;overflow:hidden}
+.bb-len{min-height:22px;min-width:20px;padding:0 2px;background:#0b0816;border:1px solid #3d3166;font-family:var(--f-num);font-size:14px;line-height:1;color:var(--amber)}
+.bb-c{height:24px;min-height:0;min-width:0;padding:0;background:#130f24;border:0;box-shadow:inset 0 0 0 1px #2a2248;font-family:var(--f-disp);font-size:7px;line-height:1;color:#140d1f;overflow:hidden}
+.bb-c.beat{background:#1a1531}
+.bb-c.on{background:var(--rc)}
+.bb-c.gh{background:color-mix(in srgb,var(--rc) 38%,#130f24)}
+.bb-c.out{opacity:.2}
+.bb-c.ph{outline:2px solid var(--ink);outline-offset:-2px}
+.bb-c.lockc{cursor:default}
 .cert{border:3px solid #ffcc4d;background:radial-gradient(circle at 50% 0,#3a2a08,#120e22 70%);padding:18px;text-align:center;display:flex;flex-direction:column;gap:10px;align-items:center}
 
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition:none!important}}
@@ -618,7 +633,7 @@ input[type=range]::-moz-range-thumb{width:18px;height:22px;background:var(--ambe
 
 <script>
 "use strict";
-const VERSION='2.1';
+const VERSION='2.2';
 /* ================= helpers ================= */
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const app=$('#app');
@@ -690,10 +705,15 @@ star:['.......k........','......kbk.......','......kbk.......','.....kAabk......
 lock:['......kkkk......','.....kGGGGk.....','....kGGkkGnk....','...kGGk..kgnk...','...kGgk..kgnk...','..kkGgkkkkgnkk..','.kAAAAAAAAAAAak.','.kAaaaaaaaaaabk.','.kAaaaakkaaaabk.','.kAaaaakkaaaabk.','.kAaaaakkaaaabk.','.kAaaaaaaaaaabk.','.kAaaaaaaaaaabk.','.kbbbbbbbbbbbbk.','..kkkkkkkkkkkk..','................'],
 skull:['................','.....kkkkkk.....','...kkLLLLLLkk...','..kLLLLlllllmk..','.kLLllllllllmmk.','.kLllllllllllmk.','.kLlkkkllkkklmk.','.kLlkakllkaklmk.','.kLlkkkllkkklmk.','.kLlllllkklllmk.','..klllllllllmk..','...kLkLkLkLmk...','...kmmmmmmmmk...','....kkkkkkkk....','................','................'],
 bolt:['.........kkkk...','........kAAAak..','.......kAAabk...','......kAAabk....','.....kAAabk.....','....kAAabkkk....','...kAAaaaaabk...','....kkkAaabk....','.....kAaabk.....','....kAaabk......','....kAabk.......','...kAabk........','...kAbk.........','..kAbk..........','..kbk...........','...k............'],
-chest:['................','....kkkkkkkk....','...kWWWWWWWWk...','..kWWgwwwwgwvk..','.kWwwgwwwwgwwvk.','.kWwwgwwwwgwwvk.','.kGGGGGYyGGGGnk.','.kWwwgYyyogwwvk.','.kWwwgyeeogwwvk.','.kWwwgoooogwwvk.','.kWwwgwwwwgwwvk.','.kWwwgwwwwgwwvk.','.kvvvnvvvvnvvvk.','..kkkkkkkkkkkk..','................','................']};
+chest:['................','....kkkkkkkk....','...kWWWWWWWWk...','..kWWgwwwwgwvk..','.kWwwgwwwwgwwvk.','.kWwwgwwwwgwwvk.','.kGGGGGYyGGGGnk.','.kWwwgYyyogwwvk.','.kWwwgyeeogwwvk.','.kWwwgoooogwwvk.','.kWwwgwwwwgwwvk.','.kWwwgwwwwgwwvk.','.kvvvnvvvvnvvvk.','..kkkkkkkkkkkk..','................','................'],
+groovebox:['................','................','.kkkkkkkkkkkkkk.','kGGGGGGGGGGGGGnk','kGgLgLgLgLgttgnk','kGgngngngnggggnk','kGggggggggggggnk','kGAAgnngAAgnngnk','kGaageegaageegnk','kGggggggggggggnk','knnnnnnnnnnnnnnk','.kkkkkkkkkkkkkk.','................','................','................','................'],
+subwoofer:['..kkkkkkkkkkkk..','.knnnnnnnnnnnnk.','.kneeeGgggeeeek.','.kneeeeeeeeeeek.','.kneeeeGGeeeeek.','.kneeGGggGGeeek.','.kneGgggggggeek.','.knGggggggnnnek.','.knGggAAAannnek.','.knGggAAaannnek.','.knGggAaaannnek.','.knGggnnnnnnnek.','.knegnnnnnnneek.','.kneegnnnnneeek.','.kneeeenneeeeek.','..kkkkkkkkkkkk..'],
+conga:['.....kkkkkk.....','....kLLLLLLk....','...kLllllllLk...','...kmllllllmk...','...kGGGGGGGnk...','...kWwGwwGwvk...','..kWwwGwwGwwvk..','..kAaaaaaaaAbk..','..kWwwGwwGwwvk..','..kWwwGwwGwwvk..','...kWwGwwGwvk...','...kAaaaaaabk...','....kWwwwwvk....','....kWwwwwvk....','....knnnnnnk....','.....kkkkkk.....'],
+smiley:['................','.....kkkkkk.....','....kYYYYYYk....','...kYYYyyyyyk...','..kYYkyyyykyyk..','.kYYYkyyyykyyok.','.kYYykyyyykyyok.','.kYyyyyyyyyyyok.','.kYkyyyyyyyykok.','.kYykyyyyyykyok.','.kYyykkkkkkyyok.','..kyyyyyyyyyok..','...kyyyyyyyok...','....kooooook....','.....kkkkkk.....','................'],
+bounce:['......kkkk......','.....kAAAAk.....','....kLLAAaak....','...kALAAaaaak...','...kAAAaaaabk...','..kAAAaaaabbbk..','..kAAaaaabbbbk..','...kaaaabbbbk...','...kaaabbbbbk...','....kabbbbbk....','.....kkkkkk.....','.....T....T.....','......kTTk......','.....knnnnk.....','....knnnnnnk....','.....kkkkkk.....']};
 function icPal(col){col=col||'#ffb547';return{k:'#140d1f',a:col,A:shade(col,.45),b:shade(col,-.38),T:col,l:'#f1e7d0',L:'#ffffff',m:'#b9aacf',S:'#ffffff',g:'#7d72a3',G:'#b0a6d2',n:'#4d4373',y:'#ffcc4d',Y:'#fff1a6',o:'#c9821c',w:'#9a5a2e',W:'#c98a4e',v:'#5e321a',e:'#241c40',r:'#ff4f5a',t:'#3ef0c8'}}
 const DIM_PAL=(()=>{const p={k:'#140d1f'};'ALGYWSlt'.split('').forEach(c=>p[c]='#3d3166');'agywmTr'.split('').forEach(c=>p[c]='#322a57');'bnove'.split('').forEach(c=>p[c]='#262040');return p})();
-const ICON_DEFAULT_COL={'home': '#ffb547', 'drums': '#ffb547', 'midi': '#ffb547', 'eq': '#3ef0c8', 'comp': '#ff7a3a', 'volume': '#ffb547', 'dist': '#ff4f5a', 'mixer': '#ffb547', 'auto': '#ffcc4d', 'limiter': '#6cb8ff', 'phones': '#3ef0c8', 'path': '#a98bff', 'flag': '#ff4f9a', 'scroll': '#ff4f9a', 'chest': '#ffcc4d', 'heart': '#ff4f9a', 'lock': '#a98bff', 'skull': '#ff4f9a', 'bolt': '#a98bff', 'sword': '#ff4f9a', 'reverb': '#6cb8ff', 'delay': '#6cb8ff', 'coin': '#ffcc4d', 'wave': '#3ef0c8', 'flame': '#ff7a3a', 'star': '#ffcc4d', 'synth': '#a98bff'};
+const ICON_DEFAULT_COL={'home': '#ffb547', 'drums': '#ffb547', 'midi': '#ffb547', 'eq': '#3ef0c8', 'comp': '#ff7a3a', 'volume': '#ffb547', 'dist': '#ff4f5a', 'mixer': '#ffb547', 'auto': '#ffcc4d', 'limiter': '#6cb8ff', 'phones': '#3ef0c8', 'path': '#a98bff', 'flag': '#ff4f9a', 'scroll': '#ff4f9a', 'chest': '#ffcc4d', 'heart': '#ff4f9a', 'lock': '#a98bff', 'skull': '#ff4f9a', 'bolt': '#a98bff', 'sword': '#ff4f9a', 'reverb': '#6cb8ff', 'delay': '#6cb8ff', 'coin': '#ffcc4d', 'wave': '#3ef0c8', 'flame': '#ff7a3a', 'star': '#ffcc4d', 'synth': '#a98bff', 'groovebox': '#ff7a3a', 'subwoofer': '#a98bff', 'conga': '#ff4f5a', 'smiley': '#ffcc4d', 'bounce': '#ff4f9a'};
 const iconScale=sc=>Math.max(1,Math.round((sc||3)*.625));
 function icon(name,col,sc,dimmed){return sprite(ICONS[name],dimmed?DIM_PAL:icPal(col||ICON_DEFAULT_COL[name]),iconScale(sc))}
 
@@ -709,8 +729,9 @@ const TOOLS=[
 {id:'dist',name:'Distortion',weapon:'Ember Charm',lv:8,world:'Compression Volcano',col:'#ff4f5a',desc:'Adds grit and harmonics by pushing a sound past clean.',daw:'Saturation and overdrive plug-ins do this gently or brutally.',tag:'Add fire and grit.'},
 {id:'synth',name:'Synthesizer',weapon:'Wave Staff',lv:9,world:'Synth Caves',col:'#a98bff',desc:'Builds brand-new sounds from oscillators, filters and envelopes.',daw:'Serum, Vital, Wavetable and Alchemy are all built from the same parts.',tag:'Create sounds that never existed.'},
 {id:'auto',name:'Automation',weapon:'Motion Rune',lv:10,world:'Mixing Castle',col:'#ffcc4d',desc:'Moves any knob over time, so your mix breathes and builds.',daw:'Draw automation lanes under any track in any DAW.',tag:'Make your mix move.'},
-{id:'limiter',name:'Limiter',weapon:'Ceiling Shield',lv:11,world:'Mastering Sky',col:'#f1e7d0',desc:'Stops your track from ever going past a set level.',daw:'The last plug-in on the master channel, set just under 0 dB.',tag:'Nothing gets past the ceiling.'}];
-const TOOL_SKILLS={volume:['volume'],drums:['kick','snare','hihat','patterns','quantize'],midi:['midi','notes'],eq:['eq','frequency','masking'],comp:['compression','threshold','ratio','attack','release'],reverb:['reverb'],delay:['delay'],dist:['synthesis'],synth:['oscillators','waveforms','adsr','filters'],auto:['automation'],limiter:['limiting','loudness']};
+{id:'limiter',name:'Limiter',weapon:'Ceiling Shield',lv:11,world:'Mastering Sky',col:'#f1e7d0',desc:'Stops your track from ever going past a set level.',daw:'The last plug-in on the master channel, set just under 0 dB.',tag:'Nothing gets past the ceiling.'},
+{id:'groovebox',name:'Groovebox',weapon:'Strobe Gauntlet',lv:12,world:'Techno Bunker',col:'#ff7a3a',desc:'A techno drum machine: a 909-style kit, MPC swing, polymeter loops, a rumble kick and an offbeat bass.',daw:'An Ableton Drum Rack with the Groove Pool, a Roland TR-909 or TR-8S, an Elektron Digitakt: same steps, same swing.',tag:'Build the groove that moves the floor.'}];
+const TOOL_SKILLS={volume:['volume'],drums:['kick','snare','hihat','patterns','quantize'],midi:['midi','notes'],eq:['eq','frequency','masking'],comp:['compression','threshold','ratio','attack','release'],reverb:['reverb'],delay:['delay'],dist:['synthesis'],synth:['oscillators','waveforms','adsr','filters'],auto:['automation'],limiter:['limiting','loudness'],groovebox:['groove','polyrhythm','bounce','technogenres','rumble','acid']};
 
 const WORLDS=[
 {id:'sky',name:'Mastering Sky',teaches:'Limiting, loudness, LUFS, headroom, exporting',boss:'The Master',x:46,y:16},
@@ -719,10 +740,11 @@ const WORLDS=[
 {id:'volcano',name:'Compression Volcano',teaches:'Threshold, ratio, attack, release, punch',boss:'The Dynamic Titan',x:66,y:119},
 {id:'desert',name:'EQ Desert',teaches:'Frequency, EQ, filters, masking',boss:'The Spectrum King',x:30,y:153},
 {id:'caves',name:'Synth Caves',teaches:'MIDI, notes, scales, chords, oscillators, ADSR, filters, LFO',boss:'The Synth Dragon',x:64,y:187},
-{id:'forest',name:'Beat Forest',teaches:'Sound, rhythm, BPM, bars, drum patterns, quantize',boss:'The Rhythm Beast',x:32,y:222}];
+{id:'forest',name:'Beat Forest',teaches:'Sound, rhythm, BPM, bars, drum patterns, quantize',boss:'The Rhythm Beast',x:32,y:222},
+{id:'bunker',name:'Techno Bunker',teaches:'Techno grooves: the rumble kick, hardgroove swing, tribal polyrhythms, hard bounce and acid',boss:'The Headliner',x:72,y:213}];
 const WNAME=Object.fromEntries(WORLDS.map(w=>[w.id,w.name]));
 
-const WORDER=['forest','caves','desert','volcano','swamp','castle','sky'];
+const WORDER=['forest','caves','desert','volcano','swamp','castle','sky','bunker'];
 const WSTAGES={forest:[
 {id:'s0',kind:'LESSON',title:'What is Sound?',sub:'Vibration, pitch, low · mid · high',mins:4,icon:'wave',quest:'Discover what sound is'},
 {id:'l1',kind:'LESSON',title:'The Pulse',sub:'BPM and tempo',mins:4,icon:'flame',quest:'Learn the pulse'},
@@ -775,7 +797,17 @@ sky:[
 {id:'a4',kind:'LESSON',title:'Ship It',sub:'Export formats and final checks',mins:5,icon:'scroll',quest:'Export your music',xp:300},
 {id:'golem',kind:'MINI-BOSS',title:'The Loudness Golem',sub:'Tests: clipping, over-limiting',mins:6,icon:'skull',quest:'Defeat the Loudness Golem',xp:350},
 {id:'master',kind:'WORLD BOSS',title:'The Master',sub:'Tests: every world',mins:10,icon:'skull',quest:'Defeat The Master',xp:500},
-{id:'final',kind:'FINAL',title:'The Final Track',sub:'Produce a complete song. Get certified.',mins:30,icon:'star',quest:'Produce the Final Track',xp:2050}]};
+{id:'final',kind:'FINAL',title:'The Final Track',sub:'Produce a complete song. Get certified.',mins:30,icon:'star',quest:'Produce the Final Track',xp:2050}],
+bunker:[
+{id:'t1',kind:'LESSON',title:'The Techno Engine',sub:'Four on the floor, 909 kit, tempo zones',mins:6,icon:'groovebox',quest:'Learn the techno engine',xp:100},
+{id:'t2',kind:'LESSON',title:'The Rumble',sub:'Kick, dark reverb, low-pass, duck, drive',mins:6,icon:'subwoofer',quest:'Make the floor rumble',xp:100},
+{id:'t3',kind:'LESSON',title:'Hardgroove',sub:'Swing and percussion, the Ben Sims sound',mins:7,icon:'conga',quest:'Learn hardgroove',xp:100},
+{id:'t4',kind:'LESSON',title:'Tribal',sub:'Polyrhythms, toms and hand drums',mins:7,icon:'conga',quest:'Learn tribal techno',xp:100},
+{id:'t5',kind:'LESSON',title:'Hard Bounce',sub:'160+ BPM, reverse bass, hits on the grid',mins:7,icon:'bounce',quest:'Learn hard bounce',xp:100},
+{id:'bouncer',kind:'MINI-BOSS',title:'The Bouncer',sub:'Tests: styles, bass shapes, offbeats, hits',mins:6,icon:'skull',quest:'Get past The Bouncer',xp:200},
+{id:'t6',kind:'LESSON',title:'Acid & Hard Techno',sub:'303 accents and slides, distortion',mins:7,icon:'smiley',quest:'Make it squelch',xp:100},
+{id:'headliner',kind:'WORLD BOSS',title:'The Headliner',sub:'Tests: every techno groove',mins:9,icon:'skull',quest:'Outplay The Headliner',xp:300},
+{id:'btrial',kind:'MASTER TRIAL',title:'The Club Trial',sub:'Three rooms, three styles, one night',mins:10,icon:'bolt',quest:'Pass the Club Trial',xp:300}]};
 const STAGES=[];WORDER.forEach(w=>WSTAGES[w].forEach(st=>{st.w=w;STAGES.push(st)}));
 const stageById=id=>STAGES.find(x=>x.id===id);
 
@@ -805,7 +837,7 @@ const QUESTS=[
 {id:'loop4',title:'Create a 4-bar drum loop',desc:'Play a kick + snare loop for 4 bars',goal:4,xp:40,coins:15,icon:'drums',needs:'drums',reward:'kit-forest'},
 {id:'balance',title:'Balance three instruments',desc:'Move the volume of 3 different tracks',goal:3,xp:30,coins:15,icon:'volume',needs:'drums',reward:'hoodie-magenta'}];
 
-const TIERS=[{id:'beg',name:'Beginner',sub:'Sound, rhythm and harmony'},{id:'sd',name:'Sound Design',sub:'Build sounds from scratch'},{id:'mix',name:'Mixing',sub:'Make every sound fit'},{id:'mas',name:'Mastering',sub:'Loud, clean and ready to release'}];
+const TIERS=[{id:'beg',name:'Beginner',sub:'Sound, rhythm and harmony'},{id:'sd',name:'Sound Design',sub:'Build sounds from scratch'},{id:'mix',name:'Mixing',sub:'Make every sound fit'},{id:'mas',name:'Mastering',sub:'Loud, clean and ready to release'},{id:'club',name:'Club Techno',sub:'Groove, rumble and the styles of the underground'}];
 const SKILLS=[
 ['sound','Sound','beg','forest','Sound is air vibrating. Faster vibration means a higher pitch.'],
 ['rhythm','Rhythm','beg','forest','The pattern of hits and gaps in time.'],
@@ -849,7 +881,13 @@ const SKILLS=[
 ['limiting','Limiting','mas','sky','A hard ceiling that stops peaks.'],
 ['clipping','Clipping','mas','sky','What happens when audio goes past 0 dB.'],
 ['headroom','Headroom','mas','sky','The safety space below 0 dB.'],
-['export','Final export','mas','sky','Rendering the finished song to a file.']];
+['export','Final export','mas','sky','Rendering the finished song to a file.'],
+['groove','Swing & groove','club','bunker','Pushing every second 16th late so the beat bounces.'],
+['rumble','Rumble kick','club','bunker','A dark, ducked reverb tail under the techno kick.'],
+['polyrhythm','Polyrhythm','club','bunker','Loops of different lengths playing against each other.'],
+['bounce','Offbeat bass','club','bunker','A bass between the kicks: pluck, reverse or rolling.'],
+['acid','Acid line','club','bunker','A 303-style bass with resonance, accents and slides.'],
+['technogenres','Techno styles','club','bunker','Detroit, hardgroove, tribal, hard techno, hard bounce, acid.']];
 const SK=Object.fromEntries(SKILLS.map(s=>[s[0],{id:s[0],n:s[1],t:s[2],w:s[3],d:s[4]}]));
 
 const ABILITIES=[
@@ -864,7 +902,8 @@ const ABILITIES=[
 {id:'dynamic',name:'Dynamic Control',from:'Taming Peaks',desc:'You understand dynamics. Your studio gains a master compressor.'},
 {id:'space',name:'Space Sense',from:'The Echo King',desc:'You hear the size of any space. Your studio lead delay now locks to your tempo (a dotted 8th).'},
 {id:'stereosight',name:'Stereo Sight',from:'The Mixing Lord',desc:'You see where every sound sits. Your studio gains pan knobs on every track.'},
-{id:'ceiling',name:'Ceiling Guard',from:'The Master',desc:'No peak can break your ceiling. Your studio master gains a live loudness meter.'}];
+{id:'ceiling',name:'Ceiling Guard',from:'The Master',desc:'No peak can break your ceiling. Your studio master gains a live loudness meter.'},
+{id:'rumblecraft',name:'Rumble Craft',from:'The Headliner',desc:'You can make a floor shake. Your studio kick gains a RUMBLE knob.'}];
 const hasAb=id=>S.abilities.includes(id);
 
 const MONS={
@@ -931,7 +970,9 @@ const has=t=>S.tools.includes(t);
 function addMission(t){S.missions[t]=(S.missions[t]||0)+1}
 const nextStage=()=>STAGES.find(x=>!S.done.includes(x.id));
 function worldDone(w){return WSTAGES[w||'forest'].every(x=>S.done.includes(x.id))}
-function worldOpen(w){const i=WORDER.indexOf(w);return i<=0||worldDone(WORDER[i-1])}
+/* the Techno Bunker is a side world: it opens as soon as Beat Forest is cleared */
+const WPREV={bunker:'forest'};
+function worldOpen(w){if(WPREV[w])return worldDone(WPREV[w]);const i=WORDER.indexOf(w);return i<=0||worldDone(WORDER[i-1])}
 const curWorldId=()=>{const n=nextStage();return n?n.w:'sky'};
 function stageState(id){if(S.done.includes(id))return'done';const st=stageById(id);if(!st||!worldOpen(st.w))return'locked';const n=WSTAGES[st.w].find(x=>!S.done.includes(x.id));return n&&n.id===id?'current':'locked'}
 
@@ -989,9 +1030,9 @@ function tone(t,type,f,dur,v,fEnd,dest){const c=AC();const o=c.createOscillator(
 function noiseHit(t,dur,v,type,freq,q,dest){const c=AC();const s=c.createBufferSource();s.buffer=A.noise;const f=c.createBiquadFilter();f.type=type;f.frequency.value=freq;f.Q.value=q||.7;const g=c.createGain();g.gain.setValueAtTime(Math.max(v,.0001),t);g.gain.exponentialRampToValueAtTime(.0001,t+dur);s.connect(f);f.connect(g);g.connect(dest||OUT());s.start(t,Math.random()*.5);s.stop(t+dur+.03)}
 const SEMI=[0,0,3,5,7,10],NOTES=['','A','C','D','E','G'];
 const V={
-  kick(t,v=.9){if(!A.ctx)return;const k=S.kit,f=k==='kit-forest',b=k==='kit-boom';tone(t,'sine',b?110:f?125:165,b?.8:f?.46:.36,v*1.1,b?34:f?38:44);noiseHit(t,.015,v*.25,'highpass',f?1800:3000)},
-  snare(t,v=.75){if(!A.ctx)return;const k=S.kit,f=k==='kit-forest',b=k==='kit-boom';if(b){noiseHit(t,.12,v*.75,'highpass',1600,.7);tone(t,'triangle',230,.07,v*.5,130);return}noiseHit(t,f?.22:.17,v*.7,f?'bandpass':'highpass',f?1700:1300,f?.9:.7);tone(t,'triangle',f?165:200,.09,v*.5,110)},
-  hat(t,v=.5){if(!A.ctx)return;const k=S.kit;noiseHit(t,k==='kit-forest'?.06:k==='kit-boom'?.03:.045,v*.42,'highpass',k==='kit-forest'?6200:k==='kit-boom'?9500:8200)},
+  kick(t,v=.9){if(!A.ctx)return;if(S.kit==='kit-bunker'){TV.kick(t,v,OUT());return}const k=S.kit,f=k==='kit-forest',b=k==='kit-boom';tone(t,'sine',b?110:f?125:165,b?.8:f?.46:.36,v*1.1,b?34:f?38:44);noiseHit(t,.015,v*.25,'highpass',f?1800:3000)},
+  snare(t,v=.75){if(!A.ctx)return;if(S.kit==='kit-bunker'){TV.clap(t,v*.8,OUT());return}const k=S.kit,f=k==='kit-forest',b=k==='kit-boom';if(b){noiseHit(t,.12,v*.75,'highpass',1600,.7);tone(t,'triangle',230,.07,v*.5,130);return}noiseHit(t,f?.22:.17,v*.7,f?'bandpass':'highpass',f?1700:1300,f?.9:.7);tone(t,'triangle',f?165:200,.09,v*.5,110)},
+  hat(t,v=.5){if(!A.ctx)return;if(S.kit==='kit-bunker'){TV.chat(t,v*1.2,OUT());return}const k=S.kit;noiseHit(t,k==='kit-forest'?.06:k==='kit-boom'?.03:.045,v*.42,'highpass',k==='kit-forest'?6200:k==='kit-boom'?9500:8200)},
   bass(t,n,v=.7){if(!A.ctx||!n)return;const c=AC(),fr=110*Math.pow(2,SEMI[n]/12);const o=c.createOscillator(),o2=c.createOscillator(),lp=c.createBiquadFilter(),g=c.createGain();o.type='sawtooth';o2.type='sine';o.frequency.value=fr;o2.frequency.value=fr/2;lp.type='lowpass';lp.Q.value=5;lp.frequency.setValueAtTime(1600,t);lp.frequency.exponentialRampToValueAtTime(260,t+.25);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(Math.max(v*.45,.0002),t+.006);g.gain.exponentialRampToValueAtTime(.0001,t+.34);o.connect(lp);o2.connect(lp);lp.connect(g);g.connect(OUT());o.start(t);o2.start(t);o.stop(t+.4);o2.stop(t+.4)},
   click(t,acc){if(!A.ctx)return;tone(t,'square',acc?1760:1320,.035,acc?.28:.18)},
   sine(t,f,dur,v){if(!A.ctx)return;const c=AC();const o=c.createOscillator(),g=c.createGain();o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(Math.max(v,.0002),t+.03);g.gain.setValueAtTime(Math.max(v,.0002),t+Math.max(.05,dur-.1));g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g);g.connect(OUT());o.start(t);o.stop(t+dur+.05)},
@@ -1100,7 +1141,8 @@ function drawMap(g){const W=96,H=238,B=34;const r=rng(42);const clear=worldDone(
   for(let i=0;i<7;i++){const x=Math.floor(r()*86),y=y0+2+Math.floor(r()*26);px(g,x,y,8,6,'#2f2850')}px(g,74,y0+12,16,10,'#100c1e');px(g,76,y0+10,12,2,'#100c1e');
   [[20,y0+8,'#6c5cff'],[40,y0+22,'#3ef0c8'],[88,y0+4,'#6c5cff'],[10,y0+26,'#3ef0c8']].forEach(([x,y,c])=>{px(g,x,y,2,4,c);px(g,x+2,y+1,1,3,c)});
   y0=6*B;for(let y=y0;y<H;y++)px(g,0,y,W,1,y%3?'#16301e':'#1a3522');
-  const r5=rng(8);for(let i=0;i<22;i++){const x=Math.floor(r5()*96),yy=y0+6+Math.floor(r5()*30);if(Math.abs(x-32)<10&&Math.abs(yy-222)<9)continue;pine(g,x,yy,7+Math.floor(r5()*5),clear?'#2c6a3a':'#1f4a2c',clear?'#3f8a4a':'#2c5a36')}
+  const r5=rng(8);for(let i=0;i<22;i++){const x=Math.floor(r5()*96),yy=y0+6+Math.floor(r5()*30);if(Math.abs(x-32)<10&&Math.abs(yy-222)<9||Math.abs(x-72)<15&&Math.abs(yy-213)<11)continue;pine(g,x,yy,7+Math.floor(r5()*5),clear?'#2c6a3a':'#1f4a2c',clear?'#3f8a4a':'#2c5a36')}
+  drawBunkerMap(g,worldOpen('bunker'));
   for(let k=1;k<7;k++){const y=k*B;for(let x=0;x<W;x+=2)px(g,x+(k%2),y-1,1,2,'rgba(0,0,0,.4)')}
   for(let k=0;k<6;k++){const yy=k*B;px(g,0,yy,W,B,'rgba(8,6,16,.35)');for(let y=yy;y<yy+B;y++)for(let x=(y%2);x<W;x+=2)px(g,x,y,1,1,'rgba(8,6,16,.4)')}
   const pts=[...WORLDS].reverse();for(let i=0;i<pts.length-1;i++){const a=pts[i],b=pts[i+1];const d=Math.hypot(b.x-a.x,b.y-a.y);for(let s=0;s<d;s+=3){const x=a.x+(b.x-a.x)*s/d,y=a.y+(b.y-a.y)*s/d;px(g,x,y,1,1,i===0?'#ffb547':'#6a5f9a')}}
@@ -1668,6 +1710,7 @@ RENDER.home=scr=>{const lp=lvProg();const rk=rankFor(lp.n),rn=rankNext(lp.n);con
   <div class="win raised stack" style="border-color:#6a4718"><p class="eyebrow" style="color:var(--amber)">ADVENTURE</p>
    ${n?`<h2>${n.quest}</h2><p class="muted">${WNAME[n.w]} · ${n.kind.toLowerCase()} · about ${n.mins} min</p>`:`<h2>${S.cert?'Producer certified':'Every world mastered'}</h2><p class="muted">Keep your skills fresh with recalls and the Ear Gym, or open the DAW and produce another track.</p>`}
    <button class="btn big block" id="cont">${n?'CONTINUE ADVENTURE ▶':'OPEN THE FINAL TRACK ▶'}</button></div>
+  ${worldOpen('bunker')&&!worldDone('bunker')?`<div class="win stack" style="border-color:#ff3d7f"><p class="eyebrow" style="color:#ff3d7f">SIDE WORLD · TECHNO BUNKER</p><h3>${WSTAGES.bunker.some(x=>S.done.includes(x.id))?'Back to the Bunker':'A bass rumbles under Beat Forest'}</h3><p class="muted" style="font-size:15px">Hardgroove, tribal, hard bounce, rumble kicks and acid. ${WSTAGES.bunker.filter(x=>S.done.includes(x.id)).length}/${WSTAGES.bunker.length} stages cleared.</p><button class="btn pink block" data-a="bunker">ENTER THE BUNKER ▶</button></div>`:''}
   ${pq?`<div class="win stack" style="border-color:var(--violet)"><p class="eyebrow" style="color:var(--violet)">PERSONAL QUEST</p><h3>${PQ[pq.tag].title}</h3><p class="muted" style="font-size:15px">${PQ[pq.tag].why} Get 3 right to clear it.</p><div class="bar"><i style="width:${pq.prog/pq.goal*100}%;--c:var(--violet)"></i></div><p class="muted" style="font-size:13px">Reward: +120 XP · ${SK[PQ[pq.tag].skill].n} mastery +8%</p><button class="btn violet block" data-a="pq">START TRIAL</button></div>`:''}
   <p class="eyebrow">YOUR PROGRESS</p>
   <div class="statgrid"><div class="stat"><span data-ic="path" data-sc="3"></span><b>${learned}</b><span>skills learned</span></div><div class="stat"><span data-ic="star" data-sc="3"></span><b>${Math.round(tierMastery('beg'))}%</b><span>beginner mastery</span></div><div class="stat"><span data-ic="sword" data-sc="3" data-col="#ff4f9a"></span><b>${S.defeated.length}</b><span>monsters</span></div><div class="stat"><span data-ic="flame" data-sc="3"></span><b>${S.streak}</b><span>day streak</span></div></div>
@@ -1682,7 +1725,7 @@ RENDER.home=scr=>{const lp=lvProg();const rk=rankFor(lp.n),rn=rankNext(lp.n);con
   $('.memo-slot',scr).replaceWith(pipSay(memoryLine()));
   renderSession($('#session',scr));
   $('.pipslot',scr).append(pipEl(3,'float'));
-  $('#cont',scr).onclick=()=>{sfx.tap();continueAdventure()};
+  $('#cont',scr).onclick=()=>{sfx.tap();continueAdventure()};const bkb=$('[data-a=bunker]',scr);if(bkb)bkb.onclick=()=>{sfx.tap();go('region','bunker')};
   const pqb=$('[data-a=pq]',scr);if(pqb)pqb.onclick=()=>{sfx.tap();startPQ(0)};
   $$('[data-to]',scr).forEach(b=>b.onclick=()=>{sfx.tap();go(b.dataset.to)});
   $('#askpip',scr).onclick=()=>{sfx.tap();openCoach()};
@@ -1697,20 +1740,20 @@ function openSettings(){const m=modal(`<h2>Settings</h2><p class="muted">Beat Qu
   let armed=false;$('.st-rs',m).onclick=e=>{const b=e.currentTarget;if(!armed){armed=true;b.textContent='TAP AGAIN TO ERASE EVERYTHING';b.classList.remove('ghost');b.classList.add('pink');return}try{localStorage.removeItem(SAVE_KEY)}catch(err){}S=DEF();S.resetAt=Date.now();S.lastDay=S.firstDay=todayStr();S.quests.day=todayStr();S.daily={day:todayStr(),segs:{},snap:{beg:0,sk:{}},shown:false,active:null};save();stopMusic();m.close();go('title')};$('.st-cl',m).onclick=()=>m.close()}
 
 /* ================= map & region ================= */
-RENDER.map=scr=>{scr.innerHTML=topbar('WORLD MAP')+`<p class="muted" style="margin-bottom:10px">Seven worlds, one skill family each. Start at the bottom in Beat Forest and climb toward the Mastering Sky.</p><div class="mapwrap"></div>`;hydrateIcons(scr);
+RENDER.map=scr=>{scr.innerHTML=topbar('WORLD MAP')+`<p class="muted" style="margin-bottom:10px">Seven worlds, one skill family each, plus a hidden techno bunker. Start at the bottom in Beat Forest and climb toward the Mastering Sky.</p><div class="mapwrap"></div>`;hydrateIcons(scr);
   const w=$('.mapwrap',scr);const cv=lowres(96,238);w.append(cv);drawMap(cv.getContext('2d'));const cw=curWorldId();
   WORLDS.forEach(W=>{const open=worldOpen(W.id),clear=worldDone(W.id);const n=WSTAGES[W.id].filter(x=>S.done.includes(x.id)).length,tot=WSTAGES[W.id].length;
     const b=h('button','mnode '+(clear?'clear':open?'open':'locked'),`<span class="pin">${clear?'<span data-ic="star" data-sc="3" data-col="#3ef0c8"></span>':open?'!':'<span data-ic="lock" data-sc="3"></span>'}</span><span class="lab">${W.name.toUpperCase()}</span>${open&&!clear?`<span class="tag">${n}/${tot} STAGES</span>`:open?'':'<span class="tag">LOCKED</span>'}`);
     b.setAttribute('aria-label',W.name+(clear?' (cleared)':open?'':' (locked)'));b.style.left=W.x/96*100+'%';b.style.top=W.y/238*100+'%';b.onclick=()=>{sfx.tap();if(open)go('region',W.id);else worldInfo(W)};w.append(b)});
   hydrateIcons(w);const f=WORLDS.find(x=>x.id===cw);const hr=heroEl(2,'maphero bob');hr.style.left=(f.x+14)/96*100+'%';hr.style.top=(f.y+6)/238*100+'%';w.append(hr);
   requestAnimationFrame(()=>{const top=hr.offsetTop-scr.clientHeight/2;scr.scrollTop=top>0?top:scr.scrollHeight})};
-function worldInfo(W){const skills=SKILLS.filter(s=>s[3]===W.id);const i=WORDER.indexOf(W.id),prev=WORLDS.find(x=>x.id===WORDER[i-1]);
-  const m=modal(`<p class="eyebrow">WORLD ${i+1} · LOCKED</p><h2>${W.name}</h2><p>Teaches: ${W.teaches}.</p><p class="muted">${WSTAGES[W.id].length} stages · Boss: ${W.boss}</p>
+function worldInfo(W){const skills=SKILLS.filter(s=>s[3]===W.id);const i=WORDER.indexOf(W.id),prev=WORLDS.find(x=>x.id===(WPREV[W.id]||WORDER[i-1]));
+  const m=modal(`<p class="eyebrow">${WPREV[W.id]?'SIDE WORLD':'WORLD '+(i+1)} · LOCKED</p><h2>${W.name}</h2><p>Teaches: ${W.teaches}.</p><p class="muted">${WSTAGES[W.id].length} stages · Boss: ${W.boss}</p>
    <div class="win raised" style="text-align:left;width:100%"><p style="font-size:15px">Clear ${prev?prev.name:'the previous world'} first: finish every stage there, including its Master Trial. Your skills and recalls carry over.</p></div>
    <button class="btn ghost block wi-ok">BACK TO THE MAP</button>`,{dismiss:true});$('.wi-ok',m).onclick=()=>m.close()}
 const WCOL={LESSON:'#ffb547',CHALLENGE:'#ffcc4d','MASTER TRIAL':'#a98bff',FINAL:'#ffcc4d'};
 RENDER.region=(scr,wid)=>{if(wid)regionW=wid;const w=regionW,W=WORLDS.find(x=>x.id===w),wi=WORDER.indexOf(w);
-  scr.innerHTML=topbar(W.name.toUpperCase(),'map')+`<div class="stack"><div class="win region-banner"><div class="scene"></div><div class="over"><p class="eyebrow" style="color:var(--leaf)">WORLD ${wi+1}${wi===0?' · FREE':''}${worldDone(w)?' · CLEARED':''}</p><h2 style="text-shadow:0 2px 0 #000">${W.name}</h2><p style="font-size:15px;text-shadow:0 2px 0 #000">${W.teaches}.</p></div></div><div class="path"></div>${worldDone(w)?`<button class="btn ghost block" data-a="vic">WORLD SUMMARY</button>`:''}</div>`;wireBack(scr);
+  scr.innerHTML=topbar(W.name.toUpperCase(),'map')+`<div class="stack"><div class="win region-banner"><div class="scene"></div><div class="over"><p class="eyebrow" style="color:var(--leaf)">${WPREV[w]?'SIDE WORLD':'WORLD '+(wi+1)}${wi===0?' · FREE':''}${worldDone(w)?' · CLEARED':''}</p><h2 style="text-shadow:0 2px 0 #000">${W.name}</h2><p style="font-size:15px;text-shadow:0 2px 0 #000">${W.teaches}.</p></div></div><div class="path"></div>${worldDone(w)?`<button class="btn ghost block" data-a="vic">WORLD SUMMARY</button>`:''}</div>`;wireBack(scr);
   const cv=lowres(108,44,'bg');$('.scene',scr).prepend(cv);addLive(cv,WSCENE[w]);
   const p=$('.path',scr);WSTAGES[w].forEach(s=>{const st=stageState(s.id);const col=WCOL[s.kind]||'#ff4f9a';
     const b=h('button','stage '+st,`<span class="ic"><span data-ic="${s.icon}" data-sc="3" data-col="${col}"${st==='locked'?' data-dim="1"':''}></span></span><span class="grow"><span class="k">${s.kind} · ${s.mins} MIN</span><br><span class="t">${s.title}</span><br><span class="s">${s.sub}</span></span><span class="st">${st==='done'?'<span style="color:var(--neon)">CLEAR<br>REPLAY</span>':st==='current'?'<span style="color:var(--amber)">▶ GO</span>':'LOCKED'}</span>`);
@@ -1970,15 +2013,15 @@ function studioGraph(){initAudio();if(!A.ctx)return null;if(SG&&SG.c===A.ctx)ret
   const rev=c.createConvolver();rev.buffer=makeIR(c,2.2,7000,.85);const rg=c.createGain();rg.gain.value=.9;rev.connect(rg);rg.connect(bus);
   const dly=c.createDelay(2),dfb=c.createGain(),dlp=c.createBiquadFilter(),dmix=c.createGain();dlp.type='lowpass';dlp.frequency.value=5000;dly.connect(dlp);dlp.connect(dfb);dfb.connect(dly);dlp.connect(dmix);dmix.connect(bus);
   const tr={};['kick','snare','hat','bass','lead'].forEach(k=>{const inp=c.createGain(),pn=c.createStereoPanner?c.createStereoPanner():c.createGain(),sg=c.createGain();inp.connect(pn);pn.connect(bus);inp.connect(sg);sg.connect(rev);if(k==='lead')inp.connect(dly);tr[k]={inp,pn,sg}});
-  SG={c,bus,drv,lim,post,an,dly,dfb,dmix,tr};return SG}
+  const rum=rumbleChain(c,bus);tr.kick.inp.connect(rum.inp);SG={c,bus,drv,lim,post,an,dly,dfb,dmix,tr,rum};return SG}
 function satCurve(k){const n=2048,c=new Float32Array(n),a=1+k*8;for(let i=0;i<n;i++){const x=i/(n-1)*2-1;c[i]=Math.tanh(a*x)/Math.tanh(a)}return c}
 function applyFx(){const G=studioGraph();if(!G)return;const F=S.fx;
   ['kick','snare','hat','bass','lead'].forEach(k=>{const t=G.tr[k];if(t.pn.pan)t.pn.pan.value=hasAb('stereosight')?(F.pan[k]||0):0;t.sg.gain.value=has('reverb')?(F.send[k]||0):0});
   G.dly.delayTime.value=hasAb('space')?.75*60/S.bpm:.3;G.dfb.gain.value=.38;G.dmix.gain.value=has('delay')?F.dly:0;
-  G.drv.curve=has('dist')&&F.drive>0?satCurve(F.drive):null;
+  G.drv.curve=has('dist')&&F.drive>0?satCurve(F.drive):null;G.rum.set({amt:hasAb('rumblecraft')?(F.rumble||0):0});
   const lon=has('limiter')&&F.lim;G.lim.threshold.value=lon?F.ceil-2:0;G.lim.ratio.value=lon?20:1;G.lim.knee.value=0;G.lim.attack.value=.002;G.lim.release.value=.08;G.post.gain.value=lon?dbToG(1.5):1}
 function studioStep(p,s,t,vol){const G=studioGraph();if(!G){playStep(p,s,t,vol);return}const i=s%16,R=k=>G.tr[k].inp;
-  withRoute(R('kick'),()=>{if(p.kick[i])V.kick(t,vol.kick)});withRoute(R('snare'),()=>{if(p.snare[i])V.snare(t,vol.snare)});withRoute(R('hat'),()=>{if(p.hat[i])V.hat(t,vol.hat)});
+  withRoute(R('kick'),()=>{if(p.kick[i]){V.kick(t,vol.kick);G.rum.duck(t,60/S.bpm)}});withRoute(R('snare'),()=>{if(p.snare[i])V.snare(t,vol.snare)});withRoute(R('hat'),()=>{if(p.hat[i])V.hat(t,vol.hat)});
   withRoute(R('bass'),()=>{if(p.bass[i])V.bass(t,p.bass[i],vol.bass)});if(p.lead&&has('synth'))withRoute(R('lead'),()=>{if(p.lead[i])SV(t,leadF(p.lead[i]),.2,S.leadPatch||PRESETS.LEAD,(vol.lead==null?.6:vol.lead)*.5)})}
 function fxRack(host){const trk=['kick','snare','hat','bass'].concat(has('synth')?['lead']:[]);const pan=hasAb('stereosight'),snd=has('reverb');const F=S.fx;
   const w=h('div','win raised stack');w.innerHTML=`<div class="row sp"><p class="eyebrow" style="color:#6cb8ff">MIX RACK</p>${has('limiter')?`<button class="chip" data-a="lim" style="min-height:36px">LIMITER ${F.lim?'ON':'OFF'}</button>`:''}</div>`;host.append(w);const tip=tipLine(w);
@@ -1989,6 +2032,7 @@ function fxRack(host){const trk=['kick','snare','hat','bass'].concat(has('synth'
   const kr=h('div','krow');w.append(kr);
   if(has('delay')&&has('synth'))knob(kr,{label:'LEAD DELAY',min:0,max:1,value:F.dly,fmt:v=>Math.round(v*100)+'%',col:'#3ef0c8',onTouch:()=>{tip.textContent=hasAb('space')?`Echoes on the lead, locked to a dotted 8th (${Math.round(.75*60/S.bpm*1000)} ms at ${S.bpm} BPM).`:'Echoes on the lead, every 300 ms. Space Sense locks them to the tempo.'},onInput:v=>{F.dly=v;on()}});
   if(has('dist'))knob(kr,{label:'DRIVE',min:0,max:1,value:F.drive,fmt:v=>Math.round(v*100)+'%',col:'#ff4f5a',onTouch:()=>{tip.textContent='Drive: saturation on the whole beat. A little adds warmth; a lot adds grit.'},onInput:v=>{F.drive=v;on()}});
+  if(hasAb('rumblecraft'))knob(kr,{label:'RUMBLE',min:0,max:1,value:F.rumble||0,fmt:v=>Math.round(v*100)+'%',col:'#a98bff',onTouch:()=>{tip.textContent='Rumble: your kick through a dark, ducked reverb. Techno pressure under the beat.'},onInput:v=>{F.rumble=v;on()}});
   if(has('limiter'))knob(kr,{label:'CEILING',min:-6,max:0,value:F.ceil,fmt:v=>v.toFixed(1)+' dB',col:'#ffcc4d',onTouch:()=>{tip.textContent='Limiter ceiling: nothing on the master goes past this level.'},onInput:v=>{F.ceil=v;on()}});
   if(hasAb('ceiling')){const lu=h('div','stack');lu.style.gap='2px';lu.innerHTML='<span class="kb-lab">LOUDNESS (SHORT-TERM, APPROX.)</span><div class="lufsbar"><i style="width:0%"></i><b style="left:55.6%"></b></div><span class="num lu" style="font-size:18px">— LUFS</span>';w.append(lu);
     const G=studioGraph(),bf=new Float32Array(2048);let acc=-70;addLive(lu,()=>{if(!G||!seq.on)return;G.an.getFloatTimeDomainData(bf);let e=0;for(let i=0;i<bf.length;i++)e+=bf[i]*bf[i];const db=10*Math.log10(e/bf.length+1e-12)-.7+3;acc=acc*.97+db*.03;$('.lu',lu).textContent=acc.toFixed(1)+' LUFS';$('i',lu).style.width=clamp((acc+24)/18,0,1)*100+'%'})}
@@ -1996,7 +2040,7 @@ function fxRack(host){const trk=['kick','snare','hat','bass'].concat(has('synth'
   if(!w.querySelector('.knob2')&&!lb)w.remove();applyFx()}
 function leadEditor(){const m=modal('<div class="led-h" style="width:100%"></div><button class="btn block fx-close">DONE</button>',{dismiss:true});const rig=synthRig($('.led-h',m),{patch:S.leadPatch,presets:hasAb('wave'),riff:[[69,0,.5],[72,.5,.5],[76,1,.5],[74,1.5,1]],lo:57,hi:81});
   const close=()=>{rig.stop();save();m.close()};$('.fx-close',m).onclick=close}
-RENDER.studio=(scr,arg)=>{const ch=!!(arg&&arg.challenge);const P=S.pattern;let hl=0;if(!P.lead)P.lead=new Array(16).fill(0);if(S.vols.lead==null)S.vols.lead=.6;S.fx=Object.assign({pan:{},send:{},dly:.25,lim:true,ceil:-1,drive:0},S.fx||{});if(!S.leadPatch)S.leadPatch=mkPatch(PRESETS.LEAD);const TRK=['kick','snare','hat','bass'].concat(has('synth')?['lead']:[]);
+RENDER.studio=(scr,arg)=>{const ch=!!(arg&&arg.challenge);const P=S.pattern;let hl=0;if(!P.lead)P.lead=new Array(16).fill(0);if(S.vols.lead==null)S.vols.lead=.6;S.fx=Object.assign({pan:{},send:{},dly:.25,lim:true,ceil:-1,drive:0,rumble:.35},S.fx||{});if(!S.leadPatch)S.leadPatch=mkPatch(PRESETS.LEAD);const TRK=['kick','snare','hat','bass'].concat(has('synth')?['lead']:[]);
   scr.innerHTML=topbar(ch?'CHALLENGE':'MY STUDIO',ch?'region':null)+`<div class="stack">
    ${ch?`<div class="win cbanner stack"><p class="eyebrow" style="color:var(--amber)">WORLD 1 CHALLENGE · FIRST BEAT</p><h2>Create an 8-bar beat</h2><p style="font-size:15px">Program a 1-bar groove below. It loops for 8 bars. Use all four instruments, then submit. There's no wrong answer, only feedback.</p><div class="check"><div data-r="kick">Kick</div><div data-r="snare">Snare</div><div data-r="hat">Hi-hat</div><div data-r="bass">Bass (tap a bass cell again to change its note)</div></div><div class="hints"></div></div>`:''}
    <div class="win room"><div class="scene"></div></div><div class="gear"></div><div class="daw stack"></div></div>`;hydrateIcons(scr);wireBack(scr);
@@ -2012,12 +2056,12 @@ RENDER.studio=(scr,arg)=>{const ch=!!(arg&&arg.challenge);const P=S.pattern;let 
     <div class="gh"></div><canvas class="px spec" width="96" height="16"></canvas>
     ${has('comp')?`<div class="win raised stack"><div class="row sp"><p class="eyebrow" style="color:var(--amber)">MASTER COMPRESSOR · DYNAMICS HAMMER</p><button class="chip" data-a="mc">${S.mcomp.on?'ON':'OFF'}</button></div><div class="knobrow"><span>THRESH</span><input type="range" id="mc-thr" min="-40" max="0" value="${S.mcomp.thr}" aria-label="Master threshold"><span class="num">${S.mcomp.thr} dB</span></div><div class="knobrow"><span>RATIO</span><input type="range" id="mc-ratio" min="1" max="12" step=".5" value="${S.mcomp.ratio}" aria-label="Master ratio"><span class="num">${S.mcomp.ratio}:1</span></div><div class="grm"><span>GAIN REDUCTION</span><div class="bar"><i style="width:0%;--c:var(--magenta)"></i></div><span class="num">0.0 dB</span></div></div>`:''}
     <div class="fxh"></div>
-    <div class="row wrap"><button class="btn ghost sm" data-a="clr">CLEAR</button><button class="btn ghost sm" data-a="bb">LOAD BACKBEAT</button>${has('synth')?'<button class="btn ghost sm" data-a="lead">EDIT LEAD SOUND</button>':''}<button class="btn ghost sm" data-a="pip">ASK PIP</button></div></div>
+    <div class="row wrap"><button class="btn ghost sm" data-a="clr">CLEAR</button><button class="btn ghost sm" data-a="bb">LOAD BACKBEAT</button>${has('synth')?'<button class="btn ghost sm" data-a="lead">EDIT LEAD SOUND</button>':''}${has('groovebox')?'<button class="btn ghost sm" data-a="bbox">BUNKER BOX</button>':''}<button class="btn ghost sm" data-a="pip">ASK PIP</button></div></div>
     ${ch?'<button class="btn big block" data-a="submit" disabled>SUBMIT BEAT ★</button>':''}`;
   addLive($('.spec',daw),specDraw);
   const reqs=()=>{if(!ch)return;const used=['kick','snare','hat','bass'].map(k=>P[k].some(Boolean));$$('[data-r]',scr).forEach((d,i)=>d.classList.toggle('ok',used[i]));$('[data-a=submit]',daw).disabled=!used.every(Boolean)};
   const onChange=()=>{save();reqs()};
-  const g=grid($('.gh',daw),{tracks:TRK,pat:P,edit:true,faders:true,onChange});reqs();fxRack($('.fxh',daw));const lb=$('[data-a=lead]',daw);if(lb)lb.onclick=()=>{seq.stop();leadEditor()};
+  const g=grid($('.gh',daw),{tracks:TRK,pat:P,edit:true,faders:true,onChange});reqs();fxRack($('.fxh',daw));const lb=$('[data-a=lead]',daw);if(lb)lb.onclick=()=>{seq.stop();leadEditor()};const bbx=$('[data-a=bbox]',daw);if(bbx)bbx.onclick=()=>{seq.stop();openBunkerBox()};
   const playB=$('[data-a=play]',daw),barc=$('.barc',daw);let bars=0,practiced=0;
   const stopUI=()=>{playB.textContent='▶ PLAY';g.step(-1);barc.textContent='BAR –'};
   const start=total=>{bars=0;playB.textContent='■ STOP';seq.start({bpm:()=>S.bpm,total,play:(s,t)=>{const i=s%16;const spb=60/S.bpm/4;studioStep(P,s,t+(hasAb('swing')&&i%4===2?S.swing/100*spb:0),S.vols)},onStep:s=>{g.step(s%16);if(s%16===0){bars++;barc.textContent='BAR '+bars+(total?'/8':'');if(bars>1&&P.kick.some(Boolean)&&P.snare.some(Boolean)){bump('loop4');if(practiced<6){practiced++;gain(['patterns','kick','snare'],'p',1)}save()}}},onStop:stopUI,onEnd:stopUI})};
@@ -2083,7 +2127,7 @@ const WVICT={forest:{big:['FOREST','MASTERED'],then:'“I don’t know what BPM 
   learned:['Hear low, mid and high','Hear and set BPM','Count bars in 4/4','Read a 16-step grid','Kick, snare, hat roles','Program a backbeat','Quantize to a grid','Hear swing, add syncopation'],
   daw:'Open Ableton\'s Drum Rack, FL Studio\'s Channel Rack or Logic\'s Step Sequencer and you\'ll find this same grid. You already know how to use it.',next:'The Synth Caves await',nextTxt:'MIDI, notes, scales and chords, then oscillators, filters and envelopes. The Synth Dragon guards the Synthesizer.'}};
 RENDER.victory=(scr,w)=>{w=w||'forest';const X=WVICT[w]||WVICT.forest;const wi=WORDER.indexOf(w);const bm=Math.round(tierMastery(SK[SKILLS.find(s=>s[3]===w)[0]].t));
-  scr.innerHTML=`<div class="stack" style="padding-top:24px;text-align:center"><p class="eyebrow" style="color:var(--leaf)">WORLD ${wi+1} · ${WNAME[w].toUpperCase()}</p><h1 class="logo" style="font-size:40px">${X.big[0]}<span>${X.big[1]}</span></h1><div class="victory-hero"></div>
+  scr.innerHTML=`<div class="stack" style="padding-top:24px;text-align:center"><p class="eyebrow" style="color:var(--leaf)">${WPREV[w]?'SIDE WORLD':'WORLD '+(wi+1)} · ${WNAME[w].toUpperCase()}</p><h1 class="logo" style="font-size:40px">${X.big[0]}<span>${X.big[1]}</span></h1><div class="victory-hero"></div>
   <div class="then-now"><div><p class="eyebrow">BEFORE</p>${X.then}</div><div><p class="eyebrow" style="color:var(--neon)">NOW</p>${X.now}</div></div>
   <div class="statgrid"><div class="stat"><b>${learnedSkills().length}</b><span>skills learned</span></div><div class="stat"><b>${bm}%</b><span>tier mastery</span></div><div class="stat"><b>${S.defeated.length}</b><span>monsters</span></div><div class="stat"><b>LV ${level()}</b><span>producer level</span></div></div>
   <div class="win stack" style="text-align:left"><p class="eyebrow">WHAT YOU CAN DO NOW</p><div class="learned">${X.learned.map(t=>`<span>${t}</span>`).join('')}</div>
@@ -2133,7 +2177,7 @@ RENDER.train=scr=>{const due=dueSkills();const nr=nextRecall();
 let pathTab='rank';
 function triBars(id){const s=S.skills[id]||{u:0,l:0,p:0};return`<div class="tri">${[['u','Understand','var(--violet)'],['l','Listening','var(--neon)'],['p','Practical','var(--amber)']].map(([k,n,c])=>`<div>${n} ${Math.round(s[k])}%<span class="bar"><i style="width:${s[k]}%;--c:${c}"></i></span></div>`).join('')}</div>`}
 RENDER.path=scr=>{const lp=lvProg();const rk=rankFor(lp.n),rn=rankNext(lp.n);const tabs=[['rank','RANK'],['skills','SKILLS'],['abilities','ABILITIES'],['tools','TOOLS'],['monsters','MONSTERS'],['style','STYLE']];
-  scr.innerHTML=topbar('PRODUCER PATH')+`<div class="stack"><div class="win raised stack"><div class="row sp"><span class="eyebrow">PRODUCER LV ${lp.n}</span><span class="chip violet">${learnedSkills().length}/43 SKILLS</span></div><h3>“${rk[1]}”</h3>${rn?`<p class="muted" style="font-size:14.5px">Next milestone at LV ${rn[0]}: “${rn[1]}”</p>`:''}</div>
+  scr.innerHTML=topbar('PRODUCER PATH')+`<div class="stack"><div class="win raised stack"><div class="row sp"><span class="eyebrow">PRODUCER LV ${lp.n}</span><span class="chip violet">${learnedSkills().length}/${SKILLS.length} SKILLS</span></div><h3>“${rk[1]}”</h3>${rn?`<p class="muted" style="font-size:14.5px">Next milestone at LV ${rn[0]}: “${rn[1]}”</p>`:''}</div>
    <div class="subtabs">${tabs.map(([k,n])=>`<button data-t="${k}" class="${pathTab===k?'on':''}">${n}</button>`).join('')}</div><div class="stack pc"></div></div>`;hydrateIcons(scr);
   $$('[data-t]',scr).forEach(b=>b.onclick=()=>{pathTab=b.dataset.t;sfx.tap();RENDER.path(scr)});const c=$('.pc',scr);
   if(pathTab==='rank'){c.innerHTML=`<p class="muted">Your levels track who you are becoming as a producer. Each milestone is a real-world ability.</p><div class="ladder">${RANKS.map(r=>{const cls=lp.n>=r[0]&&(rankNext(lp.n)||[99])[0]>r[0]&&rk===r?'cur':lp.n>=r[0]?'done':'fut';return`<div class="rung ${cls}"><span class="num">LV ${r[0]}</span><span>“${r[1]}”<small>${r[2]}</small></span></div>`}).join('')}</div>
@@ -2181,7 +2225,10 @@ const CANNED={
 'What does quantize do?':'Quantize snaps notes onto a grid so they land exactly in time.\n\nWhen you play notes by hand, some are a little early or late. Quantize moves each one to the nearest grid line. Pick the grid that matches your rhythm: 1/8 for eighth notes, 1/16 for faster sixteenths.\n\nIn a real DAW, select the notes and use the Quantize command.',
 'Why are there 16 steps?':'One bar of 4/4 has 4 beats. A step sequencer splits each beat into 4 smaller steps, so 4 × 4 = 16 steps.\n\nSteps 1, 5, 9 and 13 are the beats. The steps in between are where hi-hats, extra kicks and syncopation live.\n\nTry it: put a hi-hat on every odd step, then add one on step 16 and hear the little push into the next bar.',
 'How do I make my beat groove more?':'Groove comes from contrast and small surprises.\n\n- Add a hit on an in-between step (like step 11 or 16) for syncopation.\n- Keep the hi-hats quieter than the kick and snare.\n- Leave some gaps. Silence makes the hits feel bigger.\n\nTry it: in your studio, move one kick from step 9 to step 11 and listen to the bounce.',
-'What is the difference between kick and snare?':'The kick is the low thump you feel in your chest. It usually lands on beats 1 and 3 and anchors the groove.\n\nThe snare is the bright crack. On beats 2 and 4 it becomes the backbeat, the part people clap to.\n\nTry it: put the kick on steps 1 and 9 and the snare on steps 5 and 13. That is the backbeat.'};
+'What is the difference between kick and snare?':'The kick is the low thump you feel in your chest. It usually lands on beats 1 and 3 and anchors the groove.\n\nThe snare is the bright crack. On beats 2 and 4 it becomes the backbeat, the part people clap to.\n\nTry it: put the kick on steps 1 and 9 and the snare on steps 5 and 13. That is the backbeat.',
+'How do I make a techno rumble?':'A rumble is the low pressure under a techno kick. Send the kick into a long, dark reverb (2 to 4 seconds), put a low-pass around 100 to 200 Hz after it so only the lows remain, then duck it with a compressor sidechained from the kick so every kick still punches through. A little saturation adds grit.\n\nTry it: the Rumble lesson in the Techno Bunker. In Ableton: Reverb, then EQ Eight, then a Compressor sidechained from the kick.',
+'What is hardgroove?':'Hardgroove is percussive, swung techno, around 135 to 145 BPM. UK DJ Ben Sims named it with his Hard Groove Trax tapes in the mid-90s, and it is back in clubs since the 2020s.\n\nThe recipe: a tough kick with a rumble, claps on 2 and 4, then hats, congas, toms and rims swung around 54 to 62% (MPC-style swing).\n\nTry it: the Hardgroove lesson in the Techno Bunker.',
+'What is hard bounce?':'Hard bounce is fast, bright hard dance: 160 BPM and up. The kick sits on every beat and a bass bounces on every offbeat, often a reverse bass that swells into the next kick. Claps, percussion, short hits on the beat and stops do the rest. Collectives like 240 KM/H, founded by Adrián Mills, made it huge in the 2020s.\n\nTry it: the Hard Bounce lesson in the Techno Bunker.'};
 function openCoach(){const sh=h('div','sheet');const turns=[];let ctl=null,busy=false;
   sh.innerHTML=`<div class="sheet-in"><div class="sheet-h"><span class="pipbox"></span><div class="grow"><h3>PIP</h3><p class="muted" style="font-size:14px">Producer mentor · explains at your level (LV ${level()})</p></div><button class="iconbtn" data-a="close" aria-label="Close">✕</button></div><div class="msgs"></div><div class="chips">${Object.keys(CANNED).map(q=>`<button>${q}</button>`).join('')}</div><form class="composer"><input id="coach-in" placeholder="Ask about beats, mixing, sound…" autocomplete="off" aria-label="Ask PIP a question"><button class="btn sm" type="submit">ASK</button></form></div>`;
   app.append(sh);$('.pipbox',sh).append(pipEl(3,'float'));const msgs=$('.msgs',sh);
@@ -2190,7 +2237,7 @@ function openCoach(){const sh=h('div','sheet');const turns=[];let ctl=null,busy=
   getSample().then(s=>{if(s||!sh.isConnected)return;$('.composer',sh).hidden=true;$('.chips',sh).classList.add('wrap');add('Offline coach: tap a question below.','note')});
   const close=()=>{if(ctl)ctl.abort();sh.remove()};$('[data-a=close]',sh).onclick=close;sh.addEventListener('click',e=>{if(e.target===sh)close()});
   const RULES=()=>{const wk=weakTags().slice(0,2).map(t=>TAGNAME[t]||t);const due=dueSkills().map(id=>SK[id].n);
-    return`You are PIP, a small amber speaker-robot who mentors players in BEAT QUEST, a pixel-art RPG that teaches music production. Talk like a friendly, encouraging producer. The player is Producer Level ${level()}. Skills they have learned: ${learnedSkills().map(id=>SK[id].n).join(', ')||'none yet'}. Unlocked tools: ${S.tools.join(', ')}. ${wk.length?'They currently struggle with: '+wk.join(' and ')+'. If relevant, gently help with that.':''} ${due.length?'Skills due for review: '+due.join(', ')+'.':''} Rules: plain language for a beginner; define any technical word the first time you use it; at most about 110 words; give one concrete example; end with one small thing to try (in the game's studio drum machine if it fits, otherwise in any DAW). Never just hand over a full solution to a challenge in the game: give a hint that makes them listen. Plain text only: no markdown headings, no asterisks, at most 3 short bullet lines. If the topic is beyond their level, give the simple version and name the world that teaches it: Synth Caves (MIDI, notes, scales, chords, synths, ADSR, filters, LFO), EQ Desert (EQ, frequencies, masking), Compression Volcano (compression, distortion), Reverb Swamp (reverb, delay), Mixing Castle (volume, gain staging, panning, stereo, automation), Mastering Sky (limiting, LUFS, headroom, export).`};
+    return`You are PIP, a small amber speaker-robot who mentors players in BEAT QUEST, a pixel-art RPG that teaches music production. Talk like a friendly, encouraging producer. The player is Producer Level ${level()}. Skills they have learned: ${learnedSkills().map(id=>SK[id].n).join(', ')||'none yet'}. Unlocked tools: ${S.tools.join(', ')}. ${wk.length?'They currently struggle with: '+wk.join(' and ')+'. If relevant, gently help with that.':''} ${due.length?'Skills due for review: '+due.join(', ')+'.':''} Rules: plain language for a beginner; define any technical word the first time you use it; at most about 110 words; give one concrete example; end with one small thing to try (in the game's studio drum machine if it fits, otherwise in any DAW). Never just hand over a full solution to a challenge in the game: give a hint that makes them listen. Plain text only: no markdown headings, no asterisks, at most 3 short bullet lines. If the topic is beyond their level, give the simple version and name the world that teaches it: Synth Caves (MIDI, notes, scales, chords, synths, ADSR, filters, LFO), EQ Desert (EQ, frequencies, masking), Compression Volcano (compression, distortion), Reverb Swamp (reverb, delay), Mixing Castle (volume, gain staging, panning, stereo, automation), Mastering Sky (limiting, LUFS, headroom, export), and the Techno Bunker, a side world that opens after Beat Forest (techno styles: hardgroove, tribal, hard bounce, acid, rumble kicks).`};
   const ask=async q=>{q=q.trim();if(!q||busy)return;busy=true;add(q,'me');$('#coach-in',sh).value='';const bub=add('Thinking…','pip');const sample=await getSample();
     const fallback=()=>{const k=Object.keys(CANNED).find(x=>x.toLowerCase()===q.toLowerCase());bub.textContent=k?CANNED[k]:'Live answers aren’t available in this view, so I can only answer the questions below. Tap one of them.'};
     if(!sample){fallback();busy=false;return}
@@ -2706,6 +2753,300 @@ GAMES.push(
 {id:'wave',name:'Wave Spotter',skill:'waveforms',ic:'wave',col:'#a98bff',gen:t=>waveQ(t),unlocked:()=>S.done.includes('k3'),how:'Learn “Waves & Oscillators” in Synth Caves',tiers:['Sine or square','Four waves','Four waves, filtered'],intro:'Every synth starts with a waveform. Sine is pure, triangle soft, square hollow, saw buzzy. Name each one.'},
 {id:'echo',name:'Echo Timer',skill:'delay',ic:'delay',col:'#3ef0c8',gen:t=>delayQ(t),unlocked:()=>S.done.includes('s3'),how:'Learn “Echoes in Time” in Reverb Swamp',tiers:['1/4 or 1/8','Plus dotted 1/8','Plus dotted 1/8'],intro:'Delays sync to the tempo. Count the echoes against the clicks and name the note value.'},
 {id:'clip',name:'Clip Spotter',skill:'clipping',ic:'limiter',col:'#ff4f5a',gen:t=>clipQ(t),unlocked:()=>S.done.includes('a1'),how:'Learn “Headroom & Clipping” in Mastering Sky',tiers:['Heavy clipping','Medium','Subtle'],intro:'Two masters, same loudness. One is pushed past 0 dB and crackles. Find it.'});
+/* =====================================================================
+   TECHNO ENGINE — 909-style voices, rumble, swing and the techno styles
+   (Techno Bunker world, Bunker Box, Ear Gym and studio)
+   ===================================================================== */
+const TCURVES={};
+function tcurve(k){k=Math.round(clamp(k,0,1)*20)/20;if(!TCURVES[k]){const n=1024,c=new Float32Array(n),a=1+k*12;for(let i=0;i<n;i++){const x=i/(n-1)*2-1;c[i]=Math.tanh(a*x)/Math.tanh(a)}TCURVES[k]=c}return TCURVES[k]}
+/* MPC-style swing: 50% = straight, every second 16th moves later (66% ≈ triplet) */
+const swingDelay=(sw,spb)=>(2*clamp(sw,50,75)/100-1)*spb;
+const gcd=(a,b)=>b?gcd(b,a%b):a;
+const TV={
+  kick(t,v,d,drive){const c=AC();d=d||OUT();const o=c.createOscillator(),g=c.createGain();o.type='sine';o.frequency.setValueAtTime(175,t);o.frequency.exponentialRampToValueAtTime(72,t+.03);o.frequency.exponentialRampToValueAtTime(47,t+.13);
+    g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(v,t+.003);g.gain.setTargetAtTime(v*.62,t+.02,.07);g.gain.setTargetAtTime(.0001,t+.16,.1);o.connect(g);
+    if(drive>0){const ws=c.createWaveShaper(),pg=c.createGain();ws.curve=tcurve(drive);pg.gain.value=1/(1+drive*.5);g.connect(ws);ws.connect(pg);pg.connect(d)}else g.connect(d);
+    o.start(t);o.stop(t+.75);noiseHit(t,.012,v*.32,'highpass',3200,.7,d)},
+  clap(t,v,d){[0,.012,.024].forEach((o,i)=>noiseHit(t+o,.014,v*(2.2-i*.3),'bandpass',1150,1.3,d));noiseHit(t+.034,.22,v*1.5,'bandpass',1100,1,d)},
+  chat(t,v,d){noiseHit(t,.045,v*.22,'highpass',8200,.8,d)},
+  ohat(t,v,d){noiseHit(t,.26,v*.16,'highpass',7200,.7,d);noiseHit(t,.2,v*.21,'bandpass',10500,1.2,d)},
+  ride(t,v,d){const c=AC();d=d||OUT();const hp=c.createBiquadFilter(),g=c.createGain();hp.type='highpass';hp.frequency.value=5200;g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(v*.075,t+.002);g.gain.exponentialRampToValueAtTime(.0001,t+.85);hp.connect(g);g.connect(d);
+    [263,400,421,474,587,845].forEach(f=>{const o=c.createOscillator();o.type='square';o.frequency.value=f*1.7;o.connect(hp);o.start(t);o.stop(t+.9)});noiseHit(t,.3,v*.08,'highpass',9500,.7,d)},
+  tom(t,v,f,d){const c=AC();d=d||OUT();const o=c.createOscillator(),g=c.createGain();o.type='sine';o.frequency.setValueAtTime(f*1.5,t);o.frequency.exponentialRampToValueAtTime(f,t+.07);g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(v*.5,t+.004);g.gain.exponentialRampToValueAtTime(.0001,t+.34);o.connect(g);g.connect(d);o.start(t);o.stop(t+.36);noiseHit(t,.03,v*.28,'bandpass',f*5,1.2,d)},
+  hand(t,v,f,dec,d){const c=AC();d=d||OUT();const o=c.createOscillator(),g=c.createGain();o.type='triangle';o.frequency.setValueAtTime(f*1.18,t);o.frequency.exponentialRampToValueAtTime(f,t+.02);g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(v*.5,t+.003);g.gain.exponentialRampToValueAtTime(.0001,t+dec);o.connect(g);g.connect(d);o.start(t);o.stop(t+dec+.02);noiseHit(t,.016,v*.6,'bandpass',f*7,1.6,d)},
+  conga(t,v,d,hi){TV.hand(t,v,hi?262:196,.22,d)},
+  bongo(t,v,d,hi){TV.hand(t,v,hi?523:392,.12,d)},
+  rim(t,v,d){tone(t,'square',1700,.03,v*.14,null,d);tone(t,'triangle',820,.035,v*.25,null,d);noiseHit(t,.02,v*.42,'bandpass',3400,2,d)},
+  shaker(t,v,d){noiseHit(t,.07,v*.5,'bandpass',7000,1.2,d)},
+  cowbell(t,v,d){const c=AC();d=d||OUT();const bp=c.createBiquadFilter(),g=c.createGain();bp.type='bandpass';bp.frequency.value=2640;bp.Q.value=1.5;g.gain.setValueAtTime(v*.22,t);g.gain.exponentialRampToValueAtTime(.0001,t+.3);bp.connect(g);g.connect(d);[540,800].forEach(f=>{const o=c.createOscillator();o.type='square';o.frequency.value=f;o.connect(bp);o.start(t);o.stop(t+.32)})},
+  /* offbeat bass: pluck (short), reverse (swells into the next kick, like a kick tail played backwards), rolling (short 16ths) */
+  bass(t,v,m,mode,dur,d){const c=AC();d=d||OUT();const f=midiF(m);const o=c.createOscillator(),s=c.createOscillator(),lp=c.createBiquadFilter(),g=c.createGain(),ws=c.createWaveShaper(),sg=c.createGain();
+    o.type='sawtooth';s.type='sine';o.frequency.value=f;s.frequency.value=f;lp.type='lowpass';lp.Q.value=2;ws.curve=tcurve(.45);sg.gain.value=.8;s.connect(sg);sg.connect(g);o.connect(lp);lp.connect(ws);ws.connect(g);g.connect(d);
+    if(mode==='reverse'){const end=t+dur;g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(v*.85,end-.012);g.gain.linearRampToValueAtTime(.0001,end);lp.frequency.setValueAtTime(140,t);lp.frequency.exponentialRampToValueAtTime(1400,end-.01);
+      [o,s].forEach(x=>{x.frequency.setValueAtTime(f,end-dur*.2);x.frequency.exponentialRampToValueAtTime(f*1.9,end)})}
+    else{const len=mode==='rolling'?Math.min(dur,.13):Math.min(dur,.17);g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(v*.48,t+.004);g.gain.setTargetAtTime(.0001,t+len*.5,len/3);lp.frequency.setValueAtTime(mode==='rolling'?900:2400,t);lp.frequency.exponentialRampToValueAtTime(160,t+len)}
+    o.start(t);s.start(t);o.stop(t+dur+.1);s.stop(t+dur+.1)},
+  /* a short minor-chord stab: the "hit" of hard bounce, the chord stab of Detroit */
+  hit(t,v,m,d){const c=AC();d=d||OUT();const lp=c.createBiquadFilter(),g=c.createGain();lp.type='lowpass';lp.Q.value=4;lp.frequency.setValueAtTime(5200,t);lp.frequency.exponentialRampToValueAtTime(700,t+.13);g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(v*.14,t+.003);g.gain.exponentialRampToValueAtTime(.0001,t+.16);lp.connect(g);g.connect(d);
+    [0,3,7,12].forEach((iv,k)=>{const o=c.createOscillator();o.type=k%2?'square':'sawtooth';o.frequency.value=midiF(m+iv);o.detune.value=(k-1.5)*6;o.connect(lp);o.start(t);o.stop(t+.18)})}};
+/* 303-style voice: one oscillator through a resonant low-pass; slides glide without retriggering the envelope */
+function acidVoice(t,steps,spb,midis,P,acc,d){const c=AC();d=d||OUT();const o=c.createOscillator(),f1=c.createBiquadFilter(),f2=c.createBiquadFilter(),g=c.createGain();o.type='sawtooth';f1.type=f2.type='lowpass';f1.Q.value=.7+P.reso*19;f2.Q.value=.5;o.connect(f1);f1.connect(f2);f2.connect(g);g.connect(d);
+  const base=60*Math.pow(60,P.cut),amt=P.env*5200*(acc?1+P.accent*.7:1),dec=(.06+P.dec*.9)*(acc?.6:1),vol=.22*(1-.7*P.reso)*(acc?1+P.accent*.8:1);
+  midis.forEach((m,k)=>{const tt=t+k*spb;if(k===0)o.frequency.setValueAtTime(midiF(m),tt);else o.frequency.setTargetAtTime(midiF(m),tt-.012,.018)});
+  [f1,f2].forEach(f=>{f.frequency.setValueAtTime(Math.min(18000,base+amt),t);f.frequency.setTargetAtTime(base,t+.004,dec/3)});
+  const end=t+steps*spb*.92;g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(vol,t+.003);g.gain.setValueAtTime(vol*.85,end-.01);g.gain.linearRampToValueAtTime(.0001,end);o.start(t);o.stop(end+.05)}
+const BASS_ST=[0,0,3,5,7,10,12];
+function acidStep(a,s,t,spb,d){const i=s%16,n=a.notes[i];if(!n)return;const p=(i+15)%16;if(a.sl[p]&&a.notes[p]&&(i>0||s>0))return;
+  let k=1;while(k<16&&a.sl[(i+k-1)%16]&&a.notes[(i+k)%16])k++;const ms=[];for(let j=0;j<k;j++)ms.push(a.root+BASS_ST[a.notes[(i+j)%16]]);acidVoice(t,k,spb,ms,a,a.acc[i],d)}
+/* rumble: kick → dark reverb → low-pass → duck (on every kick) → drive */
+function rumbleChain(c,dest){const inp=c.createGain(),pre=c.createBiquadFilter(),cv=c.createConvolver(),lp=c.createBiquadFilter(),hp=c.createBiquadFilter(),ws=c.createWaveShaper(),dk=c.createGain(),out=c.createGain();
+  pre.type='lowpass';pre.frequency.value=350;lp.type='lowpass';lp.Q.value=1.1;hp.type='highpass';hp.frequency.value=32;inp.connect(pre);pre.connect(cv);cv.connect(lp);lp.connect(hp);hp.connect(ws);ws.connect(dk);dk.connect(out);out.connect(dest);
+  const R={inp,out,P:{amt:0,dec:2.4,cut:140,duck:.85,drive:.35,rel:.18},irDec:0,
+    set(p){Object.assign(R.P,p);const q=R.P;if(Math.abs(R.irDec-q.dec)>.05){R.irDec=q.dec;cv.buffer=makeIR(c,q.dec,1800,0)}lp.frequency.value=q.cut;ws.curve=tcurve(q.drive);out.gain.value=q.amt*.45/(1+q.drive*2.5)},
+    duck(t,beat){const q=R.P;if(q.amt<=0)return;dk.gain.cancelScheduledValues(t);dk.gain.setValueAtTime(Math.max(.02,1-q.duck),t);dk.gain.setTargetAtTime(1,t+.02,Math.max(.02,beat*q.rel))}};
+  R.set({});return R}
+/* ================= the 14 tracks of the Bunker Box ================= */
+const TT={kick:{n:'KICK',c:'#ffb547'},clap:{n:'CLAP',c:'#ff4f9a'},chat:{n:'CL HAT',c:'#3ef0c8'},ohat:{n:'OP HAT',c:'#8ff7e4'},ride:{n:'RIDE',c:'#b8c2f0'},ltom:{n:'LO TOM',c:'#ff7a3a'},htom:{n:'HI TOM',c:'#ffa25a'},
+  conga:{n:'CONGA',c:'#d9a441'},bongo:{n:'BONGO',c:'#f0d27a'},rim:{n:'RIM',c:'#c9b8ff'},shaker:{n:'SHAKER',c:'#8fbf3a'},cowbell:{n:'COWBELL',c:'#ffe27a'},bass:{n:'BASS',c:'#a98bff'},hit:{n:'HIT',c:'#ff5a2a'}};
+const TT_ORDER=Object.keys(TT);
+const BASSN={pluck:'PLUCK',reverse:'REVERSE',rolling:'ROLLING'};
+function mkSt(o){const st={bpm:132,swing:50,rumble:0,drive:0,kdrive:0,bassMode:'pluck',root:33,pat:{},len:{},vol:{},acid:null};TT_ORDER.forEach(k=>{st.pat[k]=new Array(16).fill(0);st.len[k]=16});
+  for(const k in o||{}){const v=o[k];if(k==='pat'){for(const tk in v){const x=v[tk];if(Array.isArray(x))x.forEach(i=>{if(Array.isArray(i))st.pat[tk][i[0]]=i[1];else st.pat[tk][i]=1});else for(const i in x)st.pat[tk][+i]=x[i]}}
+    else if(k==='len'||k==='vol')Object.assign(st[k],v);else st[k]=v}return st}
+function bunkerGraph(c,dest){const G={c,bus:{},mix:c.createGain(),kdry:c.createGain(),drive:c.createWaveShaper(),post:c.createGain()};G.mix.connect(G.drive);G.drive.connect(G.post);if(dest)G.post.connect(dest);
+  TT_ORDER.concat(['acid']).forEach(k=>{const g=c.createGain();if(k!=='kick')g.connect(G.mix);G.bus[k]=g});G.bus.kick.connect(G.kdry);G.kdry.connect(G.mix);
+  G.rum=rumbleChain(c,G.mix);G.bus.kick.connect(G.rum.inp);
+  G.set=st=>{G.drive.curve=st.drive>0?tcurve(st.drive*.7):null;G.post.gain.value=1/(1+(st.drive||0)*1.1);for(const k of TT_ORDER)G.bus[k].gain.value=(st.vol&&st.vol[k]!=null?st.vol[k]:1)*(st.mute&&st.mute[k]?0:1);G.kdry.gain.value=st.soloRumble?0:1;
+    G.rum.set({amt:st.rumble||0,dec:st.rdec||2.4,cut:st.rcut||140,duck:st.rduck==null?.85:st.rduck,drive:st.rdrive==null?.35:st.rdrive})};return G}
+function tvoice(st,k,val,t,G,i){const d=G.bus[k],v=val===2?.42:1,spb=60/st.bpm/4;
+  switch(k){case'kick':TV.kick(t,.95*v,d,st.kdrive||0);G.rum.duck(t,spb*4);break;case'clap':TV.clap(t,v,d);break;case'chat':TV.chat(t,v,d);break;case'ohat':TV.ohat(t,v,d);break;case'ride':TV.ride(t,v,d);break;
+    case'ltom':TV.tom(t,v,98,d);break;case'htom':TV.tom(t,v,156,d);break;case'conga':TV.conga(t,v,d,i%4>=2);break;case'bongo':TV.bongo(t,v,d,i%2===1);break;case'rim':TV.rim(t,v,d);break;case'shaker':TV.shaker(t,v,d);break;case'cowbell':TV.cowbell(t,v,d);break;
+    case'bass':{const dur=st.bassMode==='reverse'?(4-(i%4))*spb-.004:st.bassMode==='rolling'?spb*.92:spb*1.7;TV.bass(t,.9,st.root+BASS_ST[val],st.bassMode,dur,d);break}
+    case'hit':TV.hit(t,v,st.root+24,d);break}}
+function technoStep(st,s,t,G){const spb=60/st.bpm/4,i=s%16,tt=t+(s%2?swingDelay(st.swing,spb):0);
+  if(st.stopReq&&i===0){st.stopReq=false;st.stopUntil=s+16}const stopped=st.stopUntil!=null&&s<st.stopUntil;
+  for(const k of TT_ORDER){const L=st.len[k]||16,val=st.pat[k][s%L];if(!val||stopped&&(k==='kick'||k==='bass'))continue;tvoice(st,k,val,tt,G,i)}
+  if(st.acid&&st.acid.on!==false)acidStep(st.acid,s,t,spb,G.bus.acid)}
+function playStyle(dest,st,bars){const c=AC(),G=bunkerGraph(c,dest);G.set(st);const spb=60/st.bpm/4,t0=now()+.06;for(let s=0;s<16*(bars||2);s++)technoStep(st,s,t0+s*spb,G)}
+let LGR=null;function LG(){initAudio();if(!A.ctx)return null;if(!LGR||LGR.c!==A.ctx)LGR=bunkerGraph(A.ctx,A.bus);return LGR}
+/* A/B items for abWidget built from two Bunker states */
+const abSt=(st,label,note)=>({label,note,bpm:st.bpm,play:(s,t)=>{const G=LG();if(!G)return;if(s===0)G.set(st);technoStep(st,s,t,G)}});
+
+/* ================= the styles (researched presets) ================= */
+const ODD=[1,3,5,7,9,11,13,15],OFF=[2,6,10,14],BEATS=[0,4,8,12],ALL16=[...Array(16).keys()],g2=a=>a.map(i=>[i,2]);
+const STYLES={
+  detroit:{name:'DETROIT',bpm:'125–130',make:()=>mkSt({bpm:128,swing:55,root:36,pat:{kick:BEATS,clap:[4,12],chat:ODD,ohat:OFF,rim:[3,10],bass:{2:1,6:1,10:4,14:5},hit:[3,10]}}),
+    why:'Detroit techno: around 125–130 BPM, a swinging 909 groove, an offbeat bass and soulful chord stabs. It all started there in the mid-80s.'},
+  hardgroove:{name:'HARDGROOVE',bpm:'135–145',make:()=>mkSt({bpm:140,swing:59,rumble:.3,root:31,pat:{kick:BEATS,clap:[4,12,[7,2]],chat:ODD,ohat:OFF,conga:[3,6,11,[13,2],14],ltom:[2,10],htom:[7,15],rim:[[5,2],13],shaker:g2([0,2,4,6,8,10,12,14])}}),
+    why:'Hardgroove: about 135–145 BPM, swung hats and percussion (congas, toms, rims) over a rumbling kick. The name comes from Ben Sims\' Hard Groove Trax tapes of the mid-90s.'},
+  tribal:{name:'TRIBAL',bpm:'128–138',make:()=>mkSt({bpm:134,swing:54,rumble:.2,len:{ltom:3,conga:6,cowbell:7},pat:{kick:BEATS,ltom:[0],htom:[6,14],conga:[1,4],bongo:[3,7,[10,2],15],shaker:ALL16.map(i=>[i,i%2?1:2]),ohat:OFF,cowbell:[0]}}),
+    why:'Tribal: the drums lead. Toms, congas and bongos loop over different lengths (3, 6 or 7 steps against a 16-step bar), so the groove keeps rolling into new shapes.'},
+  bounce:{name:'HARD BOUNCE',bpm:'160+',make:()=>mkSt({bpm:162,drive:.25,bassMode:'reverse',root:33,pat:{kick:BEATS,clap:[4,12],chat:OFF,shaker:g2(ODD),bass:{2:1,6:1,10:1,14:1},hit:[0]}}),
+    why:'Hard bounce: 160 BPM and up, a reverse bass swelling into every kick, claps on 2 and 4 and a short hit on the beat. Bright, fast and playful.'},
+  hardtechno:{name:'HARD TECHNO',bpm:'145–160',make:()=>mkSt({bpm:150,rumble:.75,kdrive:.6,drive:.35,pat:{kick:BEATS,clap:[4,12],chat:ALL16.map(i=>[i,i%2?2:1]),ohat:OFF,ride:OFF,rim:[7,15]}}),
+    why:'Hard techno: about 145–160 BPM, a distorted kick with a heavy rumble and relentless 16th hats. Dark and driving, like German schranz and industrial techno.'},
+  acid:{name:'ACID',bpm:'130–140',make:()=>mkSt({bpm:136,swing:52,pat:{kick:BEATS,clap:[4,12],chat:ODD,ohat:OFF},acid:{notes:[1,1,6,1,0,4,1,5,1,0,3,1,6,0,4,2],acc:[1,0,1,0,0,1,0,0,1,0,0,1,1,0,0,0],sl:[0,1,0,0,0,0,1,0,0,0,1,0,0,0,1,0],cut:.32,reso:.78,env:.62,dec:.35,accent:.7,root:45}}),
+    why:'Acid: a 303-style bass line with a resonant filter, accents and slides squelching over a straight techno beat. It started in Chicago with Phuture\'s "Acid Tracks" (1987).'}};
+const styleState=id=>STYLES[id].make();
+
+/* ================= rules a club groove must follow (lessons, bosses, Club Trial) ================= */
+/* hits per bar, counting how a shorter loop repeats inside the 16 steps */
+const hits=(st,k)=>{const L=st.len[k]||16;return ALL16.filter(s=>st.pat[k][s%L]).length};
+const kick4=st=>(st.len.kick||16)===16&&ALL16.every(i=>(st.pat.kick[i]>0)===(i%4===0));
+const PERC=['ltom','htom','conga','bongo','rim','shaker','cowbell'];
+const oddHits=(st,ks)=>ks.reduce((a,k)=>{const L=st.len[k]||16;return a+(L===16?ODD.filter(i=>st.pat[k][i]).length:0)},0);
+const CLUB_RULES={
+  hardgroove:{name:'HARDGROOVE',venue:'WAREHOUSE · 2 AM',brief:'Hardgroove for the warehouse: driving, swung and full of percussion.',check:st=>[
+    ['Tempo',st.bpm>=135&&st.bpm<=145,`${st.bpm} BPM, hardgroove speed.`,'Hardgroove sits between 135 and 145 BPM.','tgenre'],
+    ['Kick',kick4(st),'four on the floor.','Kick on every beat, nothing in between.','pattern'],
+    ['Swing',st.swing>=54&&st.swing<=66,`${st.swing}% swing.`,'Swing the 16ths between 54 and 66%.','tswing'],
+    ['Percussion',PERC.filter(k=>hits(st,k)>=3).length>=2,'two busy percussion lines.','Give at least two percussion lines 3 hits or more.','tgenre'],
+    ['Shuffle',oddHits(st,['chat'].concat(PERC))>=3,'swung 16ths you can hear.','Put 3+ hats or percussion hits on the in-between 16ths so the swing shows.','tswing']]},
+  tribal:{name:'TRIBAL',venue:'JUNGLE ROOM · 3 AM',brief:'Tribal techno for the jungle room: drums first, polyrhythms everywhere.',check:st=>{const used=PERC.filter(k=>hits(st,k)>=2);return[
+    ['Tempo',st.bpm>=126&&st.bpm<=140,`${st.bpm} BPM, tribal speed.`,'Tribal techno sits around 126–140 BPM.','tgenre'],
+    ['Kick',kick4(st),'four on the floor.','Kick on every beat, nothing in between.','pattern'],
+    ['Drums',used.length>=3,'three percussion lines or more.','Use at least three percussion lines with 2+ hits each.','poly'],
+    ['Polyrhythm',used.some(k=>16%(st.len[k]||16)!==0),'a loop that drifts against the bar.','Set one percussion loop to a length that does not fit 16 (3, 5, 6, 7…).','poly'],
+    ['Call & response',(hits(st,'ltom')+hits(st,'htom')>=2)&&(hits(st,'conga')+hits(st,'bongo')>=2),'toms answered by hand drums.','Use toms AND congas or bongos so the drums talk to each other.','poly']]}},
+  bounce:{name:'HARD BOUNCE',venue:'240 MAIN STAGE · 5 AM',brief:'Hard bounce for the main stage: fast, bright, and the bass has to bounce.',check:st=>{const hb=ALL16.filter(i=>st.pat.hit[i]);return[
+    ['Tempo',st.bpm>=158&&st.bpm<=172,`${st.bpm} BPM, bounce speed.`,'Hard bounce runs at about 160–170 BPM.','tbounce'],
+    ['Kick',kick4(st),'four on the floor.','Kick on every beat, nothing in between.','pattern'],
+    ['Bounce',OFF.every(i=>st.pat.bass[i])&&BEATS.every(i=>!st.pat.bass[i])&&st.bassMode!=='rolling','a bass on every offbeat.','Bass on all four offbeats (the "and"), never on a kick, in REVERSE or PLUCK mode.','tbounce'],
+    ['Clap',st.pat.clap[4]&&st.pat.clap[12],'claps on 2 and 4.','Claps on beats 2 and 4.','pattern'],
+    ['Hits',hb.length>0&&hb.every(i=>i%4!==3),'short hits on the grid.','Add a short HIT on a beat, and never on the last 16th before a beat (it clashes with the bass swell).','tbounce']]}}};
+const ruleRows=(id,st)=>CLUB_RULES[id].check(st).map(([k,ok,good,bad,tag])=>({k,ok:!!ok,good,bad,tag}));
+
+/* =====================================================================
+   BUNKER BOX — techno groovebox (TR-909 / Drum Rack + Groove Pool inspired)
+   ===================================================================== */
+const BB_LEN=[16,12,8,7,6,5,4,3];
+function bunkerRig(host,o){o=o||{};initAudio();const st=o.state||mkSt(o.init);const tracks=o.tracks||TT_ORDER;const show=o.show||[];const ghosts=o.ghosts!==false;
+  const pg=plug(host,{name:'BUNKER BOX',type:'TECHNO GROOVEBOX',col:'#ff7a3a',bypass:false,extra:o.presets?'<button class="plug-btn" data-a="pp" aria-label="Previous style">◀</button><span class="chip pname" style="min-width:104px;justify-content:center">STYLES</span><button class="plug-btn" data-a="pn" aria-label="Next style">▶</button>':''});
+  const B=pg.body,tip=tipLine(B);if(!A.ctx){B.textContent='Audio is not available here.';return{st,stop(){},paint(){},set(){}}}
+  const out=rigOut(),G=bunkerGraph(A.ctx,out.g);const fire=()=>{G.set(st);if(o.onChange)o.onChange(st)};
+  const top=h('div','row wrap');top.style.cssText='gap:8px;align-items:center';B.append(top);const playB=h('button','btn neon sm','▶ PLAY'),barc=h('span','num','BAR –');barc.style.cssText='font-size:20px;color:var(--dim)';top.append(playB,barc);
+  if(show.includes('stop')){const sb=h('button','btn ghost sm','STOP 1 BAR');top.append(sb);sb.onclick=()=>{st.stopReq=true;tip.textContent='Stop: kick and bass drop out for one bar, then slam back in.';if(!seq.on)playB.click();if(o.onStopUsed)o.onStopUsed()}}
+  const kr=h('div','krow');B.append(kr);const K={};
+  if(!o.lockBpm)K.bpm=knob(kr,{label:'BPM',min:110,max:175,step:1,value:st.bpm,fmt:v=>Math.round(v)+'',col:'#ff7a3a',onTouch:()=>{tip.textContent='Tempo. Detroit ~128 · hardgroove 135–145 · hard techno 145–160 · hard bounce 160+.'},onInput:v=>{st.bpm=Math.round(v);fire()}});
+  if(show.includes('swing'))K.swing=knob(kr,{label:'SWING',min:50,max:75,step:1,value:st.swing,fmt:v=>Math.round(v)+'%',col:'#ff4f9a',onTouch:()=>{tip.textContent=`MPC-style swing: 50% is straight; every second 16th moves later. ${st.swing}% = +${Math.round(swingDelay(st.swing,60/st.bpm/4)*1000)} ms at ${st.bpm} BPM.`},onInput:v=>{st.swing=Math.round(v);tip.textContent=`${st.swing}% swing = every second 16th +${Math.round(swingDelay(st.swing,60/st.bpm/4)*1000)} ms late at ${st.bpm} BPM.`;fire()}});
+  if(show.includes('rumble'))K.rumble=knob(kr,{label:'RUMBLE',min:0,max:1,value:st.rumble,fmt:v=>Math.round(v*100)+'%',col:'#a98bff',onTouch:()=>{tip.textContent='Rumble: the kick through a dark, filtered reverb, ducked by every kick.'},onInput:v=>{st.rumble=v;fire()}});
+  if(show.includes('drive'))K.drive=knob(kr,{label:'DRIVE',min:0,max:1,value:st.drive,fmt:v=>Math.round(v*100)+'%',col:'#ff4f5a',onTouch:()=>{tip.textContent='Drive: saturates the kick and the whole loop. Hard techno pushes it hard.'},onInput:v=>{st.drive=v;st.kdrive=v*.85;fire()}});
+  let bo=()=>{};if(show.includes('bass')){const bs=h('div','seg2');bs.style.setProperty('--pc','#a98bff');bs.innerHTML=['pluck','reverse','rolling'].map(m=>`<button data-m="${m}">BASS: ${BASSN[m]}</button>`).join('');B.append(bs);bo=()=>$$('button',bs).forEach(b=>b.classList.toggle('on',b.dataset.m===st.bassMode));bo();
+    $$('button',bs).forEach(b=>b.onclick=()=>{st.bassMode=b.dataset.m;bo();tip.textContent={pluck:'Pluck: a short bass right after each kick, dying away.',reverse:'Reverse: the bass swells into the next kick and cuts just before it.',rolling:'Rolling: short 16th notes between the kicks.'}[st.bassMode];fire()})}
+  const gw=h('div','bb');B.append(gw);const hd=h('div','bb-row bb-hd');hd.innerHTML='<span></span>'+ALL16.map(i=>`<span class="${i%4?'':'b'}">${i%4?['','e','&amp;','a'][i%4]:i/4+1}</span>`).join('');gw.append(hd);
+  const cells={},lens={};
+  tracks.forEach(k=>{const T=TT[k];const row=h('div','bb-row');row.style.setProperty('--rc',T.c);const nm=h('div','bb-nm',`<b style="color:${T.c}">${T.n}</b>`);row.append(nm);
+    if(show.includes('len')&&PERC.includes(k)){const lc=h('button','bb-len');lc.setAttribute('aria-label',T.n+' loop length');nm.append(lc);lens[k]=lc;
+      lc.onclick=()=>{const L=st.len[k]||16;st.len[k]=BB_LEN[(BB_LEN.indexOf(L)+1)%BB_LEN.length];paint();fire();tip.textContent=st.len[k]===16?`${T.n} loops over the whole bar.`:`${T.n} now loops every ${st.len[k]} steps: ${16%st.len[k]?'a polyrhythm against the 4/4 kick.':'it still fits the bar.'}`}}
+    cells[k]=[];const ed=!o.edit||!!o.edit[k];
+    ALL16.forEach(i=>{const b=h('button','bb-c'+(i%4===0?' beat':''));b.setAttribute('aria-label',`${T.n} step ${i+1}`);if(!ed)b.classList.add('lockc');
+      b.onclick=()=>{if(!ed||i>=(st.len[k]||16))return;const p=st.pat[k];if(k==='bass')p[i]=(p[i]+1)%7;else if(k==='hit'||k==='kick'||!ghosts)p[i]=p[i]?0:1;else p[i]=(p[i]+1)%3;paint();if(p[i])tvoice(st,k,p[i],now()+.01,G,i);haptic(6);fire()};
+      cells[k].push(b);row.append(b)});gw.append(row)});
+  if(ghosts)B.append(h('p','muted','Tap a cell to add a hit, tap again for a softer ghost note, a third time to clear.'+(tracks.includes('bass')?' Bass cells cycle through notes.':'')));
+  function paint(){tracks.forEach(k=>{const L=st.len[k]||16;cells[k].forEach((b,i)=>{const v=st.pat[k][i];b.classList.toggle('on',k==='bass'?!!v:v===1);b.classList.toggle('gh',k!=='bass'&&v===2);b.classList.toggle('out',i>=L);b.textContent=k==='bass'&&v?NOTE_NAMES[(st.root+BASS_ST[v])%12]:''});if(lens[k])lens[k].textContent=String(st.len[k]||16)})}
+  const onStep=s=>{tracks.forEach(k=>{const L=st.len[k]||16;cells[k].forEach((b,i)=>b.classList.toggle('ph',s>=0&&i===s%L))});barc.textContent=s>=0?'BAR '+(Math.floor(s/16)+1):'BAR –';if(s>=0&&o.onStep)o.onStep(s)};
+  playB.onclick=()=>{if(seq.on){seq.stop();return}G.set(st);stopMusic();playB.textContent='■ STOP';seq.start({bpm:()=>st.bpm,play:(s,t)=>technoStep(st,s,t,G),onStep,onStop:()=>{playB.textContent='▶ PLAY';onStep(-1)}});if(o.onPlay)o.onPlay()};
+  const syncKnobs=()=>{if(K.bpm)K.bpm.set(st.bpm);if(K.swing)K.swing.set(st.swing);if(K.rumble)K.rumble.set(st.rumble);if(K.drive)K.drive.set(st.drive);bo()};
+  const api={st,G,paint,set(v){Object.assign(st,v);syncKnobs();paint();fire()},setPat(tk,arr){arr.forEach((x,i)=>st.pat[tk][i]=x);paint();fire()},load(id){const ns=styleState(id);Object.keys(st).forEach(k=>delete st[k]);Object.assign(st,ns);syncKnobs();paint();fire()},stop(){seq.stop();out.kill()}};
+  if(o.presets){const ids=Object.keys(STYLES);let pi=-1;const setP=i=>{pi=(i+ids.length)%ids.length;api.load(ids[pi]);$('.pname',pg.el).textContent=STYLES[ids[pi]].name;tip.textContent=STYLES[ids[pi]].why;if(!seq.on)playB.click()};$('[data-a=pp]',pg.el).onclick=()=>setP(pi-1);$('[data-a=pn]',pg.el).onclick=()=>setP(pi+1)}
+  paint();G.set(st);return api}
+
+/* =====================================================================
+   RUMBLE FORGE — the techno rumble kick, step by step
+   ===================================================================== */
+function rumbleRig(host,o){o=o||{};initAudio();const R=Object.assign({amt:.5,dec:2.4,cut:140,duck:.85,drive:.35},o.init||{});const st=mkSt({bpm:140,pat:{kick:BEATS,chat:ODD,ohat:OFF}});
+  const pg=plug(host,{name:'RUMBLE FORGE',type:'KICK → REVERB → LOW-PASS → DUCK → DRIVE',col:'#a98bff',bypass:false});const B=pg.body,tip=tipLine(B);if(!A.ctx){B.textContent='Audio is not available here.';return{R,stop(){},set(){}}}
+  const out=rigOut(),G=bunkerGraph(A.ctx,out.g);
+  const D=display(B,120,(g,W,H)=>{gridLines(g,W,H,{cols:8,major:4});const beat=60/st.bpm,T=2*beat;g.beginPath();g.moveTo(0,H);
+    for(let x=0;x<=W;x+=2){const t=x/W*T,tb=t%beat;let tail=0;for(let n=0;n<8;n++)tail+=Math.pow(10,-3*(tb+n*beat)/R.dec);tail=Math.min(1.6,tail)/1.6;const dk=1-R.duck*Math.exp(-tb/(beat*.18));g.lineTo(x,H-6-clamp(R.amt*tail*dk*(1+R.drive*.5),0,1)*(H-22))}
+    g.lineTo(W,H);g.closePath();const gr=g.createLinearGradient(0,0,0,H);gr.addColorStop(0,'rgba(169,139,255,.85)');gr.addColorStop(1,'rgba(169,139,255,.08)');g.fillStyle=gr;g.fill();
+    for(let k=0;k<2;k++){g.fillStyle='#f1e7d0';g.fillRect(k*W/2,14,3,H-20)}g.fillStyle='#c9b8ff';g.font='10px VT323, monospace';g.fillText(`TONE ${fmtHz(R.cut)} Hz · DECAY ${R.dec.toFixed(1)} s · DUCK ${Math.round(R.duck*100)}%`,6,11)});
+  B.append(h('div','dispcap','<span>KICKS (WHITE) · RUMBLE (PURPLE) OVER 2 BEATS</span>'));
+  const apply=()=>{st.rumble=R.amt;st.rdec=R.dec;st.rcut=R.cut;st.rduck=R.duck;st.rdrive=R.drive;G.set(st);D.redraw();if(o.onChange)o.onChange(R)};
+  const kr=h('div','krow');B.append(kr);const K={};const mk=(k,l,mn,mx,fmt,t2,x)=>{K[k]=knob(kr,Object.assign({label:l,min:mn,max:mx,value:R[k],fmt,col:'#a98bff',onTouch:()=>{tip.textContent=t2},onInput:v=>{R[k]=v;apply()}},x||{}))};
+  mk('amt','AMOUNT',0,1,v=>Math.round(v*100)+'%','Amount: how loud the rumble sits under the kick.');
+  mk('dec','DECAY',.5,8,v=>v.toFixed(1)+' s','Decay: how long the reverb tail lasts. Longer = more pressure, and more risk of mud.',{log:true});
+  mk('cut','TONE',40,600,v=>fmtHz(v)+' Hz','Tone: the low-pass. Keep only the lows (60–200 Hz) so the rumble feels deep, not boomy.',{log:true});
+  mk('duck','DUCK',0,1,v=>Math.round(v*100)+'%','Duck: how far the rumble dips on every kick (sidechain). Without it, the tail smears over the next kick.');
+  mk('drive','DRIVE',0,1,v=>Math.round(v*100)+'%','Drive: saturation on the rumble for grit and presence on small speakers.');
+  const row=h('div','row wrap');row.style.gap='6px';B.append(row);const playB=h('button','btn neon sm','▶ PLAY'),solo=h('button','btn ghost sm','SOLO RUMBLE');row.append(playB,solo);
+  solo.onclick=()=>{st.soloRumble=!st.soloRumble;solo.classList.toggle('neon',st.soloRumble);solo.classList.toggle('ghost',!st.soloRumble);G.set(st);tip.textContent=st.soloRumble?'Rumble alone: hear the tail, the duck and the drive.':'Kick and rumble together.'};
+  playB.onclick=()=>{if(seq.on){seq.stop();return}apply();stopMusic();playB.textContent='■ STOP';seq.start({bpm:st.bpm,play:(s,t)=>technoStep(st,s,t,G),onStop:()=>{playB.textContent='▶ PLAY'}})};
+  apply();return{R,set(v){Object.assign(R,v);Object.keys(K).forEach(k=>K[k].set(R[k]));apply()},stop(){seq.stop();out.kill()}}}
+
+/* =====================================================================
+   ACID BOX — a 303-style bass line: notes, accents, slides, five knobs
+   ===================================================================== */
+function acidRig(host,o){o=o||{};initAudio();const st=styleState('acid');const a=st.acid;if(o.init)Object.assign(a,JSON.parse(JSON.stringify(o.init)));
+  const pg=plug(host,{name:'ACID BOX',type:'303-STYLE BASS LINE',col:'#ffcc4d',bypass:false});const B=pg.body,tip=tipLine(B);if(!A.ctx){B.textContent='Audio is not available here.';return{a,st,stop(){}}}
+  const out=rigOut(),G=bunkerGraph(A.ctx,out.g);G.set(st);const fire=()=>{D.redraw();if(o.onChange)o.onChange(a)};
+  const D=display(B,96,(g,W,H)=>{gridLines(g,W,H,{cols:16,major:4});const cw=W/16,Y=st2=>H-12-(st2/12)*(H-28);
+    for(let i=0;i<16;i++){const n=a.notes[i];if(!n)continue;const y=Y(BASS_ST[n]);if(a.sl[i]&&i<15&&a.notes[i+1]){g.strokeStyle='#3ef0c8';g.lineWidth=2;g.beginPath();g.moveTo(i*cw+cw-2,y);g.lineTo((i+1)*cw+2,Y(BASS_ST[a.notes[i+1]]));g.stroke()}
+      g.fillStyle=a.acc[i]?'#fff1a6':'#ffcc4d';g.fillRect(i*cw+2,y-(a.acc[i]?4:2),cw-4,a.acc[i]?8:5)}
+    g.fillStyle='#ffcc4d';g.font='10px VT323, monospace';g.fillText('PITCH · BRIGHT = ACCENT · TEAL LINE = SLIDE',6,11)});
+  const gw=h('div','bb');B.append(gw);const cells={n:[],acc:[],sl:[]};
+  [['n','NOTE','#ffcc4d'],['acc','ACCENT','#fff1a6'],['sl','SLIDE','#3ef0c8']].forEach(([k,n,c])=>{const row=h('div','bb-row');row.style.setProperty('--rc',c);row.append(h('div','bb-nm',`<b style="color:${c}">${n}</b>`));
+    ALL16.forEach(i=>{const b=h('button','bb-c'+(i%4===0?' beat':''));b.setAttribute('aria-label',`${n} step ${i+1}`);b.onclick=()=>{if(k==='n'){a.notes[i]=(a.notes[i]+1)%7;if(a.notes[i])acidVoice(now()+.01,1,.14,[a.root+BASS_ST[a.notes[i]]],a,a.acc[i],G.bus.acid)}else{const arr=k==='acc'?a.acc:a.sl;arr[i]=arr[i]?0:1}paint();fire()};cells[k].push(b);row.append(b)});gw.append(row)});
+  function paint(){ALL16.forEach(i=>{const n=a.notes[i];cells.n[i].classList.toggle('on',!!n);cells.n[i].textContent=n?NOTE_NAMES[(a.root+BASS_ST[n])%12]:'';cells.acc[i].classList.toggle('on',!!a.acc[i]);cells.acc[i].textContent=a.acc[i]?'A':'';cells.sl[i].classList.toggle('on',!!a.sl[i]);cells.sl[i].textContent=a.sl[i]?'~':''})}
+  const kr=h('div','krow');B.append(kr);const K={};const mk=(k,l,fmt,t2)=>{K[k]=knob(kr,{label:l,min:0,max:1,value:a[k],fmt,col:'#ffcc4d',onTouch:()=>{tip.textContent=t2},onInput:v=>{a[k]=v;fire()}})};const pc=v=>Math.round(v*100)+'%';
+  mk('cut','CUTOFF',v=>fmtHz(60*Math.pow(60,v)),'Cutoff: where the low-pass sits. Sweep it while it plays: that is the acid move.');
+  mk('reso','RESO',pc,'Resonance: boosts the cutoff. High = squelchy, whistly, talking.');
+  mk('env','ENV MOD',pc,'Envelope mod: how far each note opens the filter.');
+  mk('dec','DECAY',pc,'Decay: how fast the filter closes after each note. Short = plucky, long = wah.');
+  mk('accent','ACCENT',pc,'Accent: how much louder and brighter accented notes get.');
+  const row=h('div','row wrap');row.style.gap='6px';B.append(row);const playB=h('button','btn neon sm','▶ PLAY WITH DRUMS');row.append(playB);
+  playB.onclick=()=>{if(seq.on){seq.stop();return}stopMusic();playB.textContent='■ STOP';seq.start({bpm:st.bpm,play:(s,t)=>technoStep(st,s,t,G),onStep:s=>{if(o.onStep)o.onStep(s)},onStop:()=>{playB.textContent='▶ PLAY WITH DRUMS'}})};
+  paint();return{a,st,set(v){Object.assign(a,v);Object.keys(K).forEach(k=>K[k].set(a[k]));paint();fire()},stop(){seq.stop();out.kill()}}}
+
+/* ================= questions ================= */
+const playSt=(st,bars)=>d=>playStyle(d,st,bars||2);
+function genreQ(tier){tier=clamp(tier||1,1,3);const ids=tier===1?['hardgroove','tribal','bounce']:tier===2?['hardgroove','tribal','bounce','hardtechno','acid']:['detroit','hardgroove','tribal','bounce','hardtechno','acid'];const id=pick(ids);
+  return{skill:'technogenres',dim:'l',tag:'tgenre',prompt:'Which techno style is playing?',plays:[{label:'▶ PLAY 2 BARS',fn:playSt(styleState(id))}],options:ids.map(x=>({v:x,label:STYLES[x].name})),answer:id,explain:()=>STYLES[id].why,
+    hints:['Tempo first: under 130 feels relaxed, 135–145 drives, 160 and up sprints.','Then the signature: swung percussion, toms in odd loops, a bass bouncing between kicks, a distorted rumble, a squelchy 303, or soulful chords.']}}
+function grooveSt(sw){const st=styleState('hardgroove');st.swing=sw;st.rumble=.15;return st}
+function swingAmtQ(tier){tier=clamp(tier||1,1,3);
+  if(tier===2){const opts=[['STRAIGHT',50],['LIGHT',55],['HEAVY',64]];const [lab,sw]=pick(opts);
+    return{skill:'groove',dim:'l',tag:'tswing',prompt:'How much swing does this groove have?',plays:[{label:'▶ PLAY',fn:playSt(grooveSt(sw))}],options:opts.map(([l])=>({v:l,label:l})),answer:lab,
+      explain:()=>`${lab}: ${sw}% swing. ${sw===50?'Every 16th sits exactly on the grid.':sw<60?'The in-between 16ths arrive a touch late: a subtle push.':'The in-between 16ths arrive very late: a lazy, triplet-like shuffle.'}`,hints:['Listen to the closed hats between the beats.','Straight hats tick evenly; swung hats go long-short, long-short.']}}
+  const amt=tier===1?62:56,sA=Math.random()<.5;
+  return{skill:'groove',dim:'l',tag:'tswing',prompt:tier===1?'Which groove swings?':'Subtle one: which groove has a little swing?',plays:[{label:'▶ A',fn:playSt(grooveSt(sA?amt:50))},{label:'▶ B',fn:playSt(grooveSt(sA?50:amt))}],options:AB_OPTS,answer:sA?'A':'B',
+    explain:()=>`${sA?'A':'B'} had ${amt}% swing: every second 16th lands late, so the hats and percussion bounce. The other was straight (50%).`,hints:['Focus on the hats between the kicks.','Straight = even ticks. Swung = long-short, long-short.']}}
+function polySt(len){return mkSt({bpm:132,len:{conga:len},pat:{kick:BEATS,chat:ODD,conga:[0]}})}
+function polyQ(tier){tier=clamp(tier||1,1,3);const odd=tier===1?3:tier===2?6:5,square=tier===3?8:4,pA=Math.random()<.5;
+  return{skill:'polyrhythm',dim:'l',tag:'poly',prompt:'One conga loop fits the bar, the other is a polyrhythm. Which one drifts against the kick?',plays:[{label:'▶ A',fn:playSt(polySt(pA?odd:square),3)},{label:'▶ B',fn:playSt(polySt(pA?square:odd),3)}],options:AB_OPTS,answer:pA?'A':'B',
+    explain:()=>`${pA?'A':'B'}: its conga loops every ${odd} steps, so it lands somewhere new on each beat and only meets beat 1 again after ${odd*16/gcd(odd,16)} steps. The other loops every ${square} steps and stays locked to the grid.`,hints:['Follow the conga against the kick.','Locked to the grid, the conga always hits with the same kick. As a polyrhythm, it slides around them.']}}
+function rumbleSt(o){return mkSt(Object.assign({bpm:140,pat:{kick:BEATS,chat:ODD,ohat:OFF}},o))}
+function rumbleQ(tier){tier=clamp(tier||1,1,3);const sA=Math.random()<.5;
+  const [good,bad,prompt,why]={1:[{rumble:.6},{rumble:0},'Which kick has a rumble under it?','had a rumble: the kick feeds a dark, filtered reverb that fills the space between the hits.'],
+    2:[{rumble:.65,rduck:.9},{rumble:.65,rduck:0},'Both have a rumble. Which one is ducked by the kick?','was ducked: the rumble dips on every kick and swells back in between, so each kick punches through. The other smears into mud.'],
+    3:[{rumble:.6,rcut:90},{rumble:.6,rcut:420},'Which rumble is darker (lower tone)?','was filtered lower (about 90 Hz against 420 Hz): only the sub remains, so it feels deep instead of boomy.']}[tier];
+  return{skill:'rumble',dim:'l',tag:'rumble',prompt,plays:[{label:'▶ A',fn:playSt(rumbleSt(sA?good:bad))},{label:'▶ B',fn:playSt(rumbleSt(sA?bad:good))}],options:AB_OPTS,answer:sA?'A':'B',explain:()=>`${sA?'A':'B'} ${why}`,hints:['Headphones or a big speaker help: listen under the kick.','Listen to the gaps between the kicks.']}}
+function bassSt(mode){return mkSt({bpm:mode==='rolling'?142:162,bassMode:mode,pat:{kick:BEATS,clap:[4,12],chat:OFF,bass:mode==='rolling'?{1:1,2:1,3:1,5:1,6:1,7:1,9:1,10:1,11:1,13:1,14:1,15:1}:{2:1,6:1,10:1,14:1}}})}
+function bounceQ(tier){tier=clamp(tier||1,1,3);const opts=tier===1?['pluck','reverse']:['pluck','reverse','rolling'];const m=pick(opts);
+  return{skill:'bounce',dim:'l',tag:'tbounce',prompt:'What kind of bass is this?',plays:[{label:'▶ PLAY',fn:playSt(bassSt(m))}],options:opts.map(x=>({v:x,label:BASSN[x]})),answer:m,
+    explain:()=>({pluck:'Pluck: a short bass on each offbeat, starting right after the kick and dying away.',reverse:'Reverse: the bass swells up on each offbeat and cuts right before the next kick, like a kick tail played backwards. The hard bounce signature, inherited from hard trance and hardstyle.',rolling:'Rolling: three short bass notes between every kick, a 16th-note roll. Classic driving techno.'})[m],
+    hints:['Listen to the shape of each bass note: does it start loud, or grow?','Pluck = short and dying. Reverse = growing into the kick. Rolling = several notes between kicks.']}}
+function acidSt(o){const st=styleState('acid');Object.assign(st.acid,o);return st}
+function acidQ(tier){tier=clamp(tier||1,1,3);const sA=Math.random()<.5;
+  const [good,bad,prompt,why]=tier===1?[{},{acc:new Array(16).fill(0),sl:new Array(16).fill(0),reso:.25,env:.3},'Which line is the real acid squelch?','had accents, slides and high resonance: the notes squelch, glide and talk.']
+    :[{reso:.85},{reso:.2},'Which line has more resonance?','had far more resonance: the filter whistles and squelches around its cutoff.'];
+  return{skill:'acid',dim:'l',tag:'acid',prompt,plays:[{label:'▶ A',fn:playSt(acidSt(sA?good:bad))},{label:'▶ B',fn:playSt(acidSt(sA?bad:good))}],options:AB_OPTS,answer:sA?'A':'B',explain:()=>`${sA?'A':'B'} ${why}`,hints:['Listen to the bass line, not the drums.','Acid squelch = resonance + accents + slides.']}}
+
+CONCEPTS.push(
+{s:'technogenres',q:'Detroit techno was started in the mid-80s by…',o:['Juan Atkins, Derrick May and Kevin Saunderson','Daft Punk','Skrillex'],a:0,e:'The "Belleville Three" from Detroit built techno out of funk, electro and machine futurism.'},
+{s:'technogenres',q:'Who gave hardgroove its name?',o:['Ben Sims, with his Hard Groove Trax tapes (mid-90s)','Jeff Mills','Armin van Buuren'],a:0,e:'UK DJ Ben Sims launched the Hard Groove Trax mixtapes in the mid-90s; they later became a label.'},
+{s:'technogenres',q:'A typical hardgroove tempo is…',o:['135–145 BPM','100–110 BPM','170–180 BPM'],a:0,e:'Driving but not frantic: most hardgroove sits between about 135 and 145 BPM.'},
+{s:'technogenres',q:'Hard bounce usually runs at…',o:['160 BPM and up','120 BPM','90 BPM'],a:0,e:'Hard bounce is fast: about 160 BPM and above, faster than most hard techno (about 145–160).'},
+{s:'technogenres',q:'The 240 KM/H collective, a home of hard bounce, was founded by…',o:['Adrián Mills, in 2021','Ben Sims, in 1995','Juan Atkins, in 1985'],a:0,e:'Spanish DJ Adrián Mills founded 240 KM/H; it officially started in 2021 at Gotec in Karlsruhe.'},
+{s:'technogenres',q:'Compared with hard techno, hard bounce feels…',o:['Brighter and more playful','Darker and more industrial','Slower and dubbier'],a:0,e:'Hard techno leans dark and industrial; hard bounce is bright, bouncy and playful.'},
+{s:'technogenres',q:'Schranz is a hard, looping techno style from…',o:['Germany, late 90s','Jamaica, 70s','Brazil, 2010s'],a:0,e:'Schranz grew out of the German (Frankfurt) scene in the late 90s: distorted loops and relentless repetition.'},
+{s:'technogenres',q:'Most techno sits between…',o:['about 120 and 150 BPM','60 and 90 BPM','180 and 220 BPM'],a:0,e:'Classic techno lives around 120–150 BPM; the harder styles push faster.'},
+{s:'groove',q:'On an MPC-style swing control, 50% means…',o:['Straight: no swing','Maximum swing','Half the tempo'],a:0,e:'50% puts the second 16th exactly halfway. Higher values push it later.'},
+{s:'groove',q:'Swing delays…',o:['Every second 16th note','Every kick','The whole track'],a:0,e:'Only the in-between 16ths move late; the beats stay on the grid.'},
+{s:'groove',q:'In hardgroove, which parts usually stay straight?',o:['Kick and clap','Every hi-hat','The conga loops'],a:0,e:'Kick and clap anchor the grid while hats and percussion swing around them.'},
+{s:'groove',q:'Swing around 66% is close to…',o:['A triplet feel','No swing at all','Half-time'],a:0,e:'At about 66% the swung 16th lands two thirds of the way through the 8th: a triplet shuffle.'},
+{s:'rumble',q:'A techno rumble is usually made by sending the kick into…',o:['A dark, filtered reverb (or delay)','A chorus','A vocoder'],a:0,e:'A long, low-passed reverb on the kick, ducked by the kick, makes the rumble.'},
+{s:'rumble',q:'Why duck (sidechain) the rumble with the kick?',o:['So the dry kick punches through','To make it brighter','To change the tempo'],a:0,e:'The rumble dips on every kick and swells between them: punch, then pressure.'},
+{s:'rumble',q:'The rumble lives mostly…',o:['Below about 150–200 Hz','Above 5 kHz','Only in the mids'],a:0,e:'It is sub and low-bass energy; filter the rest away so it stays dark.'},
+{s:'rumble',q:'A rumble without ducking sounds…',o:['Muddy and smeared','Punchier','Brighter'],a:0,e:'The tail covers the next kick, so every hit blurs.'},
+{s:'polyrhythm',q:'A polyrhythm is…',o:['Two rhythms with different cycles at once','A very fast rhythm','A rhythm with no kick'],a:0,e:'For example a 3-step loop over a 16-step bar: it keeps landing in new places.'},
+{s:'polyrhythm',q:'A 3-step loop over a 16-step bar meets beat 1 again after…',o:['3 bars (48 steps)','1 bar','16 bars'],a:0,e:'3 × 16 = 48 steps: after 3 bars the pattern starts on beat 1 again.'},
+{s:'polyrhythm',q:'In tribal techno, call and response often means…',o:['Low toms answered by higher congas or bongos','A singer and a choir','Kick and bass playing together'],a:0,e:'The drums talk: a low phrase, then a higher answer.'},
+{s:'polyrhythm',q:'Tribal techno puts the focus on…',o:['Drums and percussion','Long melodies','Vocals'],a:0,e:'Melody stays minimal: toms, congas, bongos and shakers carry the track.'},
+{s:'bounce',q:'The "bounce" comes from…',o:['A bass on the offbeat, between the kicks','A bass on every kick','Removing the kick'],a:0,e:'Kick on the beat, bass on the "and": the floor bounces between them.'},
+{s:'bounce',q:'A reverse bass…',o:['Swells up into the next kick','Fades out after the kick','Plays only on beat 1'],a:0,e:'It grows on the offbeat and cuts just before the next kick, like a kick tail played backwards.'},
+{s:'bounce',q:'Short hits in hard bounce work best…',o:['On the beat, every 4 or 8 beats','On the last 16th before each beat','On every 16th'],a:0,e:'Hits land on the grid of the beat; on the "a" 16th they collide with the bass swell and feel off.'},
+{s:'bounce',q:'A "stop" in hard bounce is…',o:['A short gap where the kick and bass drop out','A tempo change','A key change'],a:0,e:'Pull the kick for a moment and its return hits twice as hard.'},
+{s:'acid',q:'The classic acid sound comes from…',o:['The Roland TB-303 bass line','A grand piano','A drum machine hi-hat'],a:0,e:'The TB-303: resonant filter, accents and slides. Phuture\'s "Acid Tracks" (1987) made it famous.'},
+{s:'acid',q:'On a 303-style line, a slide…',o:['Glides the pitch into the next note','Makes the note louder','Mutes the note'],a:0,e:'The note holds and the pitch bends smoothly to the next step, without a new attack.'},
+{s:'acid',q:'An accent on a 303-style line…',o:['Makes the note louder and opens the filter more','Changes the tempo','Adds reverb'],a:0,e:'Accents give the squelchy, talking peaks.'},
+{s:'acid',q:'High resonance on the filter makes the line…',o:['Squelchy and whistly','Softer and duller','Lower in pitch'],a:0,e:'Resonance boosts the cutoff frequency: sweep it and the line talks.'});
+Object.assign(SKILL_Q,{technogenres:[()=>genreQ(1),()=>conceptQ('technogenres')],groove:[()=>swingAmtQ(1),()=>conceptQ('groove')],rumble:[()=>rumbleQ(1),()=>conceptQ('rumble')],
+  polyrhythm:[()=>polyQ(1),()=>conceptQ('polyrhythm')],bounce:[()=>bounceQ(1),()=>conceptQ('bounce')],acid:[()=>acidQ(1),()=>conceptQ('acid')]});
+Object.assign(PQ,{
+  tgenre:{title:'The Style Compass',why:'Techno styles still blur together for you.',gen:()=>pick([genreQ(1),conceptQ('technogenres')]),skill:'technogenres',dim:'l'},
+  tswing:{title:'The Shuffle School',why:'Swing is hard for you to hear yet.',gen:()=>swingAmtQ(1),skill:'groove',dim:'l'},
+  poly:{title:'The Drum Circle',why:'Polyrhythms slip past you.',gen:()=>pick([polyQ(1),conceptQ('polyrhythm')]),skill:'polyrhythm',dim:'l'},
+  tbounce:{title:'The Bounce Test',why:'Offbeat basses keep tricking you.',gen:()=>pick([bounceQ(1),conceptQ('bounce')]),skill:'bounce',dim:'l'},
+  acid:{title:'The Squelch Hunt',why:'Acid lines are hard to read by ear.',gen:()=>acidQ(1),skill:'acid',dim:'l'},
+  rumble:{title:'The Floor Shaker',why:'Rumble and mud still sound alike to you.',gen:()=>pick([rumbleQ(1),rumbleQ(2)]),skill:'rumble',dim:'l'}});
+Object.assign(TAGNAME,{tgenre:'techno styles',tswing:'hearing swing',poly:'polyrhythms',tbounce:'offbeat bass',acid:'acid lines',rumble:'rumble kicks'});
+GAMES.push(
+{id:'radar',name:'Techno Radar',skill:'technogenres',ic:'groovebox',col:'#ff7a3a',gen:t=>genreQ(t),unlocked:()=>S.done.includes('t1'),how:'Learn “The Techno Engine” in the Techno Bunker',tiers:['3 styles','5 styles','6 styles'],intro:'Every techno style has its own speed and signature. Hear the loop, name the style.'},
+{id:'swingsense',name:'Swing Sense',skill:'groove',ic:'conga',col:'#ff4f5a',gen:t=>swingAmtQ(t),unlocked:()=>S.done.includes('t3'),how:'Learn “Hardgroove” in the Techno Bunker',tiers:['Straight or swung','How much swing?','Subtle swing'],intro:'Swing pushes every second 16th late. Hear whether a groove swings, and how much.'});
+
+/* ================= the bunker scene ================= */
+function drawBunker(g,t,cv){const W=cv.width,H=cv.height;for(let y=0;y<H;y++)px(g,0,y,W,1,['#0d0a14','#110d1c','#151022','#191428'][Math.min(3,Math.floor(y/H*4))]);
+  for(let y=3;y<H*.62;y+=6)for(let x=(Math.floor(y/6)%2)*5-5;x<W;x+=10)px(g,x,y,9,5,'#17122a');
+  const beams=['rgba(255,61,127,.17)','rgba(62,240,200,.15)','rgba(169,139,255,.17)'];
+  beams.forEach((col,k)=>{const sx=W*(.2+k*.3),a=Math.sin(t*(.9+k*.35)+k*2)*.9;for(let y=0;y<H*.85;y+=1)px(g,Math.floor(sx+a*y*.6)-1-Math.floor(y*.06),y,2+Math.floor(y*.12),1,col)});
+  if(Math.sin(t*7.3)>.95)px(g,0,0,W,H,'rgba(255,255,255,.08)');
+  [2,W-14].forEach(x=>{px(g,x,Math.floor(H*.36),12,H,'#0b0816');for(let k=0;k<3;k++){const yy=Math.floor(H*.4)+k*Math.floor(H*.17);px(g,x+3,yy,6,6,'#2a2248');px(g,x+5,yy+2,2,2,Math.sin(t*14+k)>0?'#4d4373':'#3d3166')}});
+  const r=rng(77);for(let i=0;i<20;i++){const x=Math.floor(r()*(W-10))+5,hh=4+Math.floor(r()*3),bob=Math.sin(t*8.5+i*1.7)>0?1:0,y=H-hh-1+bob;px(g,x,y,3,hh+2,'#07050d');px(g,x,y-3,3,3,'#07050d');if(r()<.3)px(g,x+(i%2?3:-1),y-6+bob,1,4,'#07050d')}
+  for(let i=0;i<4;i++){const x=Math.floor((i*37+t*6)%(W+30))-15;px(g,x,Math.floor(H*.55)+i*3,26,2,'rgba(200,180,255,.05)')}}
+WSCENE.bunker=drawBunker;
+/* the bunker entrance on the world map, half-buried in Beat Forest */
+function drawBunkerMap(g,open){const x=60,y=204;px(g,x+1,y+4,22,13,'#2b2740');px(g,x,y+2,24,3,'#3a3552');px(g,x+2,y+5,20,1,'#221e33');px(g,x+9,y+8,6,9,'#07050d');px(g,x+10,y+9,4,1,open?'#ff3d7f':'#4a2236');px(g,x+3,y+7,4,2,open?'#3ef0c8':'#1f4a44');px(g,x+17,y+7,4,2,open?'#ff3d7f':'#4a2236');px(g,x+11,y-1,2,3,'#3a3552');if(open)for(let k=0;k<3;k++){px(g,x-3-k*2,y+8+k,1,3,'rgba(169,139,255,.65)');px(g,x+26+k*2,y+8+k,1,3,'rgba(169,139,255,.65)')}}
 /* ================= world kit: shared building blocks for worlds 2–7 ================= */
 COS.push(
  {id:'hoodie-dragon',slot:'hoodie',name:'Dragon Scale',col:'#6c5cff',price:null,how:'Defeat the Synth Dragon'},
@@ -3230,11 +3571,185 @@ master:{name:'THE MASTER',lv:64,hp:400,bpm:100,weak:'Every skill',tests:['Tempo'
 WVICT.sky={big:['SKY','MASTERED'],then:'“Mastering means making it loud.”',now:'“I understand mastering.”',
  learned:['0 dBFS and headroom','Hear clipping','Peak versus loudness','Measure LUFS','Stream-ready -14 LUFS','Set a limiter ceiling','Spot over-limiting','Export a real WAV'],
  daw:'Ableton’s Limiter, FL’s Maximus, iZotope Ozone and any loudness meter speak this language: ceiling, gain, release, LUFS and true peak.',next:'The Final Track',nextTxt:'A blank project. You choose everything, from the tempo to the master. Finish it and become PRODUCER CERTIFIED.'};
+/* ================= SIDE WORLD · TECHNO BUNKER ================= */
+const BOUNCER=['....kkkkkkkk....','...kssssssssk...','..ksssssssssdk..','..kggggggggggk..','..kgwggkkgwggk.c','..ksssssssssdkc.','..ksssskkssssdkc','...kssssssssdk.c','..kkkdddddddkkk.','.kttttttttttttk.','ktttsssssssstttk','kttsssssssssdttk','kttttttwwttttttk','kttttttttttttttk','.kttttkkkkttttk.','..kkkkk..kkkkk..'];
+const BOUNCER_PAL={k:'#140d1f',s:'#c98a5e',d:'#9a5f3a',g:'#1d1a24',w:'#ffffff',t:'#2a2440',c:'#3ef0c8'};
+const HEADLINER=['.....kkkkkk.....','....kcccccck....','...kcccccccck...','..kpkkkkkkkkpk..','.kppksssssskppk.','.kppksesseskppk.','.kppksssssskppk.','..kkksskksskkk..','...khhhhhhhhk...','..khhhhhhhhhhk..','.ksshhhhhhhhssk.','kmmmmmmmmmmmmmmk','kmrrmllllllmrrmk','kmrrmlLlLlLmrrmk','kmmmmmmmmmmmmmmk','.kkkkkkkkkkkkkk.'];
+const HEADLINER_PAL={k:'#140d1f',c:'#ff3d7f',p:'#3ef0c8',s:'#e0a878',e:'#140d1f',h:'#2a2440',m:'#4d4373',r:'#a98bff',l:'#241c40',L:'#3ef0c8'};
+Object.assign(MONS,{
+  strobebat:{name:'Strobe Bat',spr:BAT,pal:{k:K_,b:'#ff3d7f',w:'#3ef0c8'},sc:5,world:'bunker',problem:'Flickers between every tempo.',weak:'Knowing the techno tempo zones'},
+  rumbleworm:{name:'Rumble Worm',spr:WORM,pal:{k:K_,g:'#6c5cff',w:K_},sc:5,world:'bunker',problem:'Smears mud under every kick.',weak:'A ducked, filtered rumble'},
+  shuffleimp:{name:'Shuffle Imp',spr:GOBLIN,pal:{k:K_,g:'#ff7a3a',w:'#ffffff',c:'#2a2440',y:'#3ef0c8'},sc:5,world:'bunker',problem:'Marches dead straight.',weak:'Swing'},
+  drumspirit:{name:'Drum Spirit',spr:GHOST,pal:{k:K_,g:'#d9a441',w:K_},sc:5,world:'bunker',problem:'Hides in loops of three.',weak:'Polyrhythm'},
+  bounceblob:{name:'Bounce Blob',spr:SLIME,pal:{k:K_,g:'#ff4f9a',d:'#a8306a',w:'#ffffff'},sc:5,world:'bunker',problem:'Its bass sits on the kicks.',weak:'Offbeat bass'},
+  acidslime:{name:'Acid Smiley',spr:SLIME,pal:{k:K_,g:'#ffcc4d',d:'#c9821c',w:'#140d1f'},sc:5,world:'bunker',problem:'Squelches without accents or slides.',weak:'303 accents and slides'},
+  bouncer:{name:'The Bouncer',spr:BOUNCER,pal:BOUNCER_PAL,sc:5,world:'bunker',problem:'Lets in only grooves that bounce.',weak:'Offbeat bass and hits on the beat'},
+  headliner:{name:'The Headliner',spr:HEADLINER,pal:HEADLINER_PAL,sc:5,world:'bunker',problem:'Owns the 4 AM floor.',weak:'Every techno groove'}});
+COS.push({id:'phones-strobe',slot:'phones',name:'Strobe Cans',col:'#ff3d7f',price:null,how:'Defeat The Bouncer'},{id:'hoodie-rave',slot:'hoodie',name:'Rave Neon',col:'#3ef0c8',price:null,how:'Defeat The Headliner'},{id:'kit-bunker',slot:'kit',name:'Bunker 909 Kit',col:'#ff7a3a',price:null,how:'Pass the Club Trial'});
+
+/* ---- lesson visuals ---- */
+function tempoMap(host){const Z=[['DETROIT',125,130,'#6cb8ff'],['TRIBAL',128,138,'#d9a441'],['ACID',130,140,'#ffcc4d'],['HARDGROOVE',135,145,'#ff7a3a'],['HARD TECHNO',145,160,'#ff4f5a'],['HARD BOUNCE',160,172,'#ff4f9a']];
+  return display(host,140,(g,W,H)=>{g.fillStyle='#07050d';g.fillRect(0,0,W,H);const lo=120,hi=175,X=b=>(b-lo)/(hi-lo)*W;g.font='10px VT323, monospace';
+    for(let b=lo;b<=hi;b+=5){const x=Math.round(X(b))+.5;g.strokeStyle=b%10?'#171230':'#2a2248';g.beginPath();g.moveTo(x,0);g.lineTo(x,H-12);g.stroke();if(b%10===0&&b<hi){g.fillStyle='#6a5f9a';g.fillText(String(b),x+2,H-2)}}
+    Z.forEach(([n,a,b,c],i)=>{const y=4+i*20;g.fillStyle=c+'44';g.fillRect(X(a),y,X(b)-X(a),15);g.fillStyle=c;g.fillRect(X(a),y,2,15);g.fillText(n,Math.min(W-62,X(a)+5),y+11)})})}
+function chainViz(host,steps,col){return display(host,48,(g,W,H)=>{g.fillStyle='#07050d';g.fillRect(0,0,W,H);const n=steps.length,gap=7,bw=(W-(n-1)*gap)/n;g.font='10px VT323, monospace';
+  steps.forEach((s,i)=>{const x=i*(bw+gap);g.fillStyle=i===0?'#3d3166':'#1d1636';g.fillRect(x,10,bw,28);g.strokeStyle=col;g.strokeRect(x+.5,10.5,bw-1,27);g.fillStyle='#f1e7d0';const tw=g.measureText(s).width;g.fillText(s,x+(bw-tw)/2,28);if(i<n-1){g.fillStyle=col;g.fillRect(x+bw,23,gap,2)}})})}
+function swingViz(host,sw0,onSet){let sw=sw0;const d=display(host,84,(g,W,H)=>{g.fillStyle='#07050d';g.fillRect(0,0,W,H);const cw=W/16,del=swingDelay(sw,1);g.font='10px VT323, monospace';
+    [['STRAIGHT',0,'#8a7fa8'],[`SWING ${sw}% · +${Math.round(swingDelay(sw,60/140/4)*1000)} MS AT 140 BPM`,1,'#ff4f9a']].forEach(([lab,row,c])=>{const y=row?56:20;g.fillStyle=c;g.fillText(lab,4,y-7);
+      for(let i=0;i<16;i++){const x=(i+(row&&i%2?del:0))*cw+cw*.25;g.fillStyle=i%4===0?'#f1e7d0':row&&i%2?'#ff4f9a':'#3ef0c8';g.fillRect(x,y,3,i%4===0?18:11)}})});
+  const kr=h('div','krow');host.append(kr);knob(kr,{label:'SWING',min:50,max:75,step:1,value:sw,fmt:v=>Math.round(v)+'%',col:'#ff4f9a',onInput:v=>{sw=Math.round(v);d.redraw();if(onSet)onSet(sw)}});return d}
+function polyViz(host,len){return display(host,72,(g,W,H)=>{g.fillStyle='#07050d';g.fillRect(0,0,W,H);const N=48,cw=W/N;g.font='10px VT323, monospace';
+  for(let s=0;s<N;s++){const x=s*cw;if(s%4===0){g.fillStyle='#ffb547';g.fillRect(x+1,14,Math.max(2,cw-2),16)}if(s%len===0){g.fillStyle=s%16===0?'#3ef0c8':'#d9a441';g.fillRect(x+1,44,Math.max(2,cw-2),16)}}
+  for(let b=1;b<3;b++){g.fillStyle='#f1e7d0';g.fillRect(Math.round(b*16*cw),0,1,H)}g.fillStyle='#8a7fa8';g.fillText('KICK · EVERY 4 STEPS',4,10);g.fillText(`CONGA · EVERY ${len} STEPS · 3 BARS`,4,H-2)})}
+function bassShapeViz(host){const d=display(host,92,(g,W,H)=>{gridLines(g,W,H,{cols:8,major:4});const X=bt=>bt/2*W;g.font='10px VT323, monospace';
+  for(let k=0;k<2;k++){g.fillStyle='#f1e7d0';g.fillRect(X(k)+1,14,3,H-20)}
+  for(let k=0;k<2;k++){g.beginPath();for(let x=Math.ceil(X(k+.5));x<=X(k+1)-3;x++){const p=(x-X(k+.5))/(X(k+1)-X(k+.5)),y=H-6-Math.pow(p,2.2)*(H-26);if(x===Math.ceil(X(k+.5)))g.moveTo(x,y);else g.lineTo(x,y)}g.strokeStyle='#ff4f9a';g.lineWidth=2.5;g.stroke();
+    g.setLineDash([3,3]);g.beginPath();for(let x=Math.ceil(X(k+.5));x<=X(k+.85);x++){const p=(x-X(k+.5))/(X(k+.85)-X(k+.5)),y=H-6-Math.exp(-p*4)*(H-30);if(x===Math.ceil(X(k+.5)))g.moveTo(x,y);else g.lineTo(x,y)}g.strokeStyle='#3ef0c8';g.lineWidth=1.5;g.stroke();g.setLineDash([])}
+  g.fillStyle='#ff4f9a';g.fillText('REVERSE = SWELLS INTO THE KICK',8,12);g.fillStyle='#3ef0c8';g.fillText('PLUCK = SHORT, DIES AWAY',8,24)});
+  host.append(h('div','dispcap','<span>WHITE = KICK · 2 BEATS · BASS ON EVERY OFFBEAT</span>'));return d}
+function rulesFeedback(fb,rows,okMsg){const bad=rows.filter(r=>!r.ok);fb.innerHTML=bad.length?`<p class="fb">${bad.map(r=>r.bad).join(' ')}</p>`:`<p class="fb good">${okMsg}</p>`;return!bad.length}
+function openBunkerBox(){const m=modal('<p class="eyebrow" style="color:#ff7a3a">STUDIO · FREE JAM</p><div class="bbx-h" style="width:100%"></div><button class="btn block fx-close">DONE</button>');
+  const rig=bunkerRig($('.bbx-h',m),{presets:true,show:['swing','rumble','drive','bass','len','stop'],init:{bpm:132,pat:{kick:BEATS}}});$('.fx-close',m).onclick=()=>{rig.stop();m.close()}}
+const FLAT_ACID={acc:new Array(16).fill(0),sl:new Array(16).fill(0),reso:.2,env:.25};
+const kitHear=(row,list,done)=>{const heard=new Set();list.forEach(([l,fn],k)=>{const x=h('button','btn ghost sm',l);x.onclick=()=>{fn();heard.add(k);if(heard.size>=list.length)done()};row.append(x)})};
+
+Object.assign(LESSONS,{
+t1:{title:'The Techno Engine',teaches:['technogenres'],skills:['technogenres','patterns'],xp:100,coins:15,tool:'groovebox',game:'radar',mission:'groovebox',
+ battle:{mon:'strobebat',hp:3,gen:i=>i%2?conceptQ('technogenres'):genreQ(1)},
+ steps:[
+ {k:'DISCOVER',render(b,done){lessonHead(b,'Welcome to the Bunker',`Techno was born in <b>Detroit</b> in the mid-80s: Juan Atkins, Derrick May and Kevin Saunderson built funk out of drum machines. Its engine is simple: a <b>kick on every beat</b> (four on the floor), a <b>clap</b> on 2 and 4, an <b>open hat on every offbeat</b> and fast <b>16th hats</b>.<br><br>The tempo picks the style. Every scene has its own speed zone:`);eyebrowW(b,'bunker');
+   tempoMap(b);b.append(h('p','muted','Hear each part of the 909-style kit:'));const row=h('div','row wrap');row.style.gap='6px';b.append(row);
+   kitHear(row,[['kick','KICK'],['clap','CLAP'],['chat','CLOSED HAT'],['ohat','OPEN HAT'],['ride','RIDE']].map(([k,n])=>['▶ '+n,()=>{const G=LG();if(!G)return;const st=mkSt({});G.set(st);tvoice(st,k,1,now()+.03,G,0)}]),done)}},
+ {k:'LISTEN',render(b,done){b.innerHTML='<div class="big-title">Skeleton, then engine</div><p>A is only the kick and the clap. B adds the open hat on every offbeat, the 16th hats and a ride. Hear the drive appear.</p><div class="abhost"></div>';
+   abWidget($('.abhost',b),[abSt(mkSt({bpm:130,pat:{kick:BEATS,clap:[4,12]}}),'Kick + clap','The skeleton. Steady, but it does not move yet.'),abSt(mkSt({bpm:130,pat:{kick:BEATS,clap:[4,12],ohat:OFF,chat:ALL16.map(i=>[i,i%2?1:2]),ride:OFF}}),'The full engine','Offbeat open hats, 16th hats, a ride: now it drives.')],done)}},
+ {k:'EXPERIMENT',render(b,done,ctx){b.innerHTML='<div class="big-title">The Bunker Box</div><p>Your new groovebox, built like a TR-909 or an Ableton Drum Rack. Press PLAY and program. Discover at least 3:</p>';
+   const mark=discover(b,['Put an open hat on all four offbeats (the "&" columns)','Push the tempo to 140 BPM or more','Give the closed hat 8 hits or more','Make a ghost note (tap a hat cell twice)'],3,done);
+   const rig=bunkerRig(b,{tracks:['kick','clap','chat','ohat','ride'],init:{bpm:126,pat:{kick:BEATS}},onChange:st=>{if(OFF.every(i=>st.pat.ohat[i]))mark(0);if(st.bpm>=140)mark(1);if(hits(st,'chat')>=8)mark(2);if(['clap','chat','ohat','ride'].some(k=>st.pat[k].includes(2)))mark(3)}});ctx.onLeave(()=>rig.stop())}},
+ {k:'CHALLENGE',render(b,done,ctx){b.innerHTML='<div class="big-title">Build the engine</div><p>Program a classic techno engine, then CHECK:</p><div class="check"><div>Kick on every beat, nothing in between</div><div>Clap on beats 2 and 4</div><div>Open hat on every offbeat</div><div>8 closed hats or more</div><div>Tempo between 125 and 145 BPM</div></div>';
+   const rig=bunkerRig(b,{tracks:['kick','clap','chat','ohat','ride'],init:{bpm:118}});ctx.onLeave(()=>rig.stop());const fb=h('div'),ck=h('button','btn neon block','CHECK');b.append(fb,ck);
+   ck.onclick=()=>{const st=rig.st;const ok=rulesFeedback(fb,[{ok:kick4(st),bad:'The kick must sit on every beat (steps 1, 5, 9, 13) and nowhere else.'},{ok:st.pat.clap[4]&&st.pat.clap[12],bad:'Put the clap on beats 2 and 4 (steps 5 and 13).'},{ok:OFF.every(i=>st.pat.ohat[i]),bad:'Put an open hat on every offbeat: the "&" columns (steps 3, 7, 11, 15).'},{ok:hits(st,'chat')>=8,bad:'Give the closed hat at least 8 hits.'},{ok:st.bpm>=125&&st.bpm<=145,bad:`${st.bpm} BPM is outside techno's home zone: aim for 125–145.`}],`That is the techno engine at ${st.bpm} BPM. Every style in the Bunker is built on top of it.`);
+     ctx.attempt('pattern',ok);if(ok){sfx.ok();done()}else sfx.bad()};
+   ctx.hint(b,{hints:['Beats are the numbered columns (1, 2, 3, 4). Offbeats are the "&" columns.','Kick on 1-2-3-4, clap on 2 and 4, open hat on every "&", closed hats on the other 16ths.'],reveal:()=>rig.set({bpm:130,pat:Object.assign(rig.st.pat,{kick:ALL16.map(i=>i%4===0?1:0),clap:ALL16.map(i=>i===4||i===12?1:0),ohat:ALL16.map(i=>i%4===2?1:0),chat:ALL16.map(i=>i%2?1:0)})})})}}]},
+t2:{title:'The Rumble',teaches:['rumble'],skills:['rumble'],xp:100,coins:15,mission:'groovebox',
+ battle:{mon:'rumbleworm',hp:3,gen:i=>i%2?conceptQ('rumble'):rumbleQ(i<2?1:2)},
+ steps:[
+ {k:'DISCOVER',render(b,done){lessonHead(b,'The rumble',`Under hard and hypnotic techno there is a low <b>rumble</b>: pressure you feel in your chest between the kicks. The recipe: send the kick into a long, dark <b>reverb</b> (some producers use a delay), <b>low-pass</b> it so only the lows remain, <b>duck</b> it on every kick so the kick still punches through, then add some <b>drive</b> for grit.`);eyebrowW(b,'bunker');
+   chainViz(b,['KICK','REVERB','LOW-PASS','DUCK','DRIVE','MIX'],'#a98bff');const row=h('div','row wrap');row.style.gap='6px';b.append(row);
+   kitHear(row,[['▶ DRY KICK',()=>playQ(playSt(rumbleSt({rumble:0})))],['▶ WITH RUMBLE',()=>playQ(playSt(rumbleSt({rumble:.65})))]],done)}},
+ {k:'LISTEN',render(b,done){b.innerHTML='<div class="big-title">Mud versus rumble</div><p>Same kick, same reverb. In A the rumble is not ducked: it smears over every kick. In B it dips on each kick and swells back in between.</p><div class="abhost"></div>';
+   abWidget($('.abhost',b),[abSt(rumbleSt({rumble:.65,rduck:0}),'Not ducked','Mud: the tail covers the next kick.'),abSt(rumbleSt({rumble:.65,rduck:.9}),'Ducked','Punch, then pressure. Every kick cuts through.')],done)}},
+ {k:'EXPERIMENT',render(b,done,ctx){b.innerHTML='<div class="big-title">Rumble Forge</div><p>Build a rumble with real controls and watch its shape. Discover at least 3:</p>';
+   const mark=discover(b,['Turn the duck off (under 15%) with the amount over 50%: hear the mud','Darken the tone under 120 Hz','Stretch the decay over 4 seconds','Push the drive over 60%'],3,done);
+   const rig=rumbleRig(b,{onChange:R=>{if(R.duck<.15&&R.amt>.5)mark(0);if(R.cut<120)mark(1);if(R.dec>4)mark(2);if(R.drive>.6)mark(3)}});ctx.onLeave(()=>rig.stop())}},
+ {k:'CHALLENGE',render(b,done,ctx){b.innerHTML='<div class="big-title">Rumble, not mud</div><p>This rumble is too quiet, too bright, too short and not ducked. Fix it: amount 40% or more, tone between 60 and 200 Hz, decay between 1.5 and 6 s, duck 60% or more. Then CHECK.</p>';
+   const rig=rumbleRig(b,{init:{amt:.15,dec:.8,cut:520,duck:0,drive:.2}});ctx.onLeave(()=>rig.stop());const fb=h('div'),ck=h('button','btn neon block','CHECK');b.append(fb,ck);
+   ck.onclick=()=>{const R=rig.R;const ok=rulesFeedback(fb,[{ok:R.amt>=.4,bad:'Raise the amount to 40% or more.'},{ok:R.cut>=60&&R.cut<=200,bad:`The tone is ${fmtHz(R.cut)} Hz: keep it between 60 and 200 Hz so only the lows rumble.`},{ok:R.dec>=1.5&&R.dec<=6,bad:'Set the decay between 1.5 and 6 seconds.'},{ok:R.duck>=.6,bad:'Duck it 60% or more so the kick punches through.'}],'A real techno rumble: deep, long, and out of the way of every kick.');
+     ctx.attempt('rumble',ok);if(ok){sfx.ok();done()}else sfx.bad()};
+   ctx.hint(b,{hints:['Work through the chain: amount, then tone, then decay, then duck.','About: amount 60%, tone 120 Hz, decay 2.5 s, duck 85%.'],reveal:()=>rig.set({amt:.6,cut:120,dec:2.5,duck:.85})})}}]},
+t3:{title:'Hardgroove',teaches:['groove'],skills:['groove','technogenres','patterns'],xp:100,coins:15,game:'swingsense',mission:'groovebox',
+ battle:{mon:'shuffleimp',hp:3,gen:i=>i%2?conceptQ('groove'):swingAmtQ(1)},
+ steps:[
+ {k:'DISCOVER',render(b,done){lessonHead(b,'Hardgroove',`In the mid-90s, UK DJ <b>Ben Sims</b> called his mixtapes <b>Hard Groove Trax</b>: tough techno with the swing of Detroit, funk and hip-hop. Hardgroove runs at about <b>135–145 BPM</b> and is full of percussion: congas, toms, rims and shakers, often looped. Since the 2020s it is back in clubs everywhere.<br><br>Its secret is <b>swing</b>: every second 16th arrives a little late. The kick and clap stay on the grid while the hats and percussion lean back. Turn the knob to 56% or more:`);eyebrowW(b,'bunker');
+   swingViz(b,50,sw=>{if(sw>=56)done()})}},
+ {k:'LISTEN',render(b,done){b.innerHTML='<div class="big-title">Straight versus swung</div><p>The same hardgroove loop. A is dead straight (50%). B swings at 60%.</p><div class="abhost"></div>';
+   abWidget($('.abhost',b),[abSt(grooveSt(50),'Straight · 50%','Machine-tight. It marches.'),abSt(grooveSt(60),'Swung · 60%','The hats and congas lean back: it grooves.')],done)}},
+ {k:'EXPERIMENT',render(b,done,ctx){b.innerHTML='<div class="big-title">Find the groove</div><p>A straight beat with percussion lines ready to fill. Discover at least 3:</p>';
+   const mark=discover(b,['Set the swing between 54 and 62% (the hardgroove zone)','Put a conga on an in-between 16th (the "e" or "a" columns)','Give the toms 2 hits or more','Set the tempo between 135 and 145 BPM'],3,done);
+   const rig=bunkerRig(b,{tracks:['kick','clap','chat','ohat','conga','ltom','htom','rim','shaker'],show:['swing'],init:{bpm:128,pat:{kick:BEATS,clap:[4,12],chat:ODD,ohat:OFF}},onChange:st=>{if(st.swing>=54&&st.swing<=62)mark(0);if(ODD.some(i=>st.pat.conga[i]))mark(1);if(hits(st,'ltom')+hits(st,'htom')>=2)mark(2);if(st.bpm>=135&&st.bpm<=145)mark(3)}});ctx.onLeave(()=>rig.stop())}},
+ {k:'CHALLENGE',render(b,done,ctx){b.innerHTML=`<div class="big-title">Your first hardgroove</div><p>${CLUB_RULES.hardgroove.brief} Make it pass every rule, then CHECK.</p>`;
+   const rig=bunkerRig(b,{tracks:['kick','clap','chat','ohat','conga','ltom','htom','rim','shaker'],show:['swing','rumble'],init:{bpm:128,pat:{kick:BEATS,clap:[4,12],ohat:OFF}}});ctx.onLeave(()=>rig.stop());const fb=h('div'),ck=h('button','btn neon block','CHECK');b.append(fb,ck);
+   ck.onclick=()=>{const ok=rulesFeedback(fb,ruleRows('hardgroove',rig.st),`Hardgroove: ${rig.st.bpm} BPM, ${rig.st.swing}% swing and percussion that rolls.`);ctx.attempt('tswing',ok);if(ok){sfx.ok();done()}else sfx.bad()};
+   ctx.hint(b,{hints:['Tempo first (135–145), then swing (54–66%), then fill two percussion lines.','For the swing to show, put hats or congas on the in-between 16ths (the "e" and "a" columns).'],reveal:()=>{const s=styleState('hardgroove');rig.set({bpm:s.bpm,swing:s.swing,rumble:s.rumble,pat:s.pat})}})}}]},
+t4:{title:'Tribal',teaches:['polyrhythm'],skills:['polyrhythm','groove'],xp:100,coins:15,mission:'groovebox',
+ battle:{mon:'drumspirit',hp:3,gen:i=>i%2?conceptQ('polyrhythm'):polyQ(1)},
+ steps:[
+ {k:'DISCOVER',render(b,done){lessonHead(b,'Tribal',`Tribal techno lets the <b>drums</b> lead and keeps melody to a minimum. Its roots run from African drumming through New York's <b>tribal house</b> of the early 90s, Jeff Mills' percussive records of 1997 and the bongo-heavy techno of the early 2000s.<br><br>Two tricks: <b>call and response</b> (low toms answered by higher congas) and <b>polyrhythm</b>. A conga that loops every <b>3 steps</b> over a bar of 16 lands somewhere new on each beat, and only meets beat 1 again after 3 bars:`);eyebrowW(b,'bunker');
+   polyViz(b,3);const x=h('button','btn ghost block','▶ HEAR 3 AGAINST 4');x.onclick=()=>{playQ(playSt(polySt(3),3));done()};b.append(x)}},
+ {k:'LISTEN',render(b,done){b.innerHTML='<div class="big-title">Square versus polyrhythm</div><p>A loops the conga every 4 steps: locked to the kick. B loops it every 3 steps: it rolls around the kick.</p><div class="abhost"></div>';
+   abWidget($('.abhost',b),[abSt(polySt(4),'Every 4 steps','Locked to the grid. Solid but square.'),abSt(polySt(3),'Every 3 steps','A polyrhythm: it keeps landing in new places.')],done)}},
+ {k:'EXPERIMENT',render(b,done,ctx){b.innerHTML='<div class="big-title">The drum circle</div><p>Tap the number next to a drum to change its loop length. Discover at least 3:</p>';
+   const mark=discover(b,['Set a loop length to 3','Set a loop length to 5 or 7','Make a call and response: 2+ tom hits and 2+ conga or bongo hits','Get 4 percussion lines playing'],3,done);
+   const rig=bunkerRig(b,{tracks:['kick','ltom','htom','conga','bongo','shaker','cowbell'],show:['len','swing'],init:{bpm:132,pat:{kick:BEATS,shaker:ALL16.map(i=>[i,i%2?1:2])}},onChange:st=>{if(PERC.some(k=>st.len[k]===3))mark(0);if(PERC.some(k=>st.len[k]===5||st.len[k]===7))mark(1);if(hits(st,'ltom')+hits(st,'htom')>=2&&hits(st,'conga')+hits(st,'bongo')>=2)mark(2);if(PERC.filter(k=>hits(st,k)>0).length>=4)mark(3)}});ctx.onLeave(()=>rig.stop())}},
+ {k:'CHALLENGE',render(b,done,ctx){b.innerHTML=`<div class="big-title">The ritual</div><p>${CLUB_RULES.tribal.brief} Pass every rule, then CHECK.</p>`;
+   const rig=bunkerRig(b,{tracks:['kick','ltom','htom','conga','bongo','shaker','cowbell','ohat'],show:['len','swing'],init:{bpm:124,pat:{kick:BEATS}}});ctx.onLeave(()=>rig.stop());const fb=h('div'),ck=h('button','btn neon block','CHECK');b.append(fb,ck);
+   ck.onclick=()=>{const ok=rulesFeedback(fb,ruleRows('tribal',rig.st),'The drums are talking: toms call, hand drums answer, and the loops roll around the kick.');ctx.attempt('poly',ok);if(ok){sfx.ok();done()}else sfx.bad()};
+   ctx.hint(b,{hints:['Tempo 126–140, then three percussion lines, then change one loop length to 3.','A low tom every 3 steps, congas answering on 2 or 3 steps, a shaker on the 16ths.'],reveal:()=>{const s=styleState('tribal');rig.set({bpm:s.bpm,swing:s.swing,len:s.len,pat:s.pat})}})}}]},
+t5:{title:'Hard Bounce',teaches:['bounce'],skills:['bounce','technogenres'],xp:100,coins:15,mission:'groovebox',
+ battle:{mon:'bounceblob',hp:3,gen:i=>i%2?conceptQ('bounce'):bounceQ(1)},
+ steps:[
+ {k:'DISCOVER',render(b,done){lessonHead(b,'Hard bounce',`<b>Hard bounce</b> took over Europe's hard techno raves in the 2020s: <b>160 BPM and up</b>, bright and playful where hard techno is dark. Collectives like <b>240 KM/H</b>, founded by Spanish DJ Adrián Mills in 2021, made it a movement.<br><br>The kick stays on every beat and a <b>bass bounces on every offbeat</b>: either a <b>reverse bass</b> that swells into the next kick (a trick from hard trance and hardstyle) or a short <b>pluck</b>. Add claps, percussion, <b>short hits on the beat</b> every 4 or 8 beats, and <b>stops</b> where the kick drops out.`);eyebrowW(b,'bunker');
+   bassShapeViz(b);const row=h('div','row wrap');row.style.gap='6px';b.append(row);
+   kitHear(row,[['▶ KICK ONLY',()=>playQ(playSt(mkSt({bpm:162,pat:{kick:BEATS}})))],['▶ + REVERSE BASS',()=>playQ(playSt(bassSt('reverse')))],['▶ + PLUCK BASS',()=>playQ(playSt(bassSt('pluck')))]],done)}},
+ {k:'LISTEN',render(b,done){b.innerHTML='<div class="big-title">Rolling versus bouncing</div><p>A is a rolling techno bass: short 16ths between the kicks. B is a hard bounce reverse bass: one swell per offbeat, cut right before each kick.</p><div class="abhost"></div>';
+   abWidget($('.abhost',b),[abSt(bassSt('rolling'),'Rolling 16ths','Driving techno. It runs.'),abSt(bassSt('reverse'),'Reverse bass','It bounces: kick, swell, kick, swell.')],done)}},
+ {k:'EXPERIMENT',render(b,done,ctx){b.innerHTML='<div class="big-title">Make it bounce</div><p>Bass cells cycle through notes; the BASS buttons pick its shape. Discover at least 3:</p>';
+   const mark=discover(b,['Push the tempo to 160 BPM or more','Put the bass on all four offbeats','Switch the bass to REVERSE','Drop a stop: press STOP 1 BAR','Add a hit on a beat'],3,done);
+   const rig=bunkerRig(b,{tracks:['kick','clap','chat','shaker','bass','hit'],show:['bass','stop','drive'],init:{bpm:140,bassMode:'pluck',pat:{kick:BEATS,clap:[4,12]}},onStopUsed:()=>mark(3),onChange:st=>{if(st.bpm>=160)mark(0);if(OFF.every(i=>st.pat.bass[i]))mark(1);if(st.bassMode==='reverse')mark(2);if(BEATS.some(i=>st.pat.hit[i]))mark(4)}});ctx.onLeave(()=>rig.stop())}},
+ {k:'CHALLENGE',render(b,done,ctx){b.innerHTML=`<div class="big-title">Through the door</div><p>${CLUB_RULES.bounce.brief} Pass every rule, then CHECK. A tip from real productions: hits on the last 16th before a beat clash with the bass swell and sound off-grid.</p>`;
+   const rig=bunkerRig(b,{tracks:['kick','clap','chat','shaker','bass','hit'],show:['bass','stop','drive'],init:{bpm:138,bassMode:'rolling',pat:{kick:BEATS,bass:{0:1,4:1,8:1,12:1}}}});ctx.onLeave(()=>rig.stop());const fb=h('div'),ck=h('button','btn neon block','CHECK');b.append(fb,ck);
+   ck.onclick=()=>{const ok=rulesFeedback(fb,ruleRows('bounce',rig.st),`Kick, swell, kick, swell at ${rig.st.bpm} BPM: the floor bounces.`);ctx.attempt('tbounce',ok);if(ok){sfx.ok();done()}else sfx.bad()};
+   ctx.hint(b,{hints:['Tempo to 160+, then move every bass note off the kicks onto the "&" columns.','Bass on steps 3, 7, 11 and 15 in REVERSE, claps on 5 and 13, one HIT on step 1.'],reveal:()=>{const s=styleState('bounce');rig.set({bpm:s.bpm,bassMode:s.bassMode,drive:s.drive,pat:s.pat})}})}}]},
+t6:{title:'Acid & Hard Techno',teaches:['acid'],skills:['acid','rumble','technogenres'],xp:100,coins:15,mission:'groovebox',
+ battle:{mon:'acidslime',hp:3,gen:i=>i%2?conceptQ('acid'):acidQ(1)},
+ steps:[
+ {k:'DISCOVER',render(b,done){lessonHead(b,'Acid, and the hard end',`In the early 80s Roland sold the <b>TB-303</b> as a bass machine for guitarists. Chicago producers twisted its knobs and found a squelch: Phuture's <b>Acid Tracks</b> (1987) started <b>acid</b>. Three ingredients: a resonant <b>low-pass filter</b>, <b>accents</b> (louder, brighter notes) and <b>slides</b> (the pitch glides into the next note).<br><br>At the hard end, <b>hard techno</b> (about 145–160 BPM) and German <b>schranz</b> push distorted kicks, heavy rumble and relentless loops.`);eyebrowW(b,'bunker');
+   const row=h('div','row wrap');row.style.gap='6px';b.append(row);
+   kitHear(row,[['▶ FLAT LINE',()=>playQ(playSt(acidSt(FLAT_ACID)))],['▶ ACID SQUELCH',()=>playQ(playSt(styleState('acid')))],['▶ HARD TECHNO',()=>playQ(playSt(styleState('hardtechno')))]],done)}},
+ {k:'LISTEN',render(b,done){b.innerHTML='<div class="big-title">Flat versus squelch</div><p>The same notes. A has no accents, no slides and little resonance. B has all three.</p><div class="abhost"></div>';
+   abWidget($('.abhost',b),[abSt(acidSt(FLAT_ACID),'Flat','A bass line. Nothing talks.'),abSt(styleState('acid'),'Squelch','Accents bark, slides glide, the filter talks.')],done)}},
+ {k:'EXPERIMENT',render(b,done,ctx){b.innerHTML='<div class="big-title">Acid Box</div><p>A 303-style bass line: notes, accents, slides and the five knobs that matter. Discover at least 3:</p>';
+   const mark=discover(b,['Push the resonance over 70%','Add a slide (the ~ row)','Add an accent (the A row)','Sweep the cutoff below 25% or above 75%'],3,done);
+   const rig=acidRig(b,{init:{notes:[1,0,1,0,4,0,1,0,1,0,5,0,1,0,3,0],acc:new Array(16).fill(0),sl:new Array(16).fill(0),reso:.3,env:.4,cut:.4},onChange:a=>{if(a.reso>.7)mark(0);if(a.sl.some(Boolean))mark(1);if(a.acc.some(Boolean))mark(2);if(a.cut<.25||a.cut>.75)mark(3)}});ctx.onLeave(()=>rig.stop())}},
+ {k:'CHALLENGE',render(b,done,ctx){b.innerHTML='<div class="big-title">Make it squelch</div><p>Turn this flat line into acid: 6 notes or more on 2 pitches or more, 2 accents or more, at least one slide into a note, resonance 60%+ and envelope mod 50%+. Then CHECK.</p>';
+   const rig=acidRig(b,{init:{notes:[1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0],acc:new Array(16).fill(0),sl:new Array(16).fill(0),reso:.2,env:.2,cut:.35}});ctx.onLeave(()=>rig.stop());const fb=h('div'),ck=h('button','btn neon block','CHECK');b.append(fb,ck);
+   ck.onclick=()=>{const a=rig.a,notes=a.notes.filter(Boolean),slid=ALL16.some(i=>i<15&&a.sl[i]&&a.notes[i]&&a.notes[i+1]);
+     const ok=rulesFeedback(fb,[{ok:notes.length>=6,bad:'Use at least 6 notes.'},{ok:new Set(notes).size>=2,bad:'Use at least 2 different pitches.'},{ok:ALL16.filter(i=>a.acc[i]&&a.notes[i]).length>=2,bad:'Put accents on 2 notes or more.'},{ok:slid,bad:'Add a slide on a note that is followed by another note.'},{ok:a.reso>=.6,bad:'Raise the resonance to 60% or more.'},{ok:a.env>=.5,bad:'Raise the envelope mod to 50% or more.'}],'Squelch! Accents bark, slides glide, the resonance talks. That is acid.');
+     ctx.attempt('acid',ok);if(ok){sfx.ok();done()}else sfx.bad()};
+   ctx.hint(b,{hints:['Fill more notes first, then add accents and a slide, then turn up RESO and ENV MOD.','A slide only glides if the next step also has a note.'],reveal:()=>{const s=styleState('acid').acid;rig.set({notes:s.notes,acc:s.acc,sl:s.sl,reso:s.reso,env:s.env,cut:s.cut,dec:s.dec})}})}}]}});
+
+Object.assign(BATTLES,{
+bouncer:{name:'THE BOUNCER',lv:18,hp:200,bpm:162,weak:'Offbeat bass and the grid',tests:['Techno styles','Bass shapes','Offbeat bass','Hits on the beat'],xp:200,coins:70,mission:'groovebox',cosmetics:['phones-strobe'],lines:['STROBE CANS UNLOCKED'],
+ intro:'A wall of muscle blocks the Bunker door. THE BOUNCER folds his arms: "Your groove doesn\'t bounce. You\'re not getting in."',attack:'The Bouncer shoves you back into the queue. Your groove stumbles!',hint:'He only lets in grooves where the bass bounces between the kicks, at hard bounce speed.',
+ listen:()=>playQ(playSt(styleState('bounce'))),
+ rounds:[qRound({label:'READ THE QUEUE',gen:()=>genreQ(1),dmg:40}),qRound({label:'NAME THE BASS',gen:()=>bounceQ(2),dmg:45}),
+  rigRound({label:'MAKE IT BOUNCE',skill:'bounce',tag:'tbounce',dmg:55,say:'His bass lands ON the kicks, so nothing bounces. Move it onto the four offbeats and push the tempo to 160 or more. Then STRIKE.',hints:['Offbeats are the "&" columns: steps 3, 7, 11 and 15.','Clear the bass from steps 1, 5, 9 and 13, put it on 3, 7, 11 and 15, tempo 162.'],
+   build:host=>({rig:bunkerRig(host,{tracks:['kick','clap','bass'],show:['bass'],init:{bpm:140,bassMode:'pluck',pat:{kick:BEATS,clap:[4,12],bass:{0:1,4:1,8:1,12:1}}},edit:{bass:true}})}),
+   check:k=>{const st=k.rig.st,off=OFF.every(i=>st.pat.bass[i])&&BEATS.every(i=>!st.pat.bass[i]),fast=st.bpm>=160;return off&&fast?{ok:true,win:'CRITICAL HIT! Kick, swell, kick, swell. The Bouncer\'s head starts nodding against his will.'}:{ok:false,why:`${off?'':'The bass must sit on all four offbeats and never on a kick. '}${fast?'':'Faster: 160 BPM or more.'}`}},
+   reveal:k=>k.rig.set({bpm:162,pat:Object.assign(k.rig.st.pat,{bass:ALL16.map(i=>i%4===2?1:0)})})}),
+  rigRound({label:'HIT THE GRID',skill:'bounce',tag:'tbounce',dmg:70,say:'Final blow! His hit lands on the last 16th before beat 1 and clashes with the bass swell. Put a short HIT on a beat instead. Then STRIKE.',hints:['Beats are the numbered columns.','Clear step 16 and put the HIT on step 1.'],
+   build:host=>({rig:bunkerRig(host,{tracks:['kick','clap','bass','hit'],show:['bass'],init:{bpm:162,bassMode:'reverse',pat:{kick:BEATS,clap:[4,12],bass:{2:1,6:1,10:1,14:1},hit:[15]}},edit:{hit:true}})}),
+   check:k=>{const hb=ALL16.filter(i=>k.rig.st.pat.hit[i]);return hb.length&&hb.some(i=>i%4===0)&&hb.every(i=>i%4!==3)?{ok:true,win:'CRITICAL HIT! The hit lands right on the beat. The Bouncer steps aside: "You\'re on the list."'}:{ok:false,why:hb.some(i=>i%4===3)?'A hit on the last 16th before a beat still clashes with the bass swell. Move it onto the beat.':'Put a hit on a beat (a numbered column).'}},
+   reveal:k=>k.rig.setPat('hit',ALL16.map(i=>i===0?1:0))})]},
+headliner:{name:'THE HEADLINER',lv:24,hp:320,bpm:140,weak:'Every techno groove',tests:['Techno styles','Swing','Polyrhythm','Rumble','Acid','A peak-time groove'],xp:300,coins:120,mission:'groovebox',ability:'rumblecraft',cosmetics:['hoodie-rave'],lines:['RAVE NEON HOODIE UNLOCKED'],
+ intro:'The lights drop. THE HEADLINER steps up to the decks at 4 AM and the whole Bunker roars: "Think you can hold this floor? Show me."',attack:'The Headliner drops a brutal transition. The floor turns against you!',hint:'Every round is a different corner of techno. Tempo first, then the signature.',
+ listen:()=>playQ(playSt(styleState('hardtechno'))),
+ rounds:[qRound({label:'READ THE FLOOR',gen:()=>genreQ(3),dmg:45}),qRound({label:'FEEL THE SWING',gen:()=>swingAmtQ(2),dmg:45}),qRound({label:'FOLLOW THE DRUMS',gen:()=>polyQ(2),dmg:45}),qRound({label:'SHAKE THE ROOM',gen:()=>rumbleQ(2),dmg:45}),qRound({label:'SQUELCH',gen:()=>acidQ(2),dmg:45}),
+  rigRound({label:'PEAK TIME',skill:['groove','polyrhythm','bounce'],tag:'tgenre',dmg:90,say:'Final blow! The Headliner hands you the decks for one track. Build what the floor asks for, then STRIKE.',hints:['Read the brief: tempo zone first, then the signature of the style.','Hardgroove = swing + percussion on the in-between 16ths. Tribal = toms, hand drums and an odd loop length. Hard bounce = 160+ and a bass on every offbeat.'],
+   build:host=>{const id=pick(['hardgroove','tribal','bounce']),R=CLUB_RULES[id];host.append(h('p','qprompt',`The floor wants ${R.name}. ${R.brief}`));return{style:id,rig:bunkerRig(host,{show:['swing','len','bass','rumble'],tracks:['kick','clap','chat','ohat','ltom','htom','conga','bongo','shaker','bass','hit'],init:{bpm:120,pat:{kick:BEATS}}})}},
+   check:k=>{const bad=ruleRows(k.style,k.rig.st).filter(r=>!r.ok);return bad.length?{ok:false,why:bad.map(r=>r.bad).join(' ')}:{ok:true,win:`CRITICAL HIT! A perfect ${CLUB_RULES[k.style].name.toLowerCase()} groove. The Headliner takes off the headphones, smiles, and hands you the closing set.`}},
+   reveal:k=>k.rig.load(k.style)})]}});
+
+TRIALS.btrial=scr=>trialShell(scr,{id:'btrial',world:'bunker',eyebrow:'CLUB',cert:'CLUB CERTIFIED',skills:['groove','polyrhythm','bounce','technogenres'],cosmetics:['kit-bunker'],mission:'groovebox',
+ brief:'Tonight you play three rooms: hardgroove in the warehouse at 2 AM, tribal in the jungle room at 3, hard bounce on the main stage at 5. Here are my demos. None of them work yet.',
+ problems:['Warehouse demo: too slow, dead straight, no percussion.','Jungle room demo: every loop is 16 steps long and there are no toms.','Main stage demo: too slow, and the bass sits on the kicks.'],
+ hints:['Open one room at a time. Each room has its own rules: tempo zone first.','Hardgroove = 135–145 BPM, swing 54–66% and percussion on the in-between 16ths. Tribal = toms, hand drums and one odd loop length. Hard bounce = 160+ BPM, a bass on every offbeat and a hit on the beat.'],
+ build:host=>{const ROOMS=['hardgroove','tribal','bounce'];const S0={hardgroove:mkSt({bpm:126,pat:{kick:BEATS,clap:[4,12],ohat:OFF}}),tribal:mkSt({bpm:132,pat:{kick:BEATS,conga:BEATS,shaker:ALL16}}),bounce:mkSt({bpm:140,bassMode:'rolling',pat:{kick:BEATS,clap:[4,12],bass:{0:1,4:1,8:1,12:1}}})};
+   const seg=h('div','seg2');seg.style.setProperty('--pc','#ff7a3a');seg.innerHTML=ROOMS.map((id,i)=>`<button data-i="${i}">${i+1} · ${CLUB_RULES[id].venue}</button>`).join('');host.append(seg);const brief=h('p','muted');host.append(brief);const rh=h('div');host.append(rh);let rig=null,cur=0;
+   const open=i=>{if(rig)rig.stop();cur=i;rh.innerHTML='';$$('button',seg).forEach(x=>x.classList.toggle('on',+x.dataset.i===i));const id=ROOMS[i];brief.textContent=CLUB_RULES[id].brief;
+     rig=bunkerRig(rh,{state:S0[id],show:['swing','len','bass','rumble','drive','stop'],tracks:['kick','clap','chat','ohat','ride','ltom','htom','conga','bongo','rim','shaker','bass','hit']})};
+   $$('button',seg).forEach(x=>x.onclick=()=>open(+x.dataset.i));open(0);return{S0,ROOMS,stop:()=>rig&&rig.stop(),rig:()=>rig,cur:()=>cur}},
+ demo:k=>playQ(playSt(styleState(k.ROOMS[k.cur()]))),demoText:'That is a reference groove for the room you have open.',
+ criteria:k=>k.ROOMS.map(id=>{const bad=ruleRows(id,k.S0[id]).filter(r=>!r.ok);return crit(CLUB_RULES[id].venue,!bad.length,`a real ${CLUB_RULES[id].name.toLowerCase()} set.`,bad.map(r=>r.bad).join(' '),id==='tribal'?'poly':id==='bounce'?'tbounce':'tswing')})});
+
+WVICT.bunker={big:['FLOOR','RULED'],then:'“Techno is just a loud kick.”',now:'“I can make a techno floor move.”',
+ learned:['The techno engine','Tempo zones of each style','A ducked rumble kick','Hardgroove swing','Tribal polyrhythms','Hard bounce offbeat bass','Hits on the grid','Acid accents and slides'],
+ daw:'In Ableton: a Drum Rack with the Groove Pool (MPC swing around 54–62%), a Reverb into EQ Eight and a sidechained Compressor for the rumble, clips of different lengths for polyrhythms, and a 303-style synth for acid. Same moves, real tools.',
+ next:'Back to the adventure',nextTxt:'Your techno skills follow you everywhere. Your studio has the Bunker Box now, and the Final Track offers techno, hardgroove, hard techno and hard bounce.'};
 /* =====================================================================
    THE FINAL TRACK — a small DAW (Ableton-style arrangement, piano rolls,
    mixer, drum-bus compressor, reverb, automation, limiter, LUFS render)
    ===================================================================== */
-const GENRES=[{id:'hiphop',n:'HIP-HOP',lo:80,hi:100},{id:'pop',n:'POP',lo:95,hi:125},{id:'house',n:'HOUSE',lo:118,hi:130},{id:'trap',n:'TRAP',lo:130,hi:150},{id:'dnb',n:'DRUM & BASS',lo:165,hi:178}];
+const GENRES=[{id:'hiphop',n:'HIP-HOP',lo:80,hi:100},{id:'pop',n:'POP',lo:95,hi:125},{id:'house',n:'HOUSE',lo:118,hi:130},{id:'trap',n:'TRAP',lo:130,hi:150},{id:'dnb',n:'DRUM & BASS',lo:165,hi:178},{id:'techno',n:'TECHNO',lo:125,hi:135},{id:'hardgroove',n:'HARDGROOVE',lo:135,hi:145},{id:'hardtechno',n:'HARD TECHNO',lo:145,hi:160},{id:'hardbounce',n:'HARD BOUNCE',lo:158,hi:172}];
 const FKEYS=[['A MINOR',0],['B MINOR',2],['C MINOR',3],['D MINOR',5],['E MINOR',-5],['F MINOR',-4],['G MINOR',-2]];
 const PROGS=[{n:'i – VI – III – VII',mood:'Epic and emotional',ch:[[57,60,64],[53,57,60],[48,52,55],[55,59,62]],bass:[45,41,36,43]},
  {n:'i – iv – v – i',mood:'Dark, classic minor',ch:[[57,60,64],[50,53,57],[52,55,59],[57,60,64]],bass:[45,38,40,45]},
@@ -3370,7 +3885,7 @@ function submitFinal(F,meas,buf){const C=evalFinal(F,meas);const n=C.filter(c=>c
 RENDER.cert=(scr,arg)=>{arg=arg||{};const c=S.cert||{score:arg.score||0,date:todayStr()};const C=arg.C||[];
   scr.innerHTML=`<div class="stack" style="padding-top:20px"><div class="cert"><p class="eyebrow" style="color:var(--amber)">BEAT QUEST · CERTIFICATE</p><h1 class="logo" style="font-size:34px">PRODUCER<span>CERTIFIED</span></h1><div class="victory-hero"></div>
    <p style="font-size:17px">This certifies that you produced a complete track: tempo, drums, bass, harmony, melody, sound design, arrangement, EQ, compression, space, automation and mastering.</p>
-   <div class="statgrid" style="width:100%"><div class="stat"><b>${c.score}%</b><span>final track score</span></div><div class="stat"><b>LV ${level()}</b><span>producer level</span></div><div class="stat"><b>${learnedSkills().length}/43</b><span>skills learned</span></div><div class="stat"><b>${S.defeated.length}</b><span>monsters</span></div></div>
+   <div class="statgrid" style="width:100%"><div class="stat"><b>${c.score}%</b><span>final track score</span></div><div class="stat"><b>LV ${level()}</b><span>producer level</span></div><div class="stat"><b>${learnedSkills().length}/${SKILLS.length}</b><span>skills learned</span></div><div class="stat"><b>${S.defeated.length}</b><span>monsters</span></div></div>
    <div class="row wrap" style="justify-content:center;gap:6px">${WORLDS.slice().reverse().map(W=>`<span class="chip ${worldDone(W.id)?'neon':''}">${W.name.toUpperCase()}</span>`).join('')}</div>
    <p class="muted">Issued ${c.date} · “${RANKS[RANKS.length-1][1]}”</p></div>
    ${C.length?`<div class="win stack" style="text-align:left"><p class="eyebrow">YOUR TRACK</p><div class="critl">${C.map(x=>`<div class="${x.ok?'ok':'no'}"><b>${x.ok?'✓':'✗'}</b><span>${x.k}<small>${x.ok?x.good:x.bad}</small></span></div>`).join('')}</div></div>`:''}
