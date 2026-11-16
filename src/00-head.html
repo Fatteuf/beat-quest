@@ -564,6 +564,27 @@ input[type=range]::-moz-range-thumb{width:18px;height:22px;background:var(--ambe
 .critl small{display:block;color:var(--dim);font-size:13.5px}
 .progcard{display:flex;flex-direction:column;gap:2px;text-align:left;padding:8px;background:#0b0816;border:2px solid #2a2248;min-height:56px}.progcard.on{border-color:var(--amber);background:#241a08}.progcard b{font-family:var(--f-disp);font-size:10px;color:var(--amber)}
 .fxrow{display:grid;grid-template-columns:62px 1fr;gap:6px;align-items:center}.fxrow>span{font-family:var(--f-disp);font-size:9px;letter-spacing:.06em}
+/* restored from beta 0: tool cards, quests list, style tab */
+.quest{display:flex;gap:12px;align-items:center}
+.quest canvas{flex:none}
+.quest .t{font-family:var(--f-disp);font-size:13px;font-weight:700}
+.quest .d{font-size:14px;color:var(--dim)}
+.quest .rw{font-size:12px;color:var(--amber);font-family:var(--f-disp)}
+.quest.claimed{opacity:.55}
+.tools{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tool{text-align:left;display:flex;flex-direction:column;gap:6px;background:var(--panel);border:3px solid var(--edge);clip-path:var(--notch);padding:12px;min-width:0}
+.tool.have{border-color:#6a4718}
+.tool.locked{opacity:.6}
+.tool .n{font-family:var(--f-disp);font-size:13px;font-weight:700}
+.tool .w{font-size:13px;color:var(--neon)}
+.tool .r{font-family:var(--f-disp);font-size:9.5px;color:var(--dim);letter-spacing:.06em}
+.tool .bar{height:9px}
+.swatches{display:flex;gap:8px;flex-wrap:wrap}
+.sw{min-width:44px;min-height:44px;padding:6px 10px;background:var(--panel2);border:3px solid var(--edge);display:flex;align-items:center;gap:8px;font-size:14px}
+.sw i{width:18px;height:18px;flex:none;border:2px solid rgba(0,0,0,.5)}
+.sw.on{border-color:var(--amber)}
+.sw.lock{opacity:.55}
+.dressing{display:flex;justify-content:center;align-items:flex-end;gap:10px;padding:16px;background:radial-gradient(circle at 50% 70%,#2a1f4a,var(--panel) 70%)}
 .cert{border:3px solid #ffcc4d;background:radial-gradient(circle at 50% 0,#3a2a08,#120e22 70%);padding:18px;text-align:center;display:flex;flex-direction:column;gap:10px;align-items:center}
 
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition:none!important}}

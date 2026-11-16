@@ -1,4 +1,4 @@
-const VERSION='2.0';
+const VERSION='2.1';
 /* ================= helpers ================= */
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const app=$('#app');
@@ -41,38 +41,41 @@ const CASSETTE=["kkkkkkkkkk","kaaaaaaaak","kawkaawkak","kaaaaaaaak","kaakkkkaak"
 const CASSETTE_PAL={k:'#140d1f',a:'#ff4f9a',w:'#ffffff'};
 const SIL_PAL=new Proxy({},{get:(t,k)=>k==='.'?null:'#2a2248'});
 
+/* icons: 16x16 pixel art, 1px outline, light from the top left.
+   k outline · a/A/b accent (base/light/dark) · l/L/m cream · g/G/n metal · y/Y/o gold · w/W/v wood · e screen · r/t LEDs · T/S accent/white without outline */
 const ICONS={
-volume:["....dd....","....dd....","..llllll..","..laaaal..","..llllll..","....dd....","....dd....","....dd....","....dd....","...dddd..."],
-drums:["..........",".llllllll.","laaaaaaaal","llllllllll","lalalalala","lalalalala","lalalalala","llllllllll",".d......d.","d........d"],
-midi:["..........","aaaaaaaaaa","ldldlldldl","ldldlldldl","ldldlldldl","llllllllll","llllllllll","llllllllll","aaaaaaaaaa",".........."],
-eq:["........ll",".......lal","......lal.",".....lal..","....lal...","d..lal....",".dlal.....","..dd......",".d.dd.....","d........."],
-comp:["..llllll..","..laaaal..","..laaaal..","..llllll..","....dd....","....dd....","....dd....","....dd....","....dd....","...dddd..."],
-reverb:["....ll....","...laal...","..laalal..",".laaalaal.",".laalaaal.","..laaaal..","...laal...","....ll....","...dddd...","..dddddd.."],
-delay:["dddddddddd",".laaaaaal.","..laaaal..","...laal...","....ll....","....ll....","...l..l...","..l.aa.l..",".laaaaaal.","dddddddddd"],
-dist:["....a.....","...aa.....","...aal....","..aall.a..","..alllaa..",".aallllaa.",".alllllla.",".allddlla.","..alddla..","...aaaa..."],
-synth:[".......aa.","......alla","......alla",".......aa.","......d...",".....d....","....d.....","...d......","..d.......",".d........"],
-auto:["l.........","l.......a.","l......a.a","l.....a...","l..a.a....","l.a.a.....","la........","l.........","llllllllll",".........."],
-limiter:["llllllllll","laaaaaaaal","laddddddal","laaaaaaaal","laaaaaaaal",".laaaaaal.",".laaaaaal.","..laaaal..","...laal...","....ll...."],
-mixer:[".l..l..l..",".l..l..l..",".a..l..l..",".a..l..a..",".l..a..a..",".l..a..l..",".l..l..l..",".l..l..l..","dddddddddd","dddddddddd"],
-wave:["..........",".aa.......","a..a......","....a....a",".....a..a.","......aa..",".........."],
-phones:[".lllllll.","l.......l","l.......l","aa.....aa","aa.....aa","aa.....aa"],
-path:["....a....","...lal...","....l....",".a..l..a.",".l..l..l.",".lllllll.","....l....","....l....","...lll..."],
-home:["....l....","...lal...","..laaal..",".laaaaal.","lllllllll",".l.....l.",".l.ll..l.",".l.ll..l.",".lllllll."],
-flag:["la.......","laaaa....","laaaaaaa.","laaaaaa..","laaa.....","l........","l........","l........","lll......"],
-scroll:["lllllllll","l.......l","l.aaaaa.l","l.......l","l.aaaa..l","l.......l","l.aaaaa.l","l.......l","lllllllll"],
-chest:[".lllllll.","laaaaaaal","laaaaaaal","llllLllll","laaaLaaal","laaaaaaal","laaaaaaal","lllllllll"],
-coin:["..lll..",".laaal.","laalaal","laalaal","laalaal",".laaal.","..lll.."],
-heart:[".aa.aa.","alaaaaa","aaaaaaa",".aaaaa.","..aaa..","...a..."],
-flame:["...l...","..ll...","..lal..",".llal.l",".laaall","laaaaal","laaaaal",".lllll."],
-sword:["........ll",".......lal","......lal.",".....lal..","....lal...","d..lal....",".dlal.....","..dd......",".d.dd.....","d........."],
-star:["....l....","....l....","...lal...","lllaaalll",".laaaaal.","..laaal..",".lal.lal.",".l.....l."],
-lock:["..ddd..",".d...d.",".d...d.","aaaaaaa","aaalaaa","aaalaaa","aaaaaaa"],
-skull:[".aaaaaa.","aaaaaaaa","a..aa..a","a..aa..a","aaaaaaaa",".aaaaaa.",".a.aa.a.",".aaaaaa."],
-bolt:["....aa","...aa.","..aa..",".aaaaa","...aa.","..aa..",".aa...","aa...."]};
-const DIM_PAL={l:'#3d3166',a:'#2a2248',d:'#2a2248',L:'#3d3166'};
-function icPal(col){return{l:'#f1e7d0',a:col||'#ffb547',d:'#8a7fa8',L:'#ffb547'}}
-function icon(name,col,sc,dimmed){return sprite(ICONS[name],dimmed?DIM_PAL:icPal(col),sc)}
-const ICON_DEFAULT_COL={coin:'#ffcc4d',heart:'#ff4f9a',flame:'#ff7a3a',lock:'#6a5f9a',skull:'#ff4f9a',wave:'#3ef0c8',phones:'#3ef0c8',path:'#a98bff',bolt:'#a98bff'};
+home:['................','.......kk.......','......kAbk......','.....kAaabk.....','....kAaaaabk....','...kAaaaaaabk...','..kAaaaaaaaabk..','.kAaaaaaaaaaabk.','kbbbbbbbbbbbbbbk','.kkkkkkkkkkkkkk.','..kLYYllllllmk..','..kLoollGgnlmk..','..kLllllGynlmk..','..kLllllGgnlmk..','..kmmmmmGgnmmk..','...kkkkkkkkkk...'],
+flag:['..kk............','.kYYkkkkkkkkk...','.kGnAAAbbaaaak..','.kGnAAAbbaaaak..','.kGnAAAbbaaak...','.kGnAAAbbaak....','.kGnAAAbbaaak...','.kGnAAAbbaaaak..','.kGnbbbbbbbbbk..','.kGnkkkkkkkkk...','.kGnk...........','.kGnk...........','.kGnk...........','.kGnk...........','kooook..........','.kkkk...........'],
+phones:['................','.....kkkkkk.....','....kGGGGGGk....','...kGGnnnnggk...','..kGGkkkkkkggk..','.kGGk......kgnk.','.kGgk......kgnk.','.kGgkk....kkgnk.','.kAaalk..klaabk.','.kAaalk..klaabk.','.kAaalk..klaabk.','.kAaalk..klaabk.','.kAaalk..klaabk.','..kbbmk..kmbbk..','...kkk....kkk...','................'],
+drums:['..kk........kk..','.kWWkk....kkWWk.','..kkWWkkkkWWkk..','....kkWWwwkk....','....kkwwWWkk....','...kLLkkkkLLk...','..kknGGGGGGnkk..','.knGLLLLLLLLGnk.','.kglllllllllmgk.','.kGGGGGGGGGGGnk.','.kAaGaaGaaGaabk.','.kAagaagaagaabk.','.kAaGaaGaaGaabk.','.knGGGGGGGGGGnk.','..knnnnnnnnnnk..','...kkkkkkkkkk...'],
+path:['................','.......kk.......','..kkkkkyokkk....','.kAAAAAAAAAAk...','.kaallllllaaak..','.kbbbbbbbbbbk...','..kkkkkyokkkkk..','...kAAAAAAAAAAk.','..kaaaaallllaaak','...kbbbbbbbbbbk.','....kkkyokkkkk..','......kyok......','......kyok......','.....kYyook.....','....kooooook....','.....kkkkkk.....'],
+scroll:['..kkkkkkkkkkkk..','.kyLLLLLLLLLLyk.','.kommmmmmmmmmok.','..klllllllllmk..','..klnnnnnnnlmk..','..klllllllllmk..','..klnnnnnnnnmk..','..klllllllllmk..','..klnnnnnlllmk..','..klllllllllmk..','..kllllllAalmk..','..kllllllabmmk..','.kyLLLLLLLLLLyk.','.kommmmmmmmmmok.','..kkkkkkkkkkkk..','................'],
+midi:['................','................','.kkkkkkkkkkkkkk.','kAAAAAAAAAAAAAak','kAaGaGaaettteabk','kbbbbbbbbbbbbbbk','kLLnnLnnLmLLnnLk','klleeleelmlleelk','klleeleelmlleelk','klleeleelmlleelk','kllmllmllmllmllk','kllmllmllmllmllk','kmmnmmnmmnmmnmmk','kbbbbbbbbbbbbbbk','.kkkkkkkkkkkkkk.','................'],
+synth:['...........k....','.........kkAkk..','........kALAaak.','.......kALAaaaak','.......kAAaaaabk','.......kAaaaabbk','.......kaaaabbbk','.......kyoabbbk.','......kyokkbkk..','.....kyok..k....','....kyok........','...kyok.........','..kyok..........','.kyok...........','kyok............','.kk.............'],
+wave:['................','................','....k...........','...kAk..........','..kAaAk.........','..kakaAk........','.kAk.kaAk.......','.kak..kaak....k.','kAk....kak...kAk','kak....kAk..kAbk','.k.....kbAk.kbk.','........kbAkAk..','.........kbAbk..','..........kbk...','...........k....','................'],
+eq:['................','..kkkkkkkkkkkk..','.kGGGGGGGGGGGGk.','kGeeeneeeeneeenk','kGeeeneeeeneeenk','kGeeeneAAeneeenk','kGeeeneaaeneeenk','kGeeeeAbbaeeeenk','kGeeeAbbbbaeeenk','kGaaabbbbbbaaank','kGeeeneeeeneeenk','kGeeeneeeeneeenk','.knnnnnnnnnnnnk.','..kkkkkkkkkkkk..','................','................'],
+comp:['................','.kkkkkkkkkkkkkk.','kAAAAAAAAAAAAAak','kALLLLLLLLLLLLbk','kAlllllnnlllllbk','kAlllnnllnnlllbk','kAllnllllllerlbk','kAlnlllllellrlbk','kAlllllllellllbk','kAllllllelllllbk','kAmmmmmggmmmmmbk','kAaaaaaaaaaarabk','kbbbbbbbbbbbbbbk','.kkkkkkkkkkkkkk.','................','................'],
+dist:['................','...kkkkkkkkkk...','..kAAAAAAAAAak..','..kAGGaGGaGGbk..','..kAnnannannbk..','.knAaaarraaabnk.','..kAaaaaaaaabk..','..kAbbbbbbbbbk..','..kAaaaaaaaabk..','..kAaaaGGaaabk..','..kAaaGLggaabk..','..kAaagggnaabk..','..kAaaannaaabk..','..kabbbbbbbbbk..','...kkkkkkkkkk...','................'],
+reverb:['.......kk.......','......kAbk......','..S..kAAabk.....','.SSSkAAaabbk....','..SkAAAaabbbk...','...kLAAaabbbk...','...kLAAaabbbk...','...kLAAaabbbk...','...kAAAaabbbk...','...kAAAaabbbk...','....kAAaabbk.S..','.....kAabbk.SSS.','......kabk...S..','.......kk.......','................','................'],
+delay:['..kkkkkkkkkkkk..','.kYYYYYYYYYYYYk.','.kooooooooooook.','..kLeeeeeeeemk..','...kLeeeeeemk...','....kLAAAAmk....','.....kLaamk.....','......kaak......','......kaek......','.....kLaemk.....','....kLeaeemk....','...kLeAAAAemk...','..kLaaaaaabbmk..','.kYYYYYYYYYYYYk.','.kooooooooooook.','..kkkkkkkkkkkk..'],
+mixer:['................','.kkkkkkkkkkkkkk.','kGGGGGGGGGGGGGnk','kGgegggegggeggnk','kGgeggAAAggeggnk','kGgeggbbbggeggnk','kGgegggeggAAAgnk','kGgegggeggbbbgnk','kGgegggegggeggnk','kGAAAggegggeggnk','kGbbbggegggeggnk','kGgegggegggeggnk','kGgegggegggeggnk','knnnnnnnnnnnnnnk','.kkkkkkkkkkkkkk.','................'],
+auto:['................','.kkkkkkkkkkkkkk.','kAAAAAAAAAAAAAak','kaaaaaaaaaaaaabk','kGeeeeeeeeeLLAnk','kGeeeeeeeeALLank','kGeeeeeeeAabbbnk','kGeeeeeLLabbbbnk','kGeeeeeLLbbbbbnk','kGeeeAAbbbbbbbnk','kGeLLaabbbbbbbnk','kGALLbbbbbbbbbnk','kGabbbbbbbbbbbnk','knnnnnnnnnnnnnnk','.kkkkkkkkkkkkkk.','................'],
+limiter:['................','..kkkkkkkkkkkk..','.kYYYYYYYYYYYYk.','.kYAAAAAaaaaaok.','.kYALLLLLLLLaok.','.kYAmmmmmmmmaok.','.kYAAAALLaaaaok.','.kYAAALLLLaaaok.','.kYAAAALLaaaaok.','.kYAAAALLaaaaok.','..kYAAALLaaaok..','...kYAAAaaaok...','....kYAAaaok....','.....kYaaok.....','......kook......','.......kk.......'],
+volume:['................','................','.......k........','......kAk..T....','.....kAak...T...','..kkkAaakT...T..','.kGGGAaak.T..T..','.kgggAaak.T..T..','.kgggaabk.T..T..','.knnnabbk.T..T..','..kkkabbkT...T..','.....kbbk...T...','......kbk..T....','.......k........','................','................'],
+coin:['................','.....kkkkkk.....','....kYYYYYYk....','...kYooooooyk...','..kYoYyyyyoYyk..','.kYoYyyyooyYYok.','.kYoyyyyoyoyYok.','.kYoyyyyoyyyYok.','.kYoyyyyoyyyYok.','.kYoyyoooyyyYok.','.kYooyooyyyYYok.','..kyYYyyyyYYok..','...kyYYYYYYok...','....kooooook....','.....kkkkkk.....','................'],
+heart:['................','................','...kkk....kkk...','..kAAak..kaaak..','.kALLaakkaaaabk.','.kALaaaaaaaaabk.','.kAaaaaaaaaaabk.','.kaaaaaaaaaabbk.','..kaaaaaaaabbk..','...kaaaaaabbk...','....kaaaabbk....','.....kaabbk.....','......kbbk......','.......kk.......','................','................'],
+flame:['................','.........kk.....','........kAbk....','.......kAaabk...','......kAaaabk...','.....kAaaaaabk..','....kAaayoaaabk.','...kAaayyyoaabk.','...kAayyyyoaabk.','..kAaayyyyyoabk.','..kAayyYYyyoabk.','..kbayyYYYyoabk.','...kboyYYYobbk..','....kboooobkk...','.....kkkkkk.....','................'],
+sword:['..............k.','.............kLk','............kLGk','...........kLGnk','..........kLGnk.','.........kLGnk..','....k...kLGnk...','...kYkkkLGnk....','....kYoLGnk.....','.....kYonk......','....kaaYok......','...kabbkYok.....','..kabbk.kok.....','.kYobk...k......','.kook...........','..kk............'],
+star:['.......k........','......kbk.......','......kbk.......','.....kAabk......','.....kAabk......','.kkkkkAabkkkkk..','kbAAAALaaaaaabk.','.kbbAALaaaabbk..','..kkAAAaaabkk...','...kaaaaaabk....','...kaaabaabk....','...kaabkbabk....','...kbbk.kbbk....','..kbkk...kkbk...','...k.......k....','................'],
+lock:['......kkkk......','.....kGGGGk.....','....kGGkkGnk....','...kGGk..kgnk...','...kGgk..kgnk...','..kkGgkkkkgnkk..','.kAAAAAAAAAAAak.','.kAaaaaaaaaaabk.','.kAaaaakkaaaabk.','.kAaaaakkaaaabk.','.kAaaaakkaaaabk.','.kAaaaaaaaaaabk.','.kAaaaaaaaaaabk.','.kbbbbbbbbbbbbk.','..kkkkkkkkkkkk..','................'],
+skull:['................','.....kkkkkk.....','...kkLLLLLLkk...','..kLLLLlllllmk..','.kLLllllllllmmk.','.kLllllllllllmk.','.kLlkkkllkkklmk.','.kLlkakllkaklmk.','.kLlkkkllkkklmk.','.kLlllllkklllmk.','..klllllllllmk..','...kLkLkLkLmk...','...kmmmmmmmmk...','....kkkkkkkk....','................','................'],
+bolt:['.........kkkk...','........kAAAak..','.......kAAabk...','......kAAabk....','.....kAAabk.....','....kAAabkkk....','...kAAaaaaabk...','....kkkAaabk....','.....kAaabk.....','....kAaabk......','....kAabk.......','...kAabk........','...kAbk.........','..kAbk..........','..kbk...........','...k............'],
+chest:['................','....kkkkkkkk....','...kWWWWWWWWk...','..kWWgwwwwgwvk..','.kWwwgwwwwgwwvk.','.kWwwgwwwwgwwvk.','.kGGGGGYyGGGGnk.','.kWwwgYyyogwwvk.','.kWwwgyeeogwwvk.','.kWwwgoooogwwvk.','.kWwwgwwwwgwwvk.','.kWwwgwwwwgwwvk.','.kvvvnvvvvnvvvk.','..kkkkkkkkkkkk..','................','................']};
+function icPal(col){col=col||'#ffb547';return{k:'#140d1f',a:col,A:shade(col,.45),b:shade(col,-.38),T:col,l:'#f1e7d0',L:'#ffffff',m:'#b9aacf',S:'#ffffff',g:'#7d72a3',G:'#b0a6d2',n:'#4d4373',y:'#ffcc4d',Y:'#fff1a6',o:'#c9821c',w:'#9a5a2e',W:'#c98a4e',v:'#5e321a',e:'#241c40',r:'#ff4f5a',t:'#3ef0c8'}}
+const DIM_PAL=(()=>{const p={k:'#140d1f'};'ALGYWSlt'.split('').forEach(c=>p[c]='#3d3166');'agywmTr'.split('').forEach(c=>p[c]='#322a57');'bnove'.split('').forEach(c=>p[c]='#262040');return p})();
+const ICON_DEFAULT_COL={'home': '#ffb547', 'drums': '#ffb547', 'midi': '#ffb547', 'eq': '#3ef0c8', 'comp': '#ff7a3a', 'volume': '#ffb547', 'dist': '#ff4f5a', 'mixer': '#ffb547', 'auto': '#ffcc4d', 'limiter': '#6cb8ff', 'phones': '#3ef0c8', 'path': '#a98bff', 'flag': '#ff4f9a', 'scroll': '#ff4f9a', 'chest': '#ffcc4d', 'heart': '#ff4f9a', 'lock': '#a98bff', 'skull': '#ff4f9a', 'bolt': '#a98bff', 'sword': '#ff4f9a', 'reverb': '#6cb8ff', 'delay': '#6cb8ff', 'coin': '#ffcc4d', 'wave': '#3ef0c8', 'flame': '#ff7a3a', 'star': '#ffcc4d', 'synth': '#a98bff'};
+const iconScale=sc=>Math.max(1,Math.round((sc||3)*.625));
+function icon(name,col,sc,dimmed){return sprite(ICONS[name],dimmed?DIM_PAL:icPal(col||ICON_DEFAULT_COL[name]),iconScale(sc))}
 
 /* ================= data ================= */
 const TOOLS=[
@@ -550,7 +553,7 @@ function modal(inner,opt){opt=opt||{};const back=h('div','modal-back'+(opt.cls?'
   if(typeof inner==='string')m.innerHTML=inner;else m.append(inner);back.append(m);app.append(back);back.close=()=>back.remove();
   if(opt.dismiss)back.addEventListener('click',e=>{if(e.target===back)back.remove()});return back}
 function coinRow(n){return`<span class="row" style="justify-content:center;gap:8px"><span data-ic="coin"></span><b>+${n}</b> COINS</span>`}
-function hydrateIcons(root){$$('[data-ic]',root).forEach(el=>{const name=el.dataset.ic;const col=el.dataset.col||ICON_DEFAULT_COL[name];const sc=+el.dataset.sc||3;const pal=el.dataset.dim?DIM_PAL:icPal(col);
+function hydrateIcons(root){$$('[data-ic]',root).forEach(el=>{const name=el.dataset.ic;const col=el.dataset.col||ICON_DEFAULT_COL[name];const sc=iconScale(+el.dataset.sc||3);const pal=el.dataset.dim?DIM_PAL:icPal(col);
   if(el.tagName==='CANVAS')drawSprite(el,ICONS[name],pal,sc);else el.replaceWith(sprite(ICONS[name],pal,sc))})}
 function reward(o){return new Promise(res=>{const before=lvProg();S.xp+=o.xp||0;S.coins+=o.coins||0;(o.cosmetics||[]).forEach(id=>{if(!S.owned.includes(id))S.owned.push(id)});save();const after=lvProg();
   const rb=rankFor(before.n),ra=rankFor(after.n);
