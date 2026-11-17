@@ -67,7 +67,7 @@ const synOk=x=>Array.isArray(x)&&x.length===4&&x.every(Number.isFinite)&&x[0]>=0
 /* scale degrees on 16 steps (the 2.5 format and the ideas) → clip notes; a note lasts until the next one, up to what that sound used to hold */
 function degToClip(arr,snd){const hold={lead:2,pad:16,mine:4}[snd]||1,out=[];arr.forEach((d,i)=>{d=Math.round(+d||0);if(d<1||d>8)return;let l=1;if(hold>1)while(l<hold&&i+l<16&&!arr[i+l])l++;out.push([i,SYN_DEG[d-1],l,100])});return out}
 function synClean(o){const n=synNew();SYN_KEYS.forEach(k=>{const T=o&&o[k];if(!T)return;if(SYN_SOUNDS[T.snd])n[k].snd=T.snd;n[k].oct=clamp(Math.round(+T.oct||0),-1,1);
-  if(Array.isArray(T.clip))n[k].clip=T.clip.map(x=>Array.isArray(x)?x.map(v=>Math.round(+v)):x).filter(synOk);else if(Array.isArray(T.notes)&&T.notes.length===16)n[k].clip=degToClip(T.notes,n[k].snd)});return n}
+  if(Array.isArray(T.clip))n[k].clip=dedupeNotes(T.clip.map(x=>Array.isArray(x)?x.map(v=>Math.round(+v)):x).filter(synOk));else if(Array.isArray(T.notes)&&T.notes.length===16)n[k].clip=degToClip(T.notes,n[k].snd)});return n}
 const synBase=(st,T)=>st.root+(SYN_SOUNDS[T.snd]||SYN_SOUNDS.stab).base+12*(T.oct||0);
 /* one note of the stab sound, for chords written note by note */
 function stabOne(t,v,m,d){const c=AC();d=d||OUT();const lp=c.createBiquadFilter(),g=c.createGain();lp.type='lowpass';lp.Q.value=4;lp.frequency.setValueAtTime(5200,t);lp.frequency.exponentialRampToValueAtTime(700,t+.13);

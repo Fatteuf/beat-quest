@@ -13,6 +13,7 @@ Le code source est dans `src/`. Les fichiers sont assemblés dans l'ordre de leu
 | `31-pianoroll.js` | Le piano roll MIDI : le clip du studio (débloqué par l'outil MIDI) et les synthés de la Bunker Box |
 | `32-studiomix.js` | L'EQ et l'automation du studio (débloqués par les outils EQ et Automation) |
 | `33-rewards.js` | MY REWARDS : toutes les récompenses du jeu et leur place dans le studio |
+| `34-shop.js` | La boutique (skins, pets, déco du studio, kits) et les flammes (série de jours, bonus, boucliers) |
 | `40-rigs.js` | Plugins : synthé, EQ, compresseur, reverb, delay, mixeur, automation, limiteur |
 | `45-questions2.js` | Questions des mondes 2 à 7 |
 | `47-techno.js` | Moteur techno : sons 909, rumble, swing, styles, Bunker Box (avec ses 2 synthés), Rumble Forge, Acid Box, questions techno |

@@ -27,6 +27,8 @@
 html{height:100%;box-sizing:border-box}
 *,*::before,*::after{box-sizing:border-box}
 body{height:100%;margin:0;background:var(--void);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.4;display:flex;justify-content:center;align-items:center;-webkit-tap-highlight-color:transparent;overscroll-behavior:none}
+/* Pixelify Sans draws its "fi" / "fl" ligatures as an "A" ("flame" read "Aame"): keep every letter separate */
+body,button,input,textarea{font-variant-ligatures:none;font-feature-settings:"liga" 0,"clig" 0}
 button{font:inherit;color:inherit;cursor:pointer;touch-action:manipulation}
 button:focus-visible,input:focus-visible{outline:3px solid var(--neon);outline-offset:2px}
 .btn:focus-visible,.menubtn:focus-visible,.abbtn:focus-visible,.tool:focus-visible,.jam:focus-visible,.pad:focus-visible,.pip-cta:focus-visible,.trio button:focus-visible,.gcard:focus-visible{outline:none;box-shadow:inset 0 0 0 3px var(--neon)}
@@ -647,6 +649,30 @@ input[type=range]::-moz-range-thumb{width:18px;height:22px;background:var(--ambe
 .bb-row.syn-r{margin-top:4px}
 .bb-nm.syn-nm{background:none;border:0;padding:0;min-height:0;cursor:pointer;text-align:left;text-decoration:underline dotted;text-underline-offset:3px}
 .syn-roll{color:var(--pc)}
+/* shop and flames */
+.topbar .chip.amber,.topbar .chip.pink{cursor:pointer}
+.shop-head{display:flex;gap:12px;align-items:center}
+.shop-stage{display:flex;align-items:flex-end;justify-content:center;gap:4px;min-width:100px;min-height:100px;padding:6px;background:#140f28;border:2px solid var(--edge)}
+.shop-coins{font-size:30px;color:var(--amber);display:flex;align-items:center;gap:6px;line-height:1}
+.shop-sel{display:flex;flex-direction:column;gap:6px}
+.shop-tabs{display:flex;flex-wrap:wrap;gap:4px}
+.shop-tabs button{flex:1 0 auto;min-height:40px;padding:4px 8px;background:var(--panel);border:2px solid var(--edge);font-family:var(--f-disp);font-size:10px;letter-spacing:.05em;color:var(--dim)}
+.shop-tabs button.on{border-color:var(--amber);color:var(--amber);background:#1d1636}
+.shop-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:6px}
+.shop-it{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 4px;background:var(--panel2);border:2px solid var(--edge);min-height:112px;text-align:center}
+.shop-it b{font-family:var(--f-disp);font-size:9px;letter-spacing:.04em;line-height:1.2}
+.shop-it small{font-size:12px;line-height:1.15;color:var(--dim)}
+.shop-it.buy small{color:var(--amber)}
+.shop-it.own small{color:var(--neon)}
+.shop-it.used{border-color:var(--neon)}
+.shop-it.sel{border-color:var(--amber);box-shadow:inset 0 0 0 2px var(--amber)}
+.shop-it.flame,.shop-it.poor,.shop-it.reward{opacity:.62}
+.shop-it.flame small{color:var(--magenta)}
+.shop-art{min-height:48px;display:flex;align-items:flex-end;justify-content:center}
+.shop-solo{font-family:var(--f-disp);font-size:9px;color:var(--dim)}
+.flame-cta{display:flex;gap:10px;align-items:center;width:100%;padding:10px 12px;background:#2a0f20;border:3px solid var(--magenta);color:var(--ink);animation:flamepulse 1.6s steps(2) infinite}
+@keyframes flamepulse{50%{border-color:#ffb547}}
+.fl-row{display:flex;gap:10px;align-items:center;text-align:left}
 .mrflash{animation:mrflash .45s steps(2) 3}
 
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition:none!important}}
@@ -668,6 +694,7 @@ input[type=range]::-moz-range-thumb{width:18px;height:22px;background:var(--ambe
   <section class="screen full" id="s-victory" hidden></section>
   <section class="screen full" id="s-final" hidden></section>
   <section class="screen full" id="s-cert" hidden></section>
+  <section class="screen" id="s-shop" hidden></section>
   <nav id="nav" hidden aria-label="Main">
     <button data-go="home"><canvas class="px" data-ic="home"></canvas>HOME</button>
     <button data-go="map"><canvas class="px" data-ic="flag"></canvas>MAP</button>

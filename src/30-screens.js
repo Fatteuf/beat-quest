@@ -1,12 +1,12 @@
 /* ================= navigation ================= */
 const RENDER={};let cur='title',booted=false,playBack='train';
-const NAVSCREENS=['home','map','region','studio','train','path','quests'];
+const NAVSCREENS=['home','map','region','studio','train','path','quests','shop'];
 function go(name,arg){seq.stop();stopGroup();if(typing)typing.finish();$$('.modal-back,.sheet').forEach(m=>m.remove());if(A.busComp)transparentComp(A.busComp);
   $$('.screen').forEach(s=>{s.hidden=s.id!=='s-'+name});const scr=$('#s-'+name);scr.scrollTop=0;scr.classList.remove('enter','puzzle');
-  $('#nav').hidden=!NAVSCREENS.includes(name);const navOn={region:'map',quests:'home'}[name]||name;$$('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.go===navOn));
+  $('#nav').hidden=!NAVSCREENS.includes(name);const navOn={region:'map',quests:'home',shop:'home'}[name]||name;$$('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.go===navOn));
   if(booted){void scr.offsetWidth;scr.classList.add('enter');const w=$('#wipe');w.classList.remove('go');void w.offsetWidth;w.classList.add('go')}booted=true;
   cur=name;RENDER[name](scr,arg);updateBadge();
-  if(['home','map','region','train','path','quests'].includes(name))startMusic();else stopMusic()}
+  if(['home','map','region','train','path','quests','shop'].includes(name))startMusic();else stopMusic()}
 function updateBadge(){const b=$('#nav .badge');if(!b||!S)return;const n=dueSkills().length+S.pq.length;b.hidden=!n;b.textContent=n}
 function topbar(title,back){return`<div class="topbar">${back?`<button class="iconbtn" data-back="${back}" aria-label="Back">◀</button>`:''}<div class="title">${title}</div><span class="chip amber" title="Coins"><span data-ic="coin" data-sc="2"></span><span class="num" style="font-size:18px">${S.coins}</span></span><span class="chip pink" title="Day streak"><span data-ic="flame" data-sc="2"></span><span class="num" style="font-size:18px">${S.streak}</span></span></div>`}
 function wireBack(scr){$$('[data-back]',scr).forEach(b=>b.onclick=()=>{sfx.tap();go(b.dataset.back)})}
@@ -50,6 +50,9 @@ RENDER.home=scr=>{const lp=lvProg();const rk=rankFor(lp.n),rn=rankNext(lp.n);con
   <div class="win raised stack" style="border-color:#6a4718"><p class="eyebrow" style="color:var(--amber)">ADVENTURE</p>
    ${n?`<h2>${n.quest}</h2><p class="muted">${WNAME[n.w]} · ${n.kind.toLowerCase()} · about ${n.mins} min</p>`:`<h2>${S.cert?'Producer certified':'Every world mastered'}</h2><p class="muted">Keep your skills fresh with recalls and the Ear Gym, or open the DAW and produce another track.</p>`}
    <button class="btn big block" id="cont">${n?'CONTINUE ADVENTURE ▶':'OPEN THE FINAL TRACK ▶'}</button></div>
+  ${flameReady()?`<button class="flame-cta" data-a="claim"><span data-ic="flame" data-sc="3"></span><span class="stack" style="gap:2px;text-align:left"><b>FLAME BONUS READY</b><span style="font-size:14px">Day ${S.streak} in a row: tap for +${flameBonus()} coins</span></span></button>`:''}
+  <div class="win stack" style="border-color:#8a6a18"><div class="row sp"><p class="eyebrow" style="color:var(--amber)">SHOP</p><span class="chip amber"><span data-ic="coin" data-sc="2"></span><span class="num" style="font-size:18px">${S.coins}</span></span></div>
+   <p class="muted" style="font-size:15px">Skins, pets, decor for your studio and new drum kits. Spend the coins you win.</p><button class="btn block" data-a="shop" style="background:var(--amber)">OPEN THE SHOP ▶</button></div>
   ${worldOpen('bunker')&&!worldDone('bunker')?`<div class="win stack" style="border-color:#ff3d7f"><p class="eyebrow" style="color:#ff3d7f">SIDE WORLD · TECHNO BUNKER</p><h3>${WSTAGES.bunker.some(x=>S.done.includes(x.id))?'Back to the Bunker':'A bass rumbles under Beat Forest'}</h3><p class="muted" style="font-size:15px">Hardgroove, tribal, hard bounce, rumble kicks and acid. ${WSTAGES.bunker.filter(x=>S.done.includes(x.id)).length}/${WSTAGES.bunker.length} stages cleared.</p><button class="btn pink block" data-a="bunker">ENTER THE BUNKER ▶</button></div>`:''}
   ${pq?`<div class="win stack" style="border-color:var(--violet)"><p class="eyebrow" style="color:var(--violet)">PERSONAL QUEST</p><h3>${PQ[pq.tag].title}</h3><p class="muted" style="font-size:15px">${PQ[pq.tag].why} Get 3 right to clear it.</p><div class="bar"><i style="width:${pq.prog/pq.goal*100}%;--c:var(--violet)"></i></div><p class="muted" style="font-size:13px">Reward: +120 XP · ${SK[PQ[pq.tag].skill].n} mastery +8%</p><button class="btn violet block" data-a="pq">START TRIAL</button></div>`:''}
   <p class="eyebrow">YOUR PROGRESS</p>
@@ -66,6 +69,8 @@ RENDER.home=scr=>{const lp=lvProg();const rk=rankFor(lp.n),rn=rankNext(lp.n);con
   renderSession($('#session',scr));
   $('.pipslot',scr).append(pipEl(3,'float'));
   $('#cont',scr).onclick=()=>{sfx.tap();continueAdventure()};const bkb=$('[data-a=bunker]',scr);if(bkb)bkb.onclick=()=>{sfx.tap();go('region','bunker')};
+  $('[data-a=shop]',scr).onclick=()=>{sfx.tap();go('shop')};const fcl=$('[data-a=claim]',scr);if(fcl)fcl.onclick=()=>{claimFlame();RENDER.home(scr)};
+  if(S.shieldSaved===todayStr()&&S.shieldToast!==todayStr()){S.shieldToast=todayStr();save();toast('STREAK SHIELD USED · YOUR FLAMES ARE SAFE')}
   const pqb=$('[data-a=pq]',scr);if(pqb)pqb.onclick=()=>{sfx.tap();startPQ(0)};
   $$('[data-to]',scr).forEach(b=>b.onclick=()=>{sfx.tap();go(b.dataset.to)});
   $('#askpip',scr).onclick=()=>{sfx.tap();openCoach()};
@@ -570,7 +575,7 @@ RENDER.path=scr=>{const lp=lvProg();const rk=rankFor(lp.n),rn=rankNext(lp.n);con
       d.onclick=()=>{if(!seen){toast('UNKNOWN MONSTER · '+WNAME[M.world].toUpperCase());return}const m=modal(`<div class="mi"></div><h2>${M.name}</h2><p><b style="color:var(--magenta)">Musical problem:</b> ${M.problem}</p><p class="muted">Beaten with: ${M.weak}</p><button class="btn block mi-x">CLOSE</button>`,{dismiss:true});$('.mi',m).append(monEl(k,6));$('.mi-x',m).onclick=()=>m.close()};bg.append(d)})}
   if(pathTab==='style'){const slots=[['hoodie','HOODIE'],['phones','HEADPHONES'],['hair','HAIR'],['comp','COMPANION']];c.innerHTML=`<div class="win dressing"></div><p class="muted" style="font-size:14px">Cosmetics are just for style. They never change combat or scores. You have ${S.coins} coins.</p>${slots.map(([s,n])=>`<div class="stack" style="gap:8px"><p class="eyebrow">${n}</p><div class="swatches">${COS.filter(x=>x.slot===s).map(x=>{const own=S.owned.includes(x.id);return`<button class="sw ${S.eq[s]===x.id?'on':''} ${own?'':'lock'}" data-c="${x.id}"><i style="background:${x.col}"></i>${x.name}${own?'':x.price?` · <span style="color:var(--amber)">${x.price}c</span>`:' · LOCKED'}</button>`}).join('')}</div></div>`).join('')}`;
     const dr=$('.dressing',c);dr.append(heroEl(6,'bob'));const cp=companionEl(4);if(cp)dr.append(cp);
-    $$('[data-c]',c).forEach(b=>b.onclick=()=>{const x=cos(b.dataset.c);if(!S.owned.includes(x.id)){if(x.price){if(b.dataset.arm){if(S.coins>=x.price){S.coins-=x.price;S.owned.push(x.id);S.eq[x.slot]=x.id;save();sfx.coin();RENDER.path(scr)}else{toast('NOT ENOUGH COINS · QUESTS AND BATTLES EARN MORE');sfx.bad()}}else{b.dataset.arm=1;b.innerHTML=`<i style="background:${x.col}"></i>TAP TO BUY · ${x.price}c`}}else toast('LOCKED · '+x.how.toUpperCase());return}S.eq[x.slot]=x.id;save();sfx.tap();RENDER.path(scr)})}};
+    $$('[data-c]',c).forEach(b=>b.onclick=()=>{const x=cos(b.dataset.c);if(!S.owned.includes(x.id)){if(x.price){sfx.tap();go('shop',{sel:x.id})}else toast('LOCKED · '+x.how.toUpperCase());return}S.eq[x.slot]=x.id;save();sfx.tap();RENDER.path(scr)})}};
 function skillInfo(id){const s=S.skills[id]||{u:0,l:0,p:0};const K=SK[id];const due=s.learned&&s.due?dayDiff(todayStr(),s.due):null;
   const m=modal(`<p class="eyebrow">${TIERS.find(t=>t.id===K.t).name.toUpperCase()} · ${WNAME[K.w].toUpperCase()}</p><h2>${K.n}</h2><p>${K.d}</p><p class="num" style="font-size:44px;line-height:.9;color:var(--amber)">${ovr(id)}%</p>
    <div class="mbars">${[['u','Understanding','var(--violet)','Lessons and concept checks'],['l','Listening','var(--neon)','Ear Gym and ear tests'],['p','Practical','var(--amber)','Building, fixing and battles']].map(([k,n,c,why])=>`<span>${n}<br><small class="muted">${why}</small></span><span class="bar"><i style="width:${s[k]}%;--c:${c}"></i></span><span class="num">${Math.round(s[k])}</span>`).join('')}</div>

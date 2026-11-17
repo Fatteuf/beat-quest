@@ -1,4 +1,4 @@
-const VERSION='2.6';
+const VERSION='2.7';
 /* ================= helpers ================= */
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const app=$('#app');
@@ -305,7 +305,9 @@ function load(){let raw=null;try{raw=JSON.parse(localStorage.getItem(SAVE_KEY))}
 function adopt(raw){if(raw&&raw.v===1)raw=migrate1(raw);
   S=raw&&raw.v===2?Object.assign(DEF(),raw):DEF();
   const t=todayStr();if(!S.firstDay)S.firstDay=t;
-  if(S.lastDay!==t){S.prevDay=S.lastDay;S.streak=S.lastDay===addDays(t,-1)?S.streak+1:(S.lastDay?1:S.streak);S.lastDay=t}
+  /* flames: one more each day in a row; a streak shield saves them once if exactly one day was missed */
+  if(S.lastDay!==t){S.prevDay=S.lastDay;if(S.lastDay===addDays(t,-1))S.streak++;else if(S.lastDay&&S.lastDay===addDays(t,-2)&&(S.shields||0)>0){S.shields--;S.streak++;S.shieldSaved=t}else if(S.lastDay)S.streak=1;S.lastDay=t}
+  S.bestStreak=Math.max(S.bestStreak||0,S.streak||1);
   if(S.quests.day!==t)S.quests={day:t,prog:{},claimed:[],moved:[]};
   if(S.daily.day!==t)S.daily={day:t,segs:{},snap:null,shown:false,active:null};
   if(!S.daily.snap)S.daily.snap={beg:tierMastery('beg'),sk:Object.fromEntries(Object.keys(S.skills).map(k=>[k,ovr(k)]))};
@@ -395,9 +397,9 @@ function tone(t,type,f,dur,v,fEnd,dest){const c=AC();const o=c.createOscillator(
 function noiseHit(t,dur,v,type,freq,q,dest){const c=AC();const s=c.createBufferSource();s.buffer=A.noise;const f=c.createBiquadFilter();f.type=type;f.frequency.value=freq;f.Q.value=q||.7;const g=c.createGain();g.gain.setValueAtTime(Math.max(v,.0001),t);g.gain.exponentialRampToValueAtTime(.0001,t+dur);s.connect(f);f.connect(g);g.connect(dest||OUT());s.start(t,Math.random()*.5);s.stop(t+dur+.03)}
 const SEMI=[0,0,3,5,7,10],NOTES=['','A','C','D','E','G'];
 const V={
-  kick(t,v=.9){if(!A.ctx)return;if(S.kit==='kit-bunker'){TV.kick(t,v,OUT());return}const k=S.kit,f=k==='kit-forest',b=k==='kit-boom';tone(t,'sine',b?110:f?125:165,b?.8:f?.46:.36,v*1.1,b?34:f?38:44);noiseHit(t,.015,v*.25,'highpass',f?1800:3000)},
-  snare(t,v=.75){if(!A.ctx)return;if(S.kit==='kit-bunker'){TV.clap(t,v*.8,OUT());return}const k=S.kit,f=k==='kit-forest',b=k==='kit-boom';if(b){noiseHit(t,.12,v*.75,'highpass',1600,.7);tone(t,'triangle',230,.07,v*.5,130);return}noiseHit(t,f?.22:.17,v*.7,f?'bandpass':'highpass',f?1700:1300,f?.9:.7);tone(t,'triangle',f?165:200,.09,v*.5,110)},
-  hat(t,v=.5){if(!A.ctx)return;if(S.kit==='kit-bunker'){TV.chat(t,v*1.2,OUT());return}const k=S.kit;noiseHit(t,k==='kit-forest'?.06:k==='kit-boom'?.03:.045,v*.42,'highpass',k==='kit-forest'?6200:k==='kit-boom'?9500:8200)},
+  kick(t,v=.9){if(!A.ctx)return;if(S.kit==='kit-bunker'){TV.kick(t,v,OUT());return}if(S.kit==='kit-808'){tone(t,'sine',150,1.05,v*1.25,38);noiseHit(t,.008,v*.16,'highpass',2600);return}const k=S.kit,f=k==='kit-forest',b=k==='kit-boom';tone(t,'sine',b?110:f?125:165,b?.8:f?.46:.36,v*1.1,b?34:f?38:44);noiseHit(t,.015,v*.25,'highpass',f?1800:3000)},
+  snare(t,v=.75){if(!A.ctx)return;if(S.kit==='kit-bunker'){TV.clap(t,v*.8,OUT());return}if(S.kit==='kit-808'){noiseHit(t,.2,v*.55,'highpass',1900,.7);tone(t,'triangle',240,.11,v*.45,175);return}const k=S.kit,f=k==='kit-forest',b=k==='kit-boom';if(b){noiseHit(t,.12,v*.75,'highpass',1600,.7);tone(t,'triangle',230,.07,v*.5,130);return}noiseHit(t,f?.22:.17,v*.7,f?'bandpass':'highpass',f?1700:1300,f?.9:.7);tone(t,'triangle',f?165:200,.09,v*.5,110)},
+  hat(t,v=.5){if(!A.ctx)return;if(S.kit==='kit-bunker'){TV.chat(t,v*1.2,OUT());return}if(S.kit==='kit-808'){noiseHit(t,.03,v*.5,'highpass',9800,1.2);tone(t,'square',8200,.02,v*.03);return}const k=S.kit;noiseHit(t,k==='kit-forest'?.06:k==='kit-boom'?.03:.045,v*.42,'highpass',k==='kit-forest'?6200:k==='kit-boom'?9500:8200)},
   bass(t,n,v=.7){if(!A.ctx||!n)return;const c=AC(),fr=110*Math.pow(2,SEMI[n]/12);const o=c.createOscillator(),o2=c.createOscillator(),lp=c.createBiquadFilter(),g=c.createGain();o.type='sawtooth';o2.type='sine';o.frequency.value=fr;o2.frequency.value=fr/2;lp.type='lowpass';lp.Q.value=5;lp.frequency.setValueAtTime(1600,t);lp.frequency.exponentialRampToValueAtTime(260,t+.25);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(Math.max(v*.45,.0002),t+.006);g.gain.exponentialRampToValueAtTime(.0001,t+.34);o.connect(lp);o2.connect(lp);lp.connect(g);g.connect(OUT());o.start(t);o2.start(t);o.stop(t+.4);o2.stop(t+.4)},
   click(t,acc){if(!A.ctx)return;tone(t,'square',acc?1760:1320,.035,acc?.28:.18)},
   sine(t,f,dur,v){if(!A.ctx)return;const c=AC();const o=c.createOscillator(),g=c.createGain();o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(Math.max(v,.0002),t+.03);g.gain.setValueAtTime(Math.max(v,.0002),t+Math.max(.05,dur-.1));g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g);g.connect(OUT());o.start(t);o.stop(t+dur+.05)},
@@ -540,7 +542,8 @@ function drawStudio(g,t,cv){const W=cv.width,H=cv.height,fl=44;
     for(let k=0;k<7;k++)px(g,3+k*2,37,1,1,pl===k?'#ffffff':['#ff4f5a','#ff7a3a','#ffcc4d','#f1e7d0'][k>>1]);
     const fs=seq.on&&Math.floor(t*12)%4===0;px(g,57,0,6,2,'#3a3450');px(g,59,2,2,1,fs?'#ffffff':'#6a5f9a');if(fs){px(g,57,3,1,1,'#f1e7d0');px(g,62,3,1,1,'#f1e7d0');px(g,59,4,2,1,'#f1e7d0')}}
   if(hasAb('rumblecraft')){const pu=seq.on&&Math.floor(t*S.bpm/30)%2;px(g,60,41,12,9,'#1a1426');px(g,60,41,12,1,'#3d3166');px(g,pu?62:63,pu?42:43,pu?8:6,pu?7:5,'#3d3166');px(g,64,44,4,3,'#241c40');px(g,65,45,2,1,'#0d0a1c')}
-  if(S.owned.includes('kit-bunker')){px(g,63,7,14,14,'#ff7a3a');px(g,64,8,12,12,'#140d1f');px(g,66,9,8,10,'#2a2440');px(g,65,10,10,8,'#2a2440');px(g,69,13,2,2,'#ff7a3a')}}
+  if(S.owned.includes('kit-bunker')){px(g,63,7,14,14,'#ff7a3a');px(g,64,8,12,12,'#140d1f');px(g,66,9,8,10,'#2a2440');px(g,65,10,10,8,'#2a2440');px(g,69,13,2,2,'#ff7a3a')}
+  drawDecor(g,t)}   /* studio decor bought in the shop */
 function scopeDraw(g,t,cv){const W=cv.width,H=cv.height;px(g,0,0,W,H,'#08060f');for(let x=0;x<W;x+=8)px(g,x,0,1,H,'#140f24');px(g,0,H/2,W,1,'#1d1736');if(!A.an)return;const d=new Uint8Array(A.an.fftSize);A.an.getByteTimeDomainData(d);for(let x=0;x<W;x++){const v=d[Math.floor(x/W*d.length)]/128-1;const y=Math.floor(H/2-v*H*.9);px(g,x,clamp(y,0,H-1),1,1,'#ffb547')}}
 function specDraw(g,t,cv){const W=cv.width,H=cv.height;px(g,0,0,W,H,'#08060f');if(!A.an)return;const d=new Uint8Array(A.an.frequencyBinCount);A.an.getByteFrequencyData(d);const n=W/3;for(let i=0;i<n;i++){const idx=Math.floor(Math.pow(i/n,2)*d.length*.6);const v=d[idx]/255;const hh=Math.floor(v*H);for(let y=0;y<hh;y+=2)px(g,i*3,H-1-y,2,1,y>H*.7?'#ff4f9a':y>H*.4?'#ffb547':'#3ef0c8')}}
 
@@ -581,10 +584,13 @@ function gridViz(host,p,tracks,marks){const d=h('div');host.append(d);const g=gr
 function laneViz(host,pos,kicks){const X=p=>(3+p/16*94)+'%';const lane=h('div','lane');for(let i=0;i<16;i++){const l=h('i','gl'+(i%4===0?' b':''));l.style.left=X(i);lane.append(l)}(kicks||[]).forEach(p=>{const k=h('i','nt k');k.style.left=X(p);lane.append(k)});const nts=pos.map(p=>{const n=h('i','nt');n.style.left=X(p);lane.append(n);return n});host.append(lane);return{lane,nts,X,setGrid(g){$$('.gl',lane).forEach((l,i)=>l.classList.toggle('g',g>0&&i%g===0))},move(ps){nts.forEach((n,i)=>n.style.left=X(ps[i]))}}}
 
 /* ================= hero rendering ================= */
-function heroPal(){const c=id=>cos(id).col;const ph=c(S.eq.phones);return{k:'#140d1f',h:c(S.eq.hair),p:ph,P:shade(ph,-.3),s:'#f0c08a',e:'#140d1f',c:c(S.eq.hoodie),a:'#ffe9c2',j:'#2e3160',b:'#3a2618'}}
+/* the hero's colours for a set of equipped items; an outfit can recolour the print, jeans and boots too */
+function heroPalFor(eq){const c=id=>(cos(id)||{}).col;const ph=c(eq.phones)||'#c9c6d8',H=cos(eq.hoodie)||{};
+  return Object.assign({k:'#140d1f',h:c(eq.hair)||'#6b3f22',p:ph,P:shade(ph,-.3),s:'#f0c08a',e:'#140d1f',c:H.col||'#d9792a',a:'#ffe9c2',j:'#2e3160',b:'#3a2618'},H.pal||{})}
+function heroPal(){return heroPalFor(S.eq)}
 function heroEl(sc,cls){return sprite(HERO,heroPal(),sc,cls)}
 function pipEl(sc,cls){return sprite(PIP,PIP_PAL,sc,cls)}
-function companionEl(sc){return S.eq.comp==='comp-cassette'?sprite(CASSETTE,CASSETTE_PAL,sc,'bob'):null}
+function companionEl(sc){const P=PETS[S.eq.comp];return P?sprite(P.rows,P.pal,sc,'bob'):null}
 function monEl(id,sc,cls){const m=MONS[id];return m&&m.spr?sprite(m.spr,m.pal,sc||m.sc,cls):sprite(SLIME,SIL_PAL,sc||4,cls)}
 
 /* ================= UI primitives ================= */

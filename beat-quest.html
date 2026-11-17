@@ -27,6 +27,8 @@
 html{height:100%;box-sizing:border-box}
 *,*::before,*::after{box-sizing:border-box}
 body{height:100%;margin:0;background:var(--void);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.4;display:flex;justify-content:center;align-items:center;-webkit-tap-highlight-color:transparent;overscroll-behavior:none}
+/* Pixelify Sans draws its "fi" / "fl" ligatures as an "A" ("flame" read "Aame"): keep every letter separate */
+body,button,input,textarea{font-variant-ligatures:none;font-feature-settings:"liga" 0,"clig" 0}
 button{font:inherit;color:inherit;cursor:pointer;touch-action:manipulation}
 button:focus-visible,input:focus-visible{outline:3px solid var(--neon);outline-offset:2px}
 .btn:focus-visible,.menubtn:focus-visible,.abbtn:focus-visible,.tool:focus-visible,.jam:focus-visible,.pad:focus-visible,.pip-cta:focus-visible,.trio button:focus-visible,.gcard:focus-visible{outline:none;box-shadow:inset 0 0 0 3px var(--neon)}
@@ -647,6 +649,30 @@ input[type=range]::-moz-range-thumb{width:18px;height:22px;background:var(--ambe
 .bb-row.syn-r{margin-top:4px}
 .bb-nm.syn-nm{background:none;border:0;padding:0;min-height:0;cursor:pointer;text-align:left;text-decoration:underline dotted;text-underline-offset:3px}
 .syn-roll{color:var(--pc)}
+/* shop and flames */
+.topbar .chip.amber,.topbar .chip.pink{cursor:pointer}
+.shop-head{display:flex;gap:12px;align-items:center}
+.shop-stage{display:flex;align-items:flex-end;justify-content:center;gap:4px;min-width:100px;min-height:100px;padding:6px;background:#140f28;border:2px solid var(--edge)}
+.shop-coins{font-size:30px;color:var(--amber);display:flex;align-items:center;gap:6px;line-height:1}
+.shop-sel{display:flex;flex-direction:column;gap:6px}
+.shop-tabs{display:flex;flex-wrap:wrap;gap:4px}
+.shop-tabs button{flex:1 0 auto;min-height:40px;padding:4px 8px;background:var(--panel);border:2px solid var(--edge);font-family:var(--f-disp);font-size:10px;letter-spacing:.05em;color:var(--dim)}
+.shop-tabs button.on{border-color:var(--amber);color:var(--amber);background:#1d1636}
+.shop-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:6px}
+.shop-it{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 4px;background:var(--panel2);border:2px solid var(--edge);min-height:112px;text-align:center}
+.shop-it b{font-family:var(--f-disp);font-size:9px;letter-spacing:.04em;line-height:1.2}
+.shop-it small{font-size:12px;line-height:1.15;color:var(--dim)}
+.shop-it.buy small{color:var(--amber)}
+.shop-it.own small{color:var(--neon)}
+.shop-it.used{border-color:var(--neon)}
+.shop-it.sel{border-color:var(--amber);box-shadow:inset 0 0 0 2px var(--amber)}
+.shop-it.flame,.shop-it.poor,.shop-it.reward{opacity:.62}
+.shop-it.flame small{color:var(--magenta)}
+.shop-art{min-height:48px;display:flex;align-items:flex-end;justify-content:center}
+.shop-solo{font-family:var(--f-disp);font-size:9px;color:var(--dim)}
+.flame-cta{display:flex;gap:10px;align-items:center;width:100%;padding:10px 12px;background:#2a0f20;border:3px solid var(--magenta);color:var(--ink);animation:flamepulse 1.6s steps(2) infinite}
+@keyframes flamepulse{50%{border-color:#ffb547}}
+.fl-row{display:flex;gap:10px;align-items:center;text-align:left}
 .mrflash{animation:mrflash .45s steps(2) 3}
 
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition:none!important}}
@@ -668,6 +694,7 @@ input[type=range]::-moz-range-thumb{width:18px;height:22px;background:var(--ambe
   <section class="screen full" id="s-victory" hidden></section>
   <section class="screen full" id="s-final" hidden></section>
   <section class="screen full" id="s-cert" hidden></section>
+  <section class="screen" id="s-shop" hidden></section>
   <nav id="nav" hidden aria-label="Main">
     <button data-go="home"><canvas class="px" data-ic="home"></canvas>HOME</button>
     <button data-go="map"><canvas class="px" data-ic="flag"></canvas>MAP</button>
@@ -680,7 +707,7 @@ input[type=range]::-moz-range-thumb{width:18px;height:22px;background:var(--ambe
 
 <script>
 "use strict";
-const VERSION='2.6';
+const VERSION='2.7';
 /* ================= helpers ================= */
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const app=$('#app');
@@ -987,7 +1014,9 @@ function load(){let raw=null;try{raw=JSON.parse(localStorage.getItem(SAVE_KEY))}
 function adopt(raw){if(raw&&raw.v===1)raw=migrate1(raw);
   S=raw&&raw.v===2?Object.assign(DEF(),raw):DEF();
   const t=todayStr();if(!S.firstDay)S.firstDay=t;
-  if(S.lastDay!==t){S.prevDay=S.lastDay;S.streak=S.lastDay===addDays(t,-1)?S.streak+1:(S.lastDay?1:S.streak);S.lastDay=t}
+  /* flames: one more each day in a row; a streak shield saves them once if exactly one day was missed */
+  if(S.lastDay!==t){S.prevDay=S.lastDay;if(S.lastDay===addDays(t,-1))S.streak++;else if(S.lastDay&&S.lastDay===addDays(t,-2)&&(S.shields||0)>0){S.shields--;S.streak++;S.shieldSaved=t}else if(S.lastDay)S.streak=1;S.lastDay=t}
+  S.bestStreak=Math.max(S.bestStreak||0,S.streak||1);
   if(S.quests.day!==t)S.quests={day:t,prog:{},claimed:[],moved:[]};
   if(S.daily.day!==t)S.daily={day:t,segs:{},snap:null,shown:false,active:null};
   if(!S.daily.snap)S.daily.snap={beg:tierMastery('beg'),sk:Object.fromEntries(Object.keys(S.skills).map(k=>[k,ovr(k)]))};
@@ -1077,9 +1106,9 @@ function tone(t,type,f,dur,v,fEnd,dest){const c=AC();const o=c.createOscillator(
 function noiseHit(t,dur,v,type,freq,q,dest){const c=AC();const s=c.createBufferSource();s.buffer=A.noise;const f=c.createBiquadFilter();f.type=type;f.frequency.value=freq;f.Q.value=q||.7;const g=c.createGain();g.gain.setValueAtTime(Math.max(v,.0001),t);g.gain.exponentialRampToValueAtTime(.0001,t+dur);s.connect(f);f.connect(g);g.connect(dest||OUT());s.start(t,Math.random()*.5);s.stop(t+dur+.03)}
 const SEMI=[0,0,3,5,7,10],NOTES=['','A','C','D','E','G'];
 const V={
-  kick(t,v=.9){if(!A.ctx)return;if(S.kit==='kit-bunker'){TV.kick(t,v,OUT());return}const k=S.kit,f=k==='kit-forest',b=k==='kit-boom';tone(t,'sine',b?110:f?125:165,b?.8:f?.46:.36,v*1.1,b?34:f?38:44);noiseHit(t,.015,v*.25,'highpass',f?1800:3000)},
-  snare(t,v=.75){if(!A.ctx)return;if(S.kit==='kit-bunker'){TV.clap(t,v*.8,OUT());return}const k=S.kit,f=k==='kit-forest',b=k==='kit-boom';if(b){noiseHit(t,.12,v*.75,'highpass',1600,.7);tone(t,'triangle',230,.07,v*.5,130);return}noiseHit(t,f?.22:.17,v*.7,f?'bandpass':'highpass',f?1700:1300,f?.9:.7);tone(t,'triangle',f?165:200,.09,v*.5,110)},
-  hat(t,v=.5){if(!A.ctx)return;if(S.kit==='kit-bunker'){TV.chat(t,v*1.2,OUT());return}const k=S.kit;noiseHit(t,k==='kit-forest'?.06:k==='kit-boom'?.03:.045,v*.42,'highpass',k==='kit-forest'?6200:k==='kit-boom'?9500:8200)},
+  kick(t,v=.9){if(!A.ctx)return;if(S.kit==='kit-bunker'){TV.kick(t,v,OUT());return}if(S.kit==='kit-808'){tone(t,'sine',150,1.05,v*1.25,38);noiseHit(t,.008,v*.16,'highpass',2600);return}const k=S.kit,f=k==='kit-forest',b=k==='kit-boom';tone(t,'sine',b?110:f?125:165,b?.8:f?.46:.36,v*1.1,b?34:f?38:44);noiseHit(t,.015,v*.25,'highpass',f?1800:3000)},
+  snare(t,v=.75){if(!A.ctx)return;if(S.kit==='kit-bunker'){TV.clap(t,v*.8,OUT());return}if(S.kit==='kit-808'){noiseHit(t,.2,v*.55,'highpass',1900,.7);tone(t,'triangle',240,.11,v*.45,175);return}const k=S.kit,f=k==='kit-forest',b=k==='kit-boom';if(b){noiseHit(t,.12,v*.75,'highpass',1600,.7);tone(t,'triangle',230,.07,v*.5,130);return}noiseHit(t,f?.22:.17,v*.7,f?'bandpass':'highpass',f?1700:1300,f?.9:.7);tone(t,'triangle',f?165:200,.09,v*.5,110)},
+  hat(t,v=.5){if(!A.ctx)return;if(S.kit==='kit-bunker'){TV.chat(t,v*1.2,OUT());return}if(S.kit==='kit-808'){noiseHit(t,.03,v*.5,'highpass',9800,1.2);tone(t,'square',8200,.02,v*.03);return}const k=S.kit;noiseHit(t,k==='kit-forest'?.06:k==='kit-boom'?.03:.045,v*.42,'highpass',k==='kit-forest'?6200:k==='kit-boom'?9500:8200)},
   bass(t,n,v=.7){if(!A.ctx||!n)return;const c=AC(),fr=110*Math.pow(2,SEMI[n]/12);const o=c.createOscillator(),o2=c.createOscillator(),lp=c.createBiquadFilter(),g=c.createGain();o.type='sawtooth';o2.type='sine';o.frequency.value=fr;o2.frequency.value=fr/2;lp.type='lowpass';lp.Q.value=5;lp.frequency.setValueAtTime(1600,t);lp.frequency.exponentialRampToValueAtTime(260,t+.25);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(Math.max(v*.45,.0002),t+.006);g.gain.exponentialRampToValueAtTime(.0001,t+.34);o.connect(lp);o2.connect(lp);lp.connect(g);g.connect(OUT());o.start(t);o2.start(t);o.stop(t+.4);o2.stop(t+.4)},
   click(t,acc){if(!A.ctx)return;tone(t,'square',acc?1760:1320,.035,acc?.28:.18)},
   sine(t,f,dur,v){if(!A.ctx)return;const c=AC();const o=c.createOscillator(),g=c.createGain();o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(Math.max(v,.0002),t+.03);g.gain.setValueAtTime(Math.max(v,.0002),t+Math.max(.05,dur-.1));g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g);g.connect(OUT());o.start(t);o.stop(t+dur+.05)},
@@ -1222,7 +1251,8 @@ function drawStudio(g,t,cv){const W=cv.width,H=cv.height,fl=44;
     for(let k=0;k<7;k++)px(g,3+k*2,37,1,1,pl===k?'#ffffff':['#ff4f5a','#ff7a3a','#ffcc4d','#f1e7d0'][k>>1]);
     const fs=seq.on&&Math.floor(t*12)%4===0;px(g,57,0,6,2,'#3a3450');px(g,59,2,2,1,fs?'#ffffff':'#6a5f9a');if(fs){px(g,57,3,1,1,'#f1e7d0');px(g,62,3,1,1,'#f1e7d0');px(g,59,4,2,1,'#f1e7d0')}}
   if(hasAb('rumblecraft')){const pu=seq.on&&Math.floor(t*S.bpm/30)%2;px(g,60,41,12,9,'#1a1426');px(g,60,41,12,1,'#3d3166');px(g,pu?62:63,pu?42:43,pu?8:6,pu?7:5,'#3d3166');px(g,64,44,4,3,'#241c40');px(g,65,45,2,1,'#0d0a1c')}
-  if(S.owned.includes('kit-bunker')){px(g,63,7,14,14,'#ff7a3a');px(g,64,8,12,12,'#140d1f');px(g,66,9,8,10,'#2a2440');px(g,65,10,10,8,'#2a2440');px(g,69,13,2,2,'#ff7a3a')}}
+  if(S.owned.includes('kit-bunker')){px(g,63,7,14,14,'#ff7a3a');px(g,64,8,12,12,'#140d1f');px(g,66,9,8,10,'#2a2440');px(g,65,10,10,8,'#2a2440');px(g,69,13,2,2,'#ff7a3a')}
+  drawDecor(g,t)}   /* studio decor bought in the shop */
 function scopeDraw(g,t,cv){const W=cv.width,H=cv.height;px(g,0,0,W,H,'#08060f');for(let x=0;x<W;x+=8)px(g,x,0,1,H,'#140f24');px(g,0,H/2,W,1,'#1d1736');if(!A.an)return;const d=new Uint8Array(A.an.fftSize);A.an.getByteTimeDomainData(d);for(let x=0;x<W;x++){const v=d[Math.floor(x/W*d.length)]/128-1;const y=Math.floor(H/2-v*H*.9);px(g,x,clamp(y,0,H-1),1,1,'#ffb547')}}
 function specDraw(g,t,cv){const W=cv.width,H=cv.height;px(g,0,0,W,H,'#08060f');if(!A.an)return;const d=new Uint8Array(A.an.frequencyBinCount);A.an.getByteFrequencyData(d);const n=W/3;for(let i=0;i<n;i++){const idx=Math.floor(Math.pow(i/n,2)*d.length*.6);const v=d[idx]/255;const hh=Math.floor(v*H);for(let y=0;y<hh;y+=2)px(g,i*3,H-1-y,2,1,y>H*.7?'#ff4f9a':y>H*.4?'#ffb547':'#3ef0c8')}}
 
@@ -1263,10 +1293,13 @@ function gridViz(host,p,tracks,marks){const d=h('div');host.append(d);const g=gr
 function laneViz(host,pos,kicks){const X=p=>(3+p/16*94)+'%';const lane=h('div','lane');for(let i=0;i<16;i++){const l=h('i','gl'+(i%4===0?' b':''));l.style.left=X(i);lane.append(l)}(kicks||[]).forEach(p=>{const k=h('i','nt k');k.style.left=X(p);lane.append(k)});const nts=pos.map(p=>{const n=h('i','nt');n.style.left=X(p);lane.append(n);return n});host.append(lane);return{lane,nts,X,setGrid(g){$$('.gl',lane).forEach((l,i)=>l.classList.toggle('g',g>0&&i%g===0))},move(ps){nts.forEach((n,i)=>n.style.left=X(ps[i]))}}}
 
 /* ================= hero rendering ================= */
-function heroPal(){const c=id=>cos(id).col;const ph=c(S.eq.phones);return{k:'#140d1f',h:c(S.eq.hair),p:ph,P:shade(ph,-.3),s:'#f0c08a',e:'#140d1f',c:c(S.eq.hoodie),a:'#ffe9c2',j:'#2e3160',b:'#3a2618'}}
+/* the hero's colours for a set of equipped items; an outfit can recolour the print, jeans and boots too */
+function heroPalFor(eq){const c=id=>(cos(id)||{}).col;const ph=c(eq.phones)||'#c9c6d8',H=cos(eq.hoodie)||{};
+  return Object.assign({k:'#140d1f',h:c(eq.hair)||'#6b3f22',p:ph,P:shade(ph,-.3),s:'#f0c08a',e:'#140d1f',c:H.col||'#d9792a',a:'#ffe9c2',j:'#2e3160',b:'#3a2618'},H.pal||{})}
+function heroPal(){return heroPalFor(S.eq)}
 function heroEl(sc,cls){return sprite(HERO,heroPal(),sc,cls)}
 function pipEl(sc,cls){return sprite(PIP,PIP_PAL,sc,cls)}
-function companionEl(sc){return S.eq.comp==='comp-cassette'?sprite(CASSETTE,CASSETTE_PAL,sc,'bob'):null}
+function companionEl(sc){const P=PETS[S.eq.comp];return P?sprite(P.rows,P.pal,sc,'bob'):null}
 function monEl(id,sc,cls){const m=MONS[id];return m&&m.spr?sprite(m.spr,m.pal,sc||m.sc,cls):sprite(SLIME,SIL_PAL,sc||4,cls)}
 
 /* ================= UI primitives ================= */
@@ -1721,13 +1754,13 @@ function skirmish(host,o){const M=MONS[o.mon];seenMon(o.mon);const hp=o.hp||3;le
       qh.innerHTML='';o.onWin&&o.onWin(won,r)}})}
 /* ================= navigation ================= */
 const RENDER={};let cur='title',booted=false,playBack='train';
-const NAVSCREENS=['home','map','region','studio','train','path','quests'];
+const NAVSCREENS=['home','map','region','studio','train','path','quests','shop'];
 function go(name,arg){seq.stop();stopGroup();if(typing)typing.finish();$$('.modal-back,.sheet').forEach(m=>m.remove());if(A.busComp)transparentComp(A.busComp);
   $$('.screen').forEach(s=>{s.hidden=s.id!=='s-'+name});const scr=$('#s-'+name);scr.scrollTop=0;scr.classList.remove('enter','puzzle');
-  $('#nav').hidden=!NAVSCREENS.includes(name);const navOn={region:'map',quests:'home'}[name]||name;$$('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.go===navOn));
+  $('#nav').hidden=!NAVSCREENS.includes(name);const navOn={region:'map',quests:'home',shop:'home'}[name]||name;$$('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.go===navOn));
   if(booted){void scr.offsetWidth;scr.classList.add('enter');const w=$('#wipe');w.classList.remove('go');void w.offsetWidth;w.classList.add('go')}booted=true;
   cur=name;RENDER[name](scr,arg);updateBadge();
-  if(['home','map','region','train','path','quests'].includes(name))startMusic();else stopMusic()}
+  if(['home','map','region','train','path','quests','shop'].includes(name))startMusic();else stopMusic()}
 function updateBadge(){const b=$('#nav .badge');if(!b||!S)return;const n=dueSkills().length+S.pq.length;b.hidden=!n;b.textContent=n}
 function topbar(title,back){return`<div class="topbar">${back?`<button class="iconbtn" data-back="${back}" aria-label="Back">◀</button>`:''}<div class="title">${title}</div><span class="chip amber" title="Coins"><span data-ic="coin" data-sc="2"></span><span class="num" style="font-size:18px">${S.coins}</span></span><span class="chip pink" title="Day streak"><span data-ic="flame" data-sc="2"></span><span class="num" style="font-size:18px">${S.streak}</span></span></div>`}
 function wireBack(scr){$$('[data-back]',scr).forEach(b=>b.onclick=()=>{sfx.tap();go(b.dataset.back)})}
@@ -1771,6 +1804,9 @@ RENDER.home=scr=>{const lp=lvProg();const rk=rankFor(lp.n),rn=rankNext(lp.n);con
   <div class="win raised stack" style="border-color:#6a4718"><p class="eyebrow" style="color:var(--amber)">ADVENTURE</p>
    ${n?`<h2>${n.quest}</h2><p class="muted">${WNAME[n.w]} · ${n.kind.toLowerCase()} · about ${n.mins} min</p>`:`<h2>${S.cert?'Producer certified':'Every world mastered'}</h2><p class="muted">Keep your skills fresh with recalls and the Ear Gym, or open the DAW and produce another track.</p>`}
    <button class="btn big block" id="cont">${n?'CONTINUE ADVENTURE ▶':'OPEN THE FINAL TRACK ▶'}</button></div>
+  ${flameReady()?`<button class="flame-cta" data-a="claim"><span data-ic="flame" data-sc="3"></span><span class="stack" style="gap:2px;text-align:left"><b>FLAME BONUS READY</b><span style="font-size:14px">Day ${S.streak} in a row: tap for +${flameBonus()} coins</span></span></button>`:''}
+  <div class="win stack" style="border-color:#8a6a18"><div class="row sp"><p class="eyebrow" style="color:var(--amber)">SHOP</p><span class="chip amber"><span data-ic="coin" data-sc="2"></span><span class="num" style="font-size:18px">${S.coins}</span></span></div>
+   <p class="muted" style="font-size:15px">Skins, pets, decor for your studio and new drum kits. Spend the coins you win.</p><button class="btn block" data-a="shop" style="background:var(--amber)">OPEN THE SHOP ▶</button></div>
   ${worldOpen('bunker')&&!worldDone('bunker')?`<div class="win stack" style="border-color:#ff3d7f"><p class="eyebrow" style="color:#ff3d7f">SIDE WORLD · TECHNO BUNKER</p><h3>${WSTAGES.bunker.some(x=>S.done.includes(x.id))?'Back to the Bunker':'A bass rumbles under Beat Forest'}</h3><p class="muted" style="font-size:15px">Hardgroove, tribal, hard bounce, rumble kicks and acid. ${WSTAGES.bunker.filter(x=>S.done.includes(x.id)).length}/${WSTAGES.bunker.length} stages cleared.</p><button class="btn pink block" data-a="bunker">ENTER THE BUNKER ▶</button></div>`:''}
   ${pq?`<div class="win stack" style="border-color:var(--violet)"><p class="eyebrow" style="color:var(--violet)">PERSONAL QUEST</p><h3>${PQ[pq.tag].title}</h3><p class="muted" style="font-size:15px">${PQ[pq.tag].why} Get 3 right to clear it.</p><div class="bar"><i style="width:${pq.prog/pq.goal*100}%;--c:var(--violet)"></i></div><p class="muted" style="font-size:13px">Reward: +120 XP · ${SK[PQ[pq.tag].skill].n} mastery +8%</p><button class="btn violet block" data-a="pq">START TRIAL</button></div>`:''}
   <p class="eyebrow">YOUR PROGRESS</p>
@@ -1787,6 +1823,8 @@ RENDER.home=scr=>{const lp=lvProg();const rk=rankFor(lp.n),rn=rankNext(lp.n);con
   renderSession($('#session',scr));
   $('.pipslot',scr).append(pipEl(3,'float'));
   $('#cont',scr).onclick=()=>{sfx.tap();continueAdventure()};const bkb=$('[data-a=bunker]',scr);if(bkb)bkb.onclick=()=>{sfx.tap();go('region','bunker')};
+  $('[data-a=shop]',scr).onclick=()=>{sfx.tap();go('shop')};const fcl=$('[data-a=claim]',scr);if(fcl)fcl.onclick=()=>{claimFlame();RENDER.home(scr)};
+  if(S.shieldSaved===todayStr()&&S.shieldToast!==todayStr()){S.shieldToast=todayStr();save();toast('STREAK SHIELD USED · YOUR FLAMES ARE SAFE')}
   const pqb=$('[data-a=pq]',scr);if(pqb)pqb.onclick=()=>{sfx.tap();startPQ(0)};
   $$('[data-to]',scr).forEach(b=>b.onclick=()=>{sfx.tap();go(b.dataset.to)});
   $('#askpip',scr).onclick=()=>{sfx.tap();openCoach()};
@@ -2291,7 +2329,7 @@ RENDER.path=scr=>{const lp=lvProg();const rk=rankFor(lp.n),rn=rankNext(lp.n);con
       d.onclick=()=>{if(!seen){toast('UNKNOWN MONSTER · '+WNAME[M.world].toUpperCase());return}const m=modal(`<div class="mi"></div><h2>${M.name}</h2><p><b style="color:var(--magenta)">Musical problem:</b> ${M.problem}</p><p class="muted">Beaten with: ${M.weak}</p><button class="btn block mi-x">CLOSE</button>`,{dismiss:true});$('.mi',m).append(monEl(k,6));$('.mi-x',m).onclick=()=>m.close()};bg.append(d)})}
   if(pathTab==='style'){const slots=[['hoodie','HOODIE'],['phones','HEADPHONES'],['hair','HAIR'],['comp','COMPANION']];c.innerHTML=`<div class="win dressing"></div><p class="muted" style="font-size:14px">Cosmetics are just for style. They never change combat or scores. You have ${S.coins} coins.</p>${slots.map(([s,n])=>`<div class="stack" style="gap:8px"><p class="eyebrow">${n}</p><div class="swatches">${COS.filter(x=>x.slot===s).map(x=>{const own=S.owned.includes(x.id);return`<button class="sw ${S.eq[s]===x.id?'on':''} ${own?'':'lock'}" data-c="${x.id}"><i style="background:${x.col}"></i>${x.name}${own?'':x.price?` · <span style="color:var(--amber)">${x.price}c</span>`:' · LOCKED'}</button>`}).join('')}</div></div>`).join('')}`;
     const dr=$('.dressing',c);dr.append(heroEl(6,'bob'));const cp=companionEl(4);if(cp)dr.append(cp);
-    $$('[data-c]',c).forEach(b=>b.onclick=()=>{const x=cos(b.dataset.c);if(!S.owned.includes(x.id)){if(x.price){if(b.dataset.arm){if(S.coins>=x.price){S.coins-=x.price;S.owned.push(x.id);S.eq[x.slot]=x.id;save();sfx.coin();RENDER.path(scr)}else{toast('NOT ENOUGH COINS · QUESTS AND BATTLES EARN MORE');sfx.bad()}}else{b.dataset.arm=1;b.innerHTML=`<i style="background:${x.col}"></i>TAP TO BUY · ${x.price}c`}}else toast('LOCKED · '+x.how.toUpperCase());return}S.eq[x.slot]=x.id;save();sfx.tap();RENDER.path(scr)})}};
+    $$('[data-c]',c).forEach(b=>b.onclick=()=>{const x=cos(b.dataset.c);if(!S.owned.includes(x.id)){if(x.price){sfx.tap();go('shop',{sel:x.id})}else toast('LOCKED · '+x.how.toUpperCase());return}S.eq[x.slot]=x.id;save();sfx.tap();RENDER.path(scr)})}};
 function skillInfo(id){const s=S.skills[id]||{u:0,l:0,p:0};const K=SK[id];const due=s.learned&&s.due?dayDiff(todayStr(),s.due):null;
   const m=modal(`<p class="eyebrow">${TIERS.find(t=>t.id===K.t).name.toUpperCase()} · ${WNAME[K.w].toUpperCase()}</p><h2>${K.n}</h2><p>${K.d}</p><p class="num" style="font-size:44px;line-height:.9;color:var(--amber)">${ovr(id)}%</p>
    <div class="mbars">${[['u','Understanding','var(--violet)','Lessons and concept checks'],['l','Listening','var(--neon)','Ear Gym and ear tests'],['p','Practical','var(--amber)','Building, fixing and battles']].map(([k,n,c,why])=>`<span>${n}<br><small class="muted">${why}</small></span><span class="bar"><i style="width:${s[k]}%;--c:${c}"></i></span><span class="num">${Math.round(s[k])}</span>`).join('')}</div>
@@ -2367,8 +2405,10 @@ let ROLL_PH=-1;
 function rollNotes(){
   if(!Array.isArray(S.roll)){S.roll=[];const L=S.pattern&&S.pattern.lead;
     if(L&&L.some(Boolean)){L.forEach((v,i)=>{if(v)S.roll.push([i,69+SEMI[v],1,85])});L.fill(0)}}   /* a lead written in the old step grid becomes MIDI notes */
-  else if(!S.roll.every(rollOk))S.roll=S.roll.filter(rollOk);
+  else{if(!S.roll.every(rollOk))S.roll=S.roll.filter(rollOk);const d=dedupeNotes(S.roll);if(d.length!==S.roll.length)S.roll=d}
   return S.roll}
+/* one note per pitch and step: a double tap must never stack the same note twice */
+const dedupeNotes=a=>{const seen=new Set();return a.filter(n=>{const k=n[0]+':'+n[1];if(seen.has(k))return false;seen.add(k);return true})};
 const rollPatch=()=>has('synth')?(S.leadPatch||PRESETS.LEAD):ROLL_KEYS;
 const rollGain=v=>(S.vols.lead==null?.6:S.vols.lead)*.5*v/100;
 function rollStep(s,t,dest){if(!has('midi')||!Array.isArray(S.roll)||!S.roll.length)return;const i=s%16,spb=60/S.bpm/4,P=rollPatch();
@@ -2417,7 +2457,7 @@ function pianoRollModal(c){seq.stop();initAudio();const notes=c.notes,inKey=p=>M
   const paintNotes=()=>{$$('.pn',R).forEach(x=>x.remove());notes.forEach(n=>{const r=rows.indexOf(n[1]);if(r<0)return;const b=h('button','pn');
       b.style.gridArea=`${r+1} / ${n[0]+2} / ${r+2} / ${n[0]+2+n[2]}`;b.style.opacity=(.4+.6*n[3]/127).toFixed(2);b.setAttribute('aria-label',`Delete ${noteName(n[1])} at step ${n[0]+1}`);b.onclick=()=>del(n);R.append(b)})};
   const changed=()=>{paintNotes();saved()};
-  const add=(i,p)=>{const next=notes.filter(n=>n[1]===p&&n[0]>i).reduce((a,n)=>Math.min(a,n[0]),16),l=Math.max(1,Math.min(len,next-i));
+  const add=(i,p)=>{if(notes.some(n=>n[0]===i&&n[1]===p))return;const next=notes.filter(n=>n[1]===p&&n[0]>i).reduce((a,n)=>Math.min(a,n[0]),16),l=Math.max(1,Math.min(len,next-i));
     notes.push([i,p,l,vel]);notes.sort((a,b)=>a[0]-b[0]||b[1]-a[1]);c.hear(p,vel);haptic(6);
     mon.textContent=`NOTE ON · ${noteName(p)} · #${p} · VELOCITY ${vel} · ${rollLenName(l)}`;changed()};
   const del=n=>{const k=notes.indexOf(n);if(k>=0)notes.splice(k,1);haptic(4);mon.textContent=`NOTE DELETED · ${noteName(n[1])} · STEP ${n[0]+1}`;changed()};
@@ -2542,7 +2582,7 @@ const COS_FROM={'hoodie-beast':'boss','phones-leaf':'challenge','comp-cassette':
 const CERTS=[['trial','RHYTHM CERTIFIED','The gold trophy on your studio wall'],['ktrial','SOUND DESIGNER','The violet trophy on the shelf above your window'],['dtrial','EQ MASTER','The gold trophy on the shelf above your window'],
   ['vtrial','DYNAMICS CERTIFIED','The orange trophy on the shelf above your window'],['strial','SPACE CERTIFIED','The blue trophy on the shelf above your window'],['mtrial','MIX ENGINEER','The white trophy on the shelf above your window'],
   ['final','PRODUCER CERTIFIED','Your framed certificate on the studio wall'],['btrial','CLUB CERTIFIED','The record plaque on your studio wall']];
-const COS_KIND={hoodie:'HOODIE',phones:'HEADPHONES',hair:'HAIR',comp:'COMPANION',kit:'DRUM KIT'};
+const COS_KIND={hoodie:'HOODIE',phones:'HEADPHONES',hair:'HAIR',comp:'PET',kit:'DRUM KIT',decor:'STUDIO DECOR'};
 function stageWorld(id){for(const w of WORDER)if((WSTAGES[w]||[]).some(x=>x.id===id))return w;return'forest'}
 function stageTitle(id){for(const w of WORDER){const x=(WSTAGES[w]||[]).find(x=>x.id===id);if(x)return x.title}return id}
 function rewardIndex(){const L=[];
@@ -2551,9 +2591,10 @@ function rewardIndex(){const L=[];
   CERTS.forEach(([id,n,where])=>L.push({key:'c:'+id,w:stageWorld(id),kind:'CERTIFICATE',name:n,col:'#ffcc4d',got:id==='final'?!!(S.cert||S.done.includes('final')):S.done.includes(id),where,how:stageTitle(id)}));
   COS.filter(c=>c.price!==0).forEach(c=>{const st=COS_FROM[c.id],sl=c.slot;
     L.push({key:'o:'+c.id,w:st?stageWorld(st):c.price?'shop':'quests',kind:COS_KIND[sl]||sl.toUpperCase(),name:c.name,col:c.col,got:S.owned.includes(c.id),cos:c,
-      where:sl==='kit'?'SWAP KIT on your drum machine':sl==='comp'?'Your companion, next to you in the studio':'Your hero in the studio',how:c.how||(c.price?`${c.price} coins · PATH › STYLE`:'')})});
+      where:sl==='kit'?'SWAP KIT on your drum machine':sl==='comp'?'Your pet, next to you in the studio':sl==='decor'?'Your studio room':'Your hero in the studio',
+      how:c.how||(c.price?`${c.price} coins in the SHOP${c.flame?` · needs a ${c.flame}-day streak`:''}`:'')})});
   return L}
-const rwInUse=c=>c.slot==='kit'?S.kit===c.id:S.eq[c.slot]===c.id;
+const rwInUse=c=>isUsed(c);
 /* where TRY IT NOW (and USE IN STUDIO) takes you for each tool; a fresh copy each time, the studio clears the flags it uses */
 const STUDIO_TRY={groovebox:{bbox:1},midi:{roll:1},eq:{eq:1},synth:{lead:1},auto:{focus:'.auto-card'},comp:{focus:'.mcomp'},dist:{focus:'.fxrack'},reverb:{focus:'.fxrack'},delay:{focus:'.fxrack'},limiter:{focus:'.fxrack'},drums:{focus:'.dm-win'}};
 const studioTry=id=>STUDIO_TRY[id]?Object.assign({},STUDIO_TRY[id]):undefined;
@@ -2573,10 +2614,142 @@ function rewardWall(host,o){o=o||{};const L=rewardIndex();
     $$('.mr-tab',w).forEach(b=>b.onclick=()=>{tab=b.dataset.w;sfx.tap();paint()});
     $$('.mr-it',w).forEach(b=>b.onclick=()=>{const r=L.find(x=>x.key===b.dataset.k);if(!r)return;sfx.tap();
       if(!r.got){toast('LOCKED · '+String(r.how).toUpperCase());return}
-      if(r.cos){if(r.cos.slot==='kit')S.kit=r.cos.id;else S.eq[r.cos.slot]=r.cos.id;save();paint();if(o.onEquip)o.onEquip(r.cos);return}
+      if(r.cos){if(r.cos.slot==='decor'){if(!(o.go&&o.go('c:room')))toast(r.where.toUpperCase());return}useItem(r.cos);paint();if(o.onEquip)o.onEquip(r.cos);return}
       if(!(o.go&&o.go(r.key)))toast(r.where.toUpperCase())})};
   paint();S.rwSeen=L.filter(r=>r.got).map(r=>r.key);save();
   return{paint,el:w}}
+/* =====================================================================
+   SHOP: spend coins on skins, pets, studio decor and sounds.
+   FLAMES: the daily streak. A daily coin bonus, flame items (a best streak unlocks them) and streak shields.
+   ===================================================================== */
+/* ---- pets: small sprites that follow you around (the Cassette Critter is the Offbeat Slime's reward) ---- */
+const PETS={
+  'comp-cassette':{rows:CASSETTE,pal:CASSETTE_PAL},
+  'comp-slime':{rows:["....kkk....","..kkaaakk..",".kaawaaaak.",".kaaaaaaak.","kaakaaakaak","kaaaaaaaaak","kaaakkkaaak",".kkkkkkkkk."],pal:{k:'#140d1f',a:'#6fd36a',w:'#c8ffb0'}},
+  'comp-bird':{rows:["...kkkk....","..kaaaakk..",".kaakaaaaoo",".kaaaaaaak.","kaabbbaaak.","kaabbaaak..",".kkaaaakk..","...k..k...."],pal:{k:'#140d1f',a:'#ffcc4d',b:'#e09a20',o:'#ff7a3a'}},
+  'comp-bunny':{rows:["..kk...kk..","..kak.kak..","..kak.kak..",".kpkkkkkpk.","kpaaaaaaapk","kpakaaakapk","kaaaanaaaak",".kaaaaaaak.",".kaakkkaak.","..kk...kk.."],pal:{k:'#140d1f',a:'#f1e7d0',p:'#ff4f9a',n:'#ff9ac0'}},
+  'comp-cat':{rows:["k.........k","kk.......kk","krk.....krk","kaakkkkkaak","kaaaaaaaaak","kawaaaaawak","kaaaanaaaak",".kaaaaaaak.","..kk...kk.."],pal:{k:'#140d1f',a:'#3d3550',r:'#ff9ac0',w:'#ffe27a',n:'#ff9ac0'}},
+  'comp-fox':{rows:["k.........k..","kk.......kk..","kak.....kak..","kaakkkkkaak.F","kaaaaaaaaakFf","kakaaaaakakf.","kawwwkwwwakF.",".kawwwwwak.f.","..kk...kk...."],pal:{k:'#140d1f',a:'#ff7a1a',w:'#fff1d6',f:'#ffcc4d',F:'#ff3d1a'}},
+  'comp-dragon':{rows:["...h.....h...","...kh...hk...","..kaakkkaak..","bkaaaaaaaaakb","bbkaeaaaeakbb","bbkaaaaaaakbb",".bkawwwwwakb.","..kawwwwwak..","...kaaaaak...","...kk...kk..."],pal:{k:'#140d1f',a:'#6c5cff',b:'#a98bff',w:'#c9b8ff',e:'#ffe27a',h:'#ffcc4d'}}};
+/* ---- the catalogue (outfits colour the whole body through pal: a = hoodie print, j = jeans, b = boots) ---- */
+COS.push(
+  {id:'hoodie-neon',slot:'hoodie',name:'Neon Night',col:'#ff3d7f',pal:{a:'#3ef0c8'},price:120},
+  {id:'hoodie-camo',slot:'hoodie',name:'Forest Camo',col:'#4f6a3a',pal:{a:'#8fbf3a',j:'#3a3020'},price:150},
+  {id:'hoodie-ice',slot:'hoodie',name:'Ice Cold',col:'#bde8ff',pal:{a:'#ffffff',j:'#3a6a9a',b:'#e0f4ff'},price:180},
+  {id:'hoodie-galaxy',slot:'hoodie',name:'Galaxy',col:'#2a1f6a',pal:{a:'#a98bff',j:'#140d1f',b:'#6c5cff'},price:240},
+  {id:'hoodie-goldrush',slot:'hoodie',name:'Gold Rush',col:'#ffcc4d',pal:{a:'#fff1a6',j:'#5a3a10',b:'#3a2618'},price:350},
+  {id:'hoodie-blaze',slot:'hoodie',name:'Blaze',col:'#ff5a1a',pal:{a:'#ffcc4d'},price:150,flame:3},
+  {id:'hoodie-phoenix',slot:'hoodie',name:'Phoenix',col:'#e0241a',pal:{a:'#ffcc4d',j:'#5a1010',b:'#ffcc4d'},price:400,flame:14},
+  {id:'phones-chrome',slot:'phones',name:'Chrome',col:'#e6e6f0',price:60},
+  {id:'phones-mint',slot:'phones',name:'Mint',col:'#7dffb2',price:70},
+  {id:'phones-ruby',slot:'phones',name:'Ruby',col:'#ff2a4a',price:90},
+  {id:'phones-inferno',slot:'phones',name:'Inferno Cans',col:'#ff7a1a',price:200,flame:7},
+  {id:'hair-pink',slot:'hair',name:'Bubblegum',col:'#ff7ab8',price:50},
+  {id:'hair-blonde',slot:'hair',name:'Blonde',col:'#ffd76a',price:50},
+  {id:'hair-silver',slot:'hair',name:'Silver',col:'#d8d8e8',price:60},
+  {id:'hair-blue',slot:'hair',name:'Electric Blue',col:'#4a7aff',price:60},
+  {id:'hair-fire',slot:'hair',name:'Fire',col:'#ff4f2a',price:80},
+  {id:'comp-slime',slot:'comp',name:'Synth Slime',col:'#6fd36a',price:120},
+  {id:'comp-bird',slot:'comp',name:'Metro Bird',col:'#ffcc4d',price:160},
+  {id:'comp-bunny',slot:'comp',name:'Beat Bunny',col:'#f1e7d0',price:220},
+  {id:'comp-cat',slot:'comp',name:'Vinyl Cat',col:'#3d3550',price:280},
+  {id:'comp-fox',slot:'comp',name:'Ember Fox',col:'#ff7a1a',price:250,flame:5},
+  {id:'comp-dragon',slot:'comp',name:'Mini Dragon',col:'#6c5cff',price:600},
+  {id:'decor-lights',slot:'decor',name:'Fairy Lights',col:'#ffcc4d',price:80},
+  {id:'decor-led',slot:'decor',name:'Desk LEDs',col:'#3ef0c8',price:90},
+  {id:'decor-lava',slot:'decor',name:'Lava Lamp',col:'#ff5a2a',price:100},
+  {id:'decor-crate',slot:'decor',name:'Vinyl Crate',col:'#a8744a',price:120},
+  {id:'decor-neon',slot:'decor',name:'Neon Sign',col:'#ff3d7f',price:150},
+  {id:'decor-disco',slot:'decor',name:'Disco Ball',col:'#d8d8e8',price:220},
+  {id:'kit-808',slot:'kit',name:'808 Kit',col:'#ff4f5a',price:150});
+/* ---- studio decor: drawn in the room (draw(g,t,ox,oy,full)), also used, smaller, as the shop picture ---- */
+const DECOR={
+  'decor-lights':{x:0,y:0,iw:24,ih:6,draw:(g,t,ox,oy,full)=>{const cols=['#ff4f9a','#ffcc4d','#3ef0c8','#a98bff'],segs=full?[[34,53],[66,107]]:[[0,23]];let i=0;
+    segs.forEach(([a,b])=>{for(let x=a;x<=b;x++)px(g,ox+x,oy+1+((x>>2)%2),1,1,'#4d4373');for(let x=a+1;x<=b;x+=4,i++)px(g,ox+x,oy+3,1,2,Math.sin(t*3+i*1.3)>-.3?cols[i%4]:'#2a2248')})}},
+  'decor-led':{x:0,y:0,iw:22,ih:3,draw:(g,t,ox,oy,full)=>{const cols=['#ff4f9a','#ffcc4d','#3ef0c8','#a98bff','#6cb8ff'],sp=seq.on?10:3,x0=full?28:0,x1=full?81:21,y=full?39:1;
+    for(let x=x0;x<=x1;x++)px(g,ox+x,oy+y,1,1,cols[(Math.floor(x/3)+Math.floor(t*sp))%5])}},
+  'decor-lava':{x:92,y:44,iw:7,ih:11,draw:(g,t,ox,oy)=>{px(g,ox+2,oy,3,1,'#3d3166');px(g,ox+1,oy+1,5,6,'#ff7a3a');px(g,ox+1,oy+1,1,6,'#ffa06a');
+    px(g,ox+2,oy+Math.round(3+Math.sin(t*.9)*2),2,2,'#ffcc4d');px(g,ox+3,oy+Math.round(4+Math.sin(t*.7+2)*2),2,1,'#ffe27a');px(g,ox+1,oy+7,5,1,'#2a2248');px(g,ox,oy+8,7,3,'#3d3166');px(g,ox+1,oy+8,5,1,'#5a4a7a')}},
+  'decor-crate':{x:3,y:46,iw:13,ih:9,draw:(g,t,ox,oy)=>{['#ff4f9a','#ffcc4d','#3ef0c8','#a98bff'].forEach((l,i)=>{px(g,ox+1+i*3,oy,3,5,'#140d1f');px(g,ox+2+i*3,oy+2,1,1,l)});
+    px(g,ox,oy+4,13,5,'#8a5a34');px(g,ox,oy+4,13,1,'#a8744a');px(g,ox+1,oy+6,11,1,'#6a4630')}},
+  'decor-neon':{x:94,y:10,iw:13,ih:11,draw:(g,t,ox,oy)=>{px(g,ox,oy,13,11,'#1a1030');const on=Math.sin(t*7)>-.85,c=on?'#ff3d7f':'#5a2040';
+    px(g,ox+8,oy+2,1,6,c);px(g,ox+8,oy+2,3,1,c);px(g,ox+10,oy+3,1,1,c);px(g,ox+4,oy+7,4,2,c);px(g,ox+5,oy+6,2,1,c);px(g,ox+5,oy+7,1,1,on?'#ff9ac0':c);px(g,ox+1,oy+1,1,1,'#3ef0c8')}},
+  'decor-disco':{x:98,y:0,iw:7,ih:9,draw:(g,t,ox,oy)=>{px(g,ox+3,oy,1,2,'#8a7fa8');px(g,ox+1,oy+2,5,6,'#8a8ca8');px(g,ox,oy+3,7,4,'#8a8ca8');const f=Math.floor(t*6);
+    for(let i=0;i<6;i++)px(g,ox+(i*3+f)%7,oy+2+(i*5+f)%6,1,1,i%2?'#ffffff':'#d8d8e8')}}};
+function drawDecor(g,t){for(const id in DECOR)if(S.owned.includes(id)&&!(S.decorOff||[]).includes(id)){const D=DECOR[id];D.draw(g,t,D.x,D.y,true)}}
+/* ---- buying and using ---- */
+const shopState=x=>S.owned.includes(x.id)?'own':x.price==null?'reward':x.flame&&(S.bestStreak||1)<x.flame?'flame':S.coins>=x.price?'buy':'poor';
+const isUsed=x=>x.slot==='kit'?S.kit===x.id:x.slot==='decor'?S.owned.includes(x.id)&&!(S.decorOff||[]).includes(x.id):S.eq[x.slot]===x.id;
+function useItem(x){if(x.slot==='kit')S.kit=x.id;else if(x.slot==='decor'){const off=S.decorOff||(S.decorOff=[]),i=off.indexOf(x.id);if(i>=0)off.splice(i,1);else off.push(x.id)}else S.eq[x.slot]=x.id;save()}
+function buyItem(x){const s=shopState(x);if(s==='own')return true;
+  if(s==='reward'){toast('WIN IT · '+String(x.how||'').toUpperCase());return false}
+  if(s==='flame'){toast(`NEEDS A ${x.flame}-DAY STREAK · YOUR BEST: ${S.bestStreak||1}`);sfx.bad();return false}
+  if(s==='poor'){toast(`NOT ENOUGH COINS · ${x.price-S.coins} MORE`);sfx.bad();return false}
+  S.coins-=x.price;S.owned.push(x.id);if(x.slot!=='decor')useItem(x);save();sfx.coin();haptic([20,40,20]);toast('BOUGHT · '+x.name.toUpperCase());return true}
+/* ---- flames ---- */
+const flameBonus=()=>10*Math.min(Math.max(S.streak||1,1),7);
+const flameReady=()=>S.flameDay!==todayStr();
+function claimFlame(){if(!flameReady())return 0;const c=flameBonus();S.coins+=c;S.flameDay=todayStr();save();sfx.coin();haptic([20,40,20]);toast(`FLAME BONUS · +${c} COINS`);return c}
+const FLAME_STEPS=[[3,'Blaze hoodie'],[5,'Ember Fox pet'],[7,'Inferno Cans'],[14,'Phoenix outfit']];
+function flamesHtml(){const nx=FLAME_STEPS.find(([n])=>(S.bestStreak||1)<n);
+  return`<div class="fl-row"><span data-ic="flame" data-sc="4"></span><div class="stack" style="gap:2px"><b class="num" style="font-size:30px;line-height:1">${S.streak} DAY${S.streak===1?'':'S'} IN A ROW</b><span class="muted" style="font-size:14px">Best streak: ${S.bestStreak||1} · Shields: ${S.shields||0}/2</span></div></div>
+  <p style="font-size:14.5px;text-align:left">A flame is one day in a row that you came back to make music. Miss a day and the fire goes out, back to 1.</p>
+  <div class="stack" style="gap:6px;text-align:left;font-size:14.5px">
+   <p><b style="color:var(--amber)">DAILY BONUS</b> · every day, +10 coins per flame (up to +70 at 7 flames).</p>
+   <p><b style="color:var(--magenta)">FLAME ITEMS</b> · in the shop, a streak unlocks them: ${FLAME_STEPS.map(([n,w])=>`${n} days: ${w}`).join(' · ')}.${nx?` Next: ${nx[1]} at ${nx[0]} days.`:' You unlocked them all.'}</p>
+   <p><b style="color:var(--neon)">STREAK SHIELD</b> · 60 coins in the shop. If you miss a single day, it is used up and your flames keep burning.</p></div>`}
+function openFlames(){const m=modal(`<p class="eyebrow" style="color:var(--magenta)">FLAMES · YOUR DAILY STREAK</p>${flamesHtml()}
+  ${flameReady()?`<button class="btn big block fl-claim">CLAIM +${flameBonus()} COINS</button>`:`<p class="fb good" style="width:100%">Today's bonus is claimed. Come back tomorrow for flame ${S.streak+1}.</p>`}
+  <button class="btn ghost block fl-shop">OPEN THE SHOP</button><button class="btn ghost block fl-x">CLOSE</button>`,{dismiss:true});hydrateIcons(m);
+  const c=$('.fl-claim',m);if(c)c.onclick=()=>{claimFlame();m.close();if(cur==='home'||cur==='shop')RENDER[cur]($('#s-'+cur))};
+  $('.fl-shop',m).onclick=()=>{m.close();go('shop',{tab:'flames'})};$('.fl-x',m).onclick=()=>m.close();return m}
+/* tapping the coins or the flames in the top bar */
+document.addEventListener('click',e=>{const tb=e.target.closest&&e.target.closest('.topbar .chip');if(!tb||!(NAVSCREENS.includes(cur)))return;
+  if(tb.classList.contains('amber')){if(cur!=='shop'){sfx.tap();go('shop')}}else if(tb.classList.contains('pink')){sfx.tap();openFlames()}});
+/* ---- the shop screen ---- */
+let SHOP_TAB='skins';
+const SHOP_TABS=[['skins','SKINS'],['pets','PETS'],['studio','STUDIO'],['sounds','SOUNDS'],['flames','FLAMES']];
+const shopTabOf=x=>x.slot==='comp'?'pets':x.slot==='decor'?'studio':x.slot==='kit'?'sounds':'skins';
+function shopGroups(tab){const by=s=>COS.filter(c=>c.slot===s);
+  return tab==='skins'?[['HOODIES & OUTFITS',by('hoodie')],['HEADPHONES',by('phones')],['HAIR',by('hair')]]:tab==='pets'?[['PETS',by('comp')]]:tab==='studio'?[['STUDIO DECOR · SHOWS IN YOUR STUDIO ROOM',by('decor')]]:
+    tab==='sounds'?[['DRUM KITS · FOR YOUR DRUM MACHINE',by('kit')]]:[['FLAME ITEMS · UNLOCKED BY YOUR BEST STREAK',COS.filter(c=>c.flame)]]}
+function itemArt(x,sc){if(x.slot==='comp'){const P=PETS[x.id];if(!P)return h('span','shop-solo','SOLO');return sprite(P.rows,P.pal,sc||3)}
+  if(x.slot==='decor'){const D=DECOR[x.id],cv=lowres(D.iw,D.ih);cv.style.width=D.iw*(sc||3)+'px';addLive(cv,(g,t)=>{g.clearRect(0,0,cv.width,cv.height);D.draw(g,t,0,0,false)});return cv}
+  if(x.slot==='kit')return icon('drums',x.col,2);
+  return sprite(HERO,heroPalFor(Object.assign({},S.eq,{[x.slot]:x.id})),sc||2)}
+function shopLabel(x,s){const u=isUsed(x);return s==='own'?(x.slot==='decor'?(u?'✓ IN YOUR STUDIO':'HIDDEN · TAP TO SHOW'):(u?'✓ IN USE':'OWNED · TAP TO USE')):s==='reward'?'WIN IT IN THE GAME':
+  s==='flame'?`${x.flame}-DAY STREAK · ${x.price}c`:s==='buy'?`${x.price} COINS`:`${x.price}c · ${x.price-S.coins} MORE`}
+RENDER.shop=(scr,arg)=>{let sel=arg&&arg.sel?cos(arg.sel):null;if(arg&&arg.tab)SHOP_TAB=arg.tab;if(sel)SHOP_TAB=shopTabOf(sel);
+  const paint=()=>{const tab=SHOP_TAB,groups=shopGroups(tab),s=sel?shopState(sel):null;
+    scr.innerHTML=topbar('SHOP','home')+`<div class="stack">
+     <div class="win raised shop-head"><div class="shop-stage"></div><div class="stack" style="gap:6px;min-width:0;flex:1">
+      <p class="eyebrow" style="color:var(--amber)">YOUR COINS</p><p class="num shop-coins"><span data-ic="coin" data-sc="2"></span>${S.coins}</p><div class="shop-sel"></div></div></div>
+     ${flameReady()?`<button class="flame-cta" data-a="claim"><span data-ic="flame" data-sc="3"></span><span class="stack" style="gap:2px;text-align:left"><b>FLAME BONUS READY</b><span style="font-size:14px">Day ${S.streak} in a row: tap for +${flameBonus()} coins</span></span></button>`:''}
+     <div class="shop-tabs">${SHOP_TABS.map(([id,n])=>`<button class="${id===tab?'on':''}" data-t="${id}">${n}</button>`).join('')}</div>
+     ${tab==='flames'?`<div class="win raised stack">${flamesHtml()}</div>`:''}
+     ${groups.map(([title,list])=>`<p class="eyebrow">${title}</p><div class="shop-grid">${list.map(x=>{const st=shopState(x);return`<button class="shop-it ${st}${isUsed(x)?' used':''}${sel&&sel.id===x.id?' sel':''}" data-id="${x.id}"><span class="shop-art"></span><b>${x.name}</b><small>${shopLabel(x,st)}</small></button>`}).join('')}</div>`).join('')}
+     ${tab==='flames'?`<div class="win raised stack shield"><div class="row sp"><b>STREAK SHIELD</b><span class="chip">${S.shields||0} / 2</span></div><p class="muted" style="font-size:14px">Miss one day and a shield is used up: your flames keep burning.</p><button class="btn block" data-a="shield"${(S.shields||0)>=2?' disabled':''}>${(S.shields||0)>=2?'SHIELDS FULL':'BUY A SHIELD · 60 COINS'}</button></div>`:''}
+     <p class="muted" style="font-size:13.5px">Coins come from lessons, battles, Master Trials, daily quests and the daily flame bonus.</p></div>`;
+    hydrateIcons(scr);wireBack(scr);
+    /* the preview: you, wearing what you picked, with your pet */
+    const stg=$('.shop-stage',scr),eq=Object.assign({},S.eq);if(sel&&['hoodie','phones','hair','comp'].includes(sel.slot))eq[sel.slot]=sel.id;
+    if(sel&&sel.slot==='decor')stg.append(itemArt(sel,6));else if(sel&&sel.slot==='kit')stg.append(icon('drums',sel.col,6));
+    else{stg.append(sprite(HERO,heroPalFor(eq),4,'bob'));const P=PETS[eq.comp];if(P)stg.append(sprite(P.rows,P.pal,3,'bob'))}
+    const sb=$('.shop-sel',scr);
+    if(!sel)sb.innerHTML='<p class="muted" style="font-size:14px">Tap anything to try it on before you buy.</p>';
+    else{sb.innerHTML=`<b>${sel.name}</b>`;const add=(cls,txt,fn)=>{const b=h('button',cls,txt);b.onclick=fn;sb.append(b);return b};
+      if(s==='own'){if(!(isUsed(sel)&&sel.slot!=='decor'))add('btn sm block',sel.slot==='decor'?(isUsed(sel)?'HIDE IN THE STUDIO':'SHOW IN THE STUDIO'):'USE IT',()=>{useItem(sel);sfx.tap();paint()});else sb.append(h('p','fb good','In use.'))}
+      else if(s==='buy')add('btn sm block',`BUY · ${sel.price} COINS`,()=>{if(buyItem(sel))paint()});
+      else if(s==='poor')sb.append(h('p','muted',`${sel.price} coins: ${sel.price-S.coins} more to go.`));
+      else if(s==='flame')sb.append(h('p','muted',`Reach a ${sel.flame}-day streak to unlock it (best: ${S.bestStreak||1}). Then ${sel.price} coins.`));
+      else sb.append(h('p','muted','Win it: '+(sel.how||'in the game')+'.'))}
+    $$('.shop-it',scr).forEach(b=>{const x=cos(b.dataset.id);$('.shop-art',b).append(itemArt(x));
+      b.onclick=()=>{sfx.tap();if(shopState(x)==='own'&&x.slot!=='decor'&&!isUsed(x))useItem(x);sel=x;
+        if(x.slot==='kit'){initAudio();if(A.ctx){const o=S.kit;S.kit=x.id;V.kick(now()+.02,.9);V.hat(now()+.27,.5);V.snare(now()+.52,.8);V.kick(now()+.77,.9);S.kit=o}}paint()}});
+    $$('.shop-tabs [data-t]',scr).forEach(b=>b.onclick=()=>{SHOP_TAB=b.dataset.t;sel=null;sfx.tap();paint()});
+    const cl=$('[data-a=claim]',scr);if(cl)cl.onclick=()=>{claimFlame();paint()};
+    const sh=$('[data-a=shield]',scr);if(sh)sh.onclick=()=>{if(S.coins<60){toast(`NOT ENOUGH COINS · ${60-S.coins} MORE`);sfx.bad();return}S.coins-=60;S.shields=(S.shields||0)+1;save();sfx.coin();toast('STREAK SHIELD READY');paint()}};
+  paint()};
 /* =====================================================================
    PRO PLUGIN KIT: knobs, faders, meters, displays, keyboard
    ===================================================================== */
@@ -3142,7 +3315,7 @@ const synOk=x=>Array.isArray(x)&&x.length===4&&x.every(Number.isFinite)&&x[0]>=0
 /* scale degrees on 16 steps (the 2.5 format and the ideas) → clip notes; a note lasts until the next one, up to what that sound used to hold */
 function degToClip(arr,snd){const hold={lead:2,pad:16,mine:4}[snd]||1,out=[];arr.forEach((d,i)=>{d=Math.round(+d||0);if(d<1||d>8)return;let l=1;if(hold>1)while(l<hold&&i+l<16&&!arr[i+l])l++;out.push([i,SYN_DEG[d-1],l,100])});return out}
 function synClean(o){const n=synNew();SYN_KEYS.forEach(k=>{const T=o&&o[k];if(!T)return;if(SYN_SOUNDS[T.snd])n[k].snd=T.snd;n[k].oct=clamp(Math.round(+T.oct||0),-1,1);
-  if(Array.isArray(T.clip))n[k].clip=T.clip.map(x=>Array.isArray(x)?x.map(v=>Math.round(+v)):x).filter(synOk);else if(Array.isArray(T.notes)&&T.notes.length===16)n[k].clip=degToClip(T.notes,n[k].snd)});return n}
+  if(Array.isArray(T.clip))n[k].clip=dedupeNotes(T.clip.map(x=>Array.isArray(x)?x.map(v=>Math.round(+v)):x).filter(synOk));else if(Array.isArray(T.notes)&&T.notes.length===16)n[k].clip=degToClip(T.notes,n[k].snd)});return n}
 const synBase=(st,T)=>st.root+(SYN_SOUNDS[T.snd]||SYN_SOUNDS.stab).base+12*(T.oct||0);
 /* one note of the stab sound, for chords written note by note */
 function stabOne(t,v,m,d){const c=AC();d=d||OUT();const lp=c.createBiquadFilter(),g=c.createGain();lp.type='lowpass';lp.Q.value=4;lp.frequency.setValueAtTime(5200,t);lp.frequency.exponentialRampToValueAtTime(700,t+.13);

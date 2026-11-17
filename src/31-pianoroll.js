@@ -12,8 +12,10 @@ let ROLL_PH=-1;
 function rollNotes(){
   if(!Array.isArray(S.roll)){S.roll=[];const L=S.pattern&&S.pattern.lead;
     if(L&&L.some(Boolean)){L.forEach((v,i)=>{if(v)S.roll.push([i,69+SEMI[v],1,85])});L.fill(0)}}   /* a lead written in the old step grid becomes MIDI notes */
-  else if(!S.roll.every(rollOk))S.roll=S.roll.filter(rollOk);
+  else{if(!S.roll.every(rollOk))S.roll=S.roll.filter(rollOk);const d=dedupeNotes(S.roll);if(d.length!==S.roll.length)S.roll=d}
   return S.roll}
+/* one note per pitch and step: a double tap must never stack the same note twice */
+const dedupeNotes=a=>{const seen=new Set();return a.filter(n=>{const k=n[0]+':'+n[1];if(seen.has(k))return false;seen.add(k);return true})};
 const rollPatch=()=>has('synth')?(S.leadPatch||PRESETS.LEAD):ROLL_KEYS;
 const rollGain=v=>(S.vols.lead==null?.6:S.vols.lead)*.5*v/100;
 function rollStep(s,t,dest){if(!has('midi')||!Array.isArray(S.roll)||!S.roll.length)return;const i=s%16,spb=60/S.bpm/4,P=rollPatch();
@@ -62,7 +64,7 @@ function pianoRollModal(c){seq.stop();initAudio();const notes=c.notes,inKey=p=>M
   const paintNotes=()=>{$$('.pn',R).forEach(x=>x.remove());notes.forEach(n=>{const r=rows.indexOf(n[1]);if(r<0)return;const b=h('button','pn');
       b.style.gridArea=`${r+1} / ${n[0]+2} / ${r+2} / ${n[0]+2+n[2]}`;b.style.opacity=(.4+.6*n[3]/127).toFixed(2);b.setAttribute('aria-label',`Delete ${noteName(n[1])} at step ${n[0]+1}`);b.onclick=()=>del(n);R.append(b)})};
   const changed=()=>{paintNotes();saved()};
-  const add=(i,p)=>{const next=notes.filter(n=>n[1]===p&&n[0]>i).reduce((a,n)=>Math.min(a,n[0]),16),l=Math.max(1,Math.min(len,next-i));
+  const add=(i,p)=>{if(notes.some(n=>n[0]===i&&n[1]===p))return;const next=notes.filter(n=>n[1]===p&&n[0]>i).reduce((a,n)=>Math.min(a,n[0]),16),l=Math.max(1,Math.min(len,next-i));
     notes.push([i,p,l,vel]);notes.sort((a,b)=>a[0]-b[0]||b[1]-a[1]);c.hear(p,vel);haptic(6);
     mon.textContent=`NOTE ON · ${noteName(p)} · #${p} · VELOCITY ${vel} · ${rollLenName(l)}`;changed()};
   const del=n=>{const k=notes.indexOf(n);if(k>=0)notes.splice(k,1);haptic(4);mon.textContent=`NOTE DELETED · ${noteName(n[1])} · STEP ${n[0]+1}`;changed()};

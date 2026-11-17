@@ -17,7 +17,7 @@ const COS_FROM={'hoodie-beast':'boss','phones-leaf':'challenge','comp-cassette':
 const CERTS=[['trial','RHYTHM CERTIFIED','The gold trophy on your studio wall'],['ktrial','SOUND DESIGNER','The violet trophy on the shelf above your window'],['dtrial','EQ MASTER','The gold trophy on the shelf above your window'],
   ['vtrial','DYNAMICS CERTIFIED','The orange trophy on the shelf above your window'],['strial','SPACE CERTIFIED','The blue trophy on the shelf above your window'],['mtrial','MIX ENGINEER','The white trophy on the shelf above your window'],
   ['final','PRODUCER CERTIFIED','Your framed certificate on the studio wall'],['btrial','CLUB CERTIFIED','The record plaque on your studio wall']];
-const COS_KIND={hoodie:'HOODIE',phones:'HEADPHONES',hair:'HAIR',comp:'COMPANION',kit:'DRUM KIT'};
+const COS_KIND={hoodie:'HOODIE',phones:'HEADPHONES',hair:'HAIR',comp:'PET',kit:'DRUM KIT',decor:'STUDIO DECOR'};
 function stageWorld(id){for(const w of WORDER)if((WSTAGES[w]||[]).some(x=>x.id===id))return w;return'forest'}
 function stageTitle(id){for(const w of WORDER){const x=(WSTAGES[w]||[]).find(x=>x.id===id);if(x)return x.title}return id}
 function rewardIndex(){const L=[];
@@ -26,9 +26,10 @@ function rewardIndex(){const L=[];
   CERTS.forEach(([id,n,where])=>L.push({key:'c:'+id,w:stageWorld(id),kind:'CERTIFICATE',name:n,col:'#ffcc4d',got:id==='final'?!!(S.cert||S.done.includes('final')):S.done.includes(id),where,how:stageTitle(id)}));
   COS.filter(c=>c.price!==0).forEach(c=>{const st=COS_FROM[c.id],sl=c.slot;
     L.push({key:'o:'+c.id,w:st?stageWorld(st):c.price?'shop':'quests',kind:COS_KIND[sl]||sl.toUpperCase(),name:c.name,col:c.col,got:S.owned.includes(c.id),cos:c,
-      where:sl==='kit'?'SWAP KIT on your drum machine':sl==='comp'?'Your companion, next to you in the studio':'Your hero in the studio',how:c.how||(c.price?`${c.price} coins · PATH › STYLE`:'')})});
+      where:sl==='kit'?'SWAP KIT on your drum machine':sl==='comp'?'Your pet, next to you in the studio':sl==='decor'?'Your studio room':'Your hero in the studio',
+      how:c.how||(c.price?`${c.price} coins in the SHOP${c.flame?` · needs a ${c.flame}-day streak`:''}`:'')})});
   return L}
-const rwInUse=c=>c.slot==='kit'?S.kit===c.id:S.eq[c.slot]===c.id;
+const rwInUse=c=>isUsed(c);
 /* where TRY IT NOW (and USE IN STUDIO) takes you for each tool; a fresh copy each time, the studio clears the flags it uses */
 const STUDIO_TRY={groovebox:{bbox:1},midi:{roll:1},eq:{eq:1},synth:{lead:1},auto:{focus:'.auto-card'},comp:{focus:'.mcomp'},dist:{focus:'.fxrack'},reverb:{focus:'.fxrack'},delay:{focus:'.fxrack'},limiter:{focus:'.fxrack'},drums:{focus:'.dm-win'}};
 const studioTry=id=>STUDIO_TRY[id]?Object.assign({},STUDIO_TRY[id]):undefined;
@@ -48,7 +49,7 @@ function rewardWall(host,o){o=o||{};const L=rewardIndex();
     $$('.mr-tab',w).forEach(b=>b.onclick=()=>{tab=b.dataset.w;sfx.tap();paint()});
     $$('.mr-it',w).forEach(b=>b.onclick=()=>{const r=L.find(x=>x.key===b.dataset.k);if(!r)return;sfx.tap();
       if(!r.got){toast('LOCKED · '+String(r.how).toUpperCase());return}
-      if(r.cos){if(r.cos.slot==='kit')S.kit=r.cos.id;else S.eq[r.cos.slot]=r.cos.id;save();paint();if(o.onEquip)o.onEquip(r.cos);return}
+      if(r.cos){if(r.cos.slot==='decor'){if(!(o.go&&o.go('c:room')))toast(r.where.toUpperCase());return}useItem(r.cos);paint();if(o.onEquip)o.onEquip(r.cos);return}
       if(!(o.go&&o.go(r.key)))toast(r.where.toUpperCase())})};
   paint();S.rwSeen=L.filter(r=>r.got).map(r=>r.key);save();
   return{paint,el:w}}
