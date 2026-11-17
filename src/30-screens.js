@@ -207,7 +207,7 @@ RENDER.lesson=(scr,id)=>{const L=LESSONS[id];let i=0,ok=false,hl=0,leave=[];
     if(first&&L.ability)await unlockAbility(L.ability);
     if(first&&L.game){const gm=GAMES.find(x=>x.id===L.game);toast('EAR GYM · '+gm.name.toUpperCase()+' UNLOCKED')}
     if(first&&L.after&&await L.after())return;
-    if(first&&L.tool&&!has(L.tool)){const r=await unlockTool(L.tool);if(r==='try'){markSeg('new');S.daily.active=null;save();go('studio',L.tool==='groovebox'?{bbox:1}:undefined);return}}
+    if(first&&L.tool&&!has(L.tool)){const r=await unlockTool(L.tool);if(r==='try'){markSeg('new');S.daily.active=null;save();go('studio',L.tool==='groovebox'?{bbox:1}:L.tool==='midi'?{roll:1}:undefined);return}}
     finishActivity('new',id==='l3'&&first?['battle','slime']:'region')};
   show()};
 
@@ -360,10 +360,10 @@ function applyFx(){const G=studioGraph();if(!G)return;const F=S.fx;
   G.dly.delayTime.value=hasAb('space')?.75*60/S.bpm:.3;G.dfb.gain.value=.38;G.dmix.gain.value=has('delay')?F.dly:0;
   G.drv.curve=has('dist')&&F.drive>0?satCurve(F.drive):null;G.rum.set({amt:hasAb('rumblecraft')?(F.rumble||0):0});
   const lon=has('limiter')&&F.lim;G.lim.threshold.value=lon?F.ceil-2:0;G.lim.ratio.value=lon?20:1;G.lim.knee.value=0;G.lim.attack.value=.002;G.lim.release.value=.08;G.post.gain.value=lon?dbToG(1.5):1}
-function studioStep(p,s,t,vol){const G=studioGraph();if(!G){playStep(p,s,t,vol);return}const i=s%16,R=k=>G.tr[k].inp;
+function studioStep(p,s,t,vol){const G=studioGraph();if(!G){playStep(p,s,t,vol);rollStep(s,t);return}const i=s%16,R=k=>G.tr[k].inp;
   withRoute(R('kick'),()=>{if(p.kick[i]){V.kick(t,vol.kick);G.rum.duck(t,60/S.bpm)}});withRoute(R('snare'),()=>{if(p.snare[i])V.snare(t,vol.snare)});withRoute(R('hat'),()=>{if(p.hat[i])V.hat(t,vol.hat)});
-  withRoute(R('bass'),()=>{if(p.bass[i])V.bass(t,p.bass[i],vol.bass)});if(p.lead&&has('synth'))withRoute(R('lead'),()=>{if(p.lead[i])SV(t,leadF(p.lead[i]),.2,S.leadPatch||PRESETS.LEAD,(vol.lead==null?.6:vol.lead)*.5)})}
-function fxRack(host){const trk=['kick','snare','hat','bass'].concat(has('synth')?['lead']:[]);const pan=hasAb('stereosight'),snd=has('reverb');const F=S.fx;
+  withRoute(R('bass'),()=>{if(p.bass[i])V.bass(t,p.bass[i],vol.bass)});if(p.lead&&has('synth')&&!has('midi'))withRoute(R('lead'),()=>{if(p.lead[i])SV(t,leadF(p.lead[i]),.2,S.leadPatch||PRESETS.LEAD,(vol.lead==null?.6:vol.lead)*.5)});rollStep(s,t,R('lead'))}
+function fxRack(host){const trk=['kick','snare','hat','bass'].concat(has('synth')||has('midi')?['lead']:[]);const pan=hasAb('stereosight'),snd=has('reverb');const F=S.fx;
   const w=h('div','win raised stack');w.innerHTML=`<div class="row sp"><p class="eyebrow" style="color:#6cb8ff">MIX RACK</p>${has('limiter')?`<button class="chip" data-a="lim" style="min-height:36px">LIMITER ${F.lim?'ON':'OFF'}</button>`:''}</div>`;host.append(w);const tip=tipLine(w);
   const on=()=>{applyFx();save()};
   if(pan||snd)trk.forEach(k=>{const r=h('div','fxrow');r.innerHTML=`<span style="color:${TR[k].c}">${TR[k].n}</span>`;const kr=h('div','krow');kr.style.justifyContent='flex-start';r.append(kr);w.append(r);
@@ -380,7 +380,7 @@ function fxRack(host){const trk=['kick','snare','hat','bass'].concat(has('synth'
   if(!w.querySelector('.knob2')&&!lb)w.remove();applyFx()}
 function leadEditor(){const m=modal('<div class="led-h" style="width:100%"></div><button class="btn block fx-close">DONE</button>',{dismiss:true});const rig=synthRig($('.led-h',m),{patch:S.leadPatch,presets:hasAb('wave'),riff:[[69,0,.5],[72,.5,.5],[76,1,.5],[74,1.5,1]],lo:57,hi:81});
   const close=()=>{rig.stop();save();m.close()};$('.fx-close',m).onclick=close}
-RENDER.studio=(scr,arg)=>{const ch=!!(arg&&arg.challenge);const P=S.pattern;let hl=0;if(!P.lead)P.lead=new Array(16).fill(0);if(S.vols.lead==null)S.vols.lead=.6;S.fx=Object.assign({pan:{},send:{},dly:.25,lim:true,ceil:-1,drive:0,rumble:.35},S.fx||{});if(!S.leadPatch)S.leadPatch=mkPatch(PRESETS.LEAD);const TRK=['kick','snare','hat','bass'].concat(has('synth')?['lead']:[]);
+RENDER.studio=(scr,arg)=>{const ch=!!(arg&&arg.challenge);const P=S.pattern;let hl=0;if(!P.lead)P.lead=new Array(16).fill(0);if(S.vols.lead==null)S.vols.lead=.6;S.fx=Object.assign({pan:{},send:{},dly:.25,lim:true,ceil:-1,drive:0,rumble:.35},S.fx||{});if(!S.leadPatch)S.leadPatch=mkPatch(PRESETS.LEAD);const TRK=['kick','snare','hat','bass'].concat(has('synth')&&!has('midi')?['lead']:[]);
   scr.innerHTML=topbar(ch?'CHALLENGE':'MY STUDIO',ch?'region':null)+`<div class="stack">
    ${ch?`<div class="win cbanner stack"><p class="eyebrow" style="color:var(--amber)">WORLD 1 CHALLENGE · FIRST BEAT</p><h2>Create an 8-bar beat</h2><p style="font-size:15px">Program a 1-bar groove below. It loops for 8 bars. Use all four instruments, then submit. There's no wrong answer, only feedback.</p><div class="check"><div data-r="kick">Kick</div><div data-r="snare">Snare</div><div data-r="hat">Hi-hat</div><div data-r="bass">Bass (tap a bass cell again to change its note)</div></div><div class="hints"></div></div>`:''}
    <div class="win room"><div class="scene"></div></div><div class="gear"></div><div class="daw stack"></div></div>`;hydrateIcons(scr);wireBack(scr);
@@ -397,15 +397,16 @@ RENDER.studio=(scr,arg)=>{const ch=!!(arg&&arg.challenge);const P=S.pattern;let 
     ${has('comp')?`<div class="win raised stack"><div class="row sp"><p class="eyebrow" style="color:var(--amber)">MASTER COMPRESSOR · DYNAMICS HAMMER</p><button class="chip" data-a="mc">${S.mcomp.on?'ON':'OFF'}</button></div><div class="knobrow"><span>THRESH</span><input type="range" id="mc-thr" min="-40" max="0" value="${S.mcomp.thr}" aria-label="Master threshold"><span class="num">${S.mcomp.thr} dB</span></div><div class="knobrow"><span>RATIO</span><input type="range" id="mc-ratio" min="1" max="12" step=".5" value="${S.mcomp.ratio}" aria-label="Master ratio"><span class="num">${S.mcomp.ratio}:1</span></div><div class="grm"><span>GAIN REDUCTION</span><div class="bar"><i style="width:0%;--c:var(--magenta)"></i></div><span class="num">0.0 dB</span></div></div>`:''}
     <div class="fxh"></div>
     <div class="row wrap"><button class="btn ghost sm" data-a="clr">CLEAR</button><button class="btn ghost sm" data-a="bb">LOAD BACKBEAT</button>${has('synth')?'<button class="btn ghost sm" data-a="lead">EDIT LEAD SOUND</button>':''}<button class="btn ghost sm" data-a="pip">ASK PIP</button></div></div>
+    ${!ch&&has('midi')?rollCard():''}
     ${!ch&&has('groovebox')?bunkerCard():''}
     ${ch?'<button class="btn big block" data-a="submit" disabled>SUBMIT BEAT ★</button>':''}`;
   addLive($('.spec',daw),specDraw);
   const reqs=()=>{if(!ch)return;const used=['kick','snare','hat','bass'].map(k=>P[k].some(Boolean));$$('[data-r]',scr).forEach((d,i)=>d.classList.toggle('ok',used[i]));$('[data-a=submit]',daw).disabled=!used.every(Boolean)};
   const onChange=()=>{save();reqs()};
-  const g=grid($('.gh',daw),{tracks:TRK,pat:P,edit:true,faders:true,onChange});reqs();fxRack($('.fxh',daw));const lb=$('[data-a=lead]',daw);if(lb)lb.onclick=()=>{seq.stop();leadEditor()};const bbx=$('[data-a=bbox]',daw);if(bbx)bbx.onclick=()=>{seq.stop();openBunkerBox()};
+  const g=grid($('.gh',daw),{tracks:TRK,pat:P,edit:true,faders:true,onChange});reqs();fxRack($('.fxh',daw));const lb=$('[data-a=lead]',daw);if(lb)lb.onclick=()=>{seq.stop();leadEditor()};const bbx=$('[data-a=bbox]',daw);if(bbx)bbx.onclick=()=>{seq.stop();openBunkerBox()};const rc=$('.roll-card',daw),openRoll=rc?wireRollCard(rc,()=>seq.stop()):null;
   const playB=$('[data-a=play]',daw),barc=$('.barc',daw);let bars=0,practiced=0;
-  const stopUI=()=>{playB.textContent='▶ PLAY';g.step(-1);barc.textContent='BAR –'};
-  const start=total=>{bars=0;playB.textContent='■ STOP';seq.start({bpm:()=>S.bpm,total,play:(s,t)=>{const i=s%16;const spb=60/S.bpm/4;studioStep(P,s,t+(hasAb('swing')&&i%4===2?S.swing/100*spb:0),S.vols)},onStep:s=>{g.step(s%16);if(s%16===0){bars++;barc.textContent='BAR '+bars+(total?'/8':'');if(bars>1&&P.kick.some(Boolean)&&P.snare.some(Boolean)){bump('loop4');if(practiced<6){practiced++;gain(['patterns','kick','snare'],'p',1)}save()}}},onStop:stopUI,onEnd:stopUI})};
+  const stopUI=()=>{playB.textContent='▶ PLAY';g.step(-1);ROLL_PH=-1;barc.textContent='BAR –'};
+  const start=total=>{bars=0;playB.textContent='■ STOP';seq.start({bpm:()=>S.bpm,total,play:(s,t)=>{const i=s%16;const spb=60/S.bpm/4;studioStep(P,s,t+(hasAb('swing')&&i%4===2?S.swing/100*spb:0),S.vols)},onStep:s=>{g.step(s%16);ROLL_PH=s%16;if(s%16===0){bars++;barc.textContent='BAR '+bars+(total?'/8':'');if(bars>1&&P.kick.some(Boolean)&&P.snare.some(Boolean)){bump('loop4');if(practiced<6){practiced++;gain(['patterns','kick','snare'],'p',1)}save()}}},onStop:stopUI,onEnd:stopUI})};
   playB.onclick=()=>{if(seq.on){seq.stop();return}start(ch?128:0)};
   const setBpm=d=>{S.bpm=clamp(S.bpm+d,60,180);$('.bpmv',daw).textContent=S.bpm;applyFx();save()};$('[data-a=slower]',daw).onclick=()=>setBpm(-2);$('[data-a=faster]',daw).onclick=()=>setBpm(2);
   const sw=$('#studio-swing',daw);if(sw)sw.oninput=()=>{S.swing=+sw.value;sw.nextElementSibling.textContent=S.swing+'%';save()};
@@ -420,7 +421,8 @@ RENDER.studio=(scr,arg)=>{const ch=!!(arg&&arg.challenge);const P=S.pattern;let 
   $('[data-a=kit]',daw).onclick=()=>{const kits=COS.filter(c=>c.slot==='kit');const m=modal(`<h2>Drum kits</h2><div class="stack" style="width:100%">${kits.map(k=>{const own=S.owned.includes(k.id);return`<button class="sw ${S.kit===k.id?'on':''} ${own?'':'lock'}" data-k="${k.id}" style="width:100%"><i style="background:${k.col}"></i><span class="grow" style="text-align:left">${k.name}${own?'':`<br><small class="muted">${k.how}</small>`}</span></button>`}).join('')}</div><button class="btn block kit-done">DONE</button>`,{dismiss:true});
     $$('[data-k]',m).forEach(b=>b.onclick=()=>{if(!S.owned.includes(b.dataset.k)){toast('LOCKED · '+cos(b.dataset.k).how.toUpperCase());return}S.kit=b.dataset.k;save();initAudio();if(A.ctx){V.kick(now()+.02,.9);V.snare(now()+.3,.8)}$$('[data-k]',m).forEach(x=>x.classList.toggle('on',x===b))});$('.kit-done',m).onclick=()=>{m.close();seq.stop();RENDER.studio(scr,arg)}};
   if(ch){hintBar($('.hints',scr),{hints:['Start with the backbone: a kick on step 1 and a snare on steps 5 and 13.','Add hats on the 8th notes. Then tap bass cells, and tap again to change the note.'],onLevel:l=>{hl=l},reveal:loadBB});$('[data-a=submit]',daw).onclick=()=>{seq.stop();submitBeat(hl)}}
-  if(arg&&arg.bbox&&has('groovebox')){arg.bbox=0;openBunkerBox()}};
+  if(arg&&arg.bbox&&has('groovebox')){arg.bbox=0;openBunkerBox()}
+  if(arg&&arg.roll&&openRoll){arg.roll=0;openRoll()}};
 function submitBeat(hl){const r=scoreBeat(S.pattern,S.vols);const label=r.overall>=90?'LEGENDARY LOOP':r.overall>=75?'FRESH GROOVE':r.overall>=55?'SOLID START':'ROUGH DEMO';
   const rows=[['Rhythm',r.rhythm],['Structure',r.structure],['Balance',r.balance],['Creativity',r.creativity],['Completion',r.completion]];
   const m=modal(`<p class="eyebrow">FIRST BEAT · RESULTS</p><h2 class="rw-t">${label}</h2><p class="num" style="font-size:52px;line-height:.9;color:var(--neon)">${r.overall}</p>
@@ -545,7 +547,7 @@ function skillInfo(id){const s=S.skills[id]||{u:0,l:0,p:0};const K=SK[id];const 
    ${SKILL_Q[id]&&(s.learned||s.u+s.l+s.p>0)?'<button class="btn block si-p">PRACTICE NOW · 3 QUESTIONS</button>':''}<button class="btn ghost block si-x">CLOSE</button>`,{dismiss:true});
   const p=$('.si-p',m);if(p)p.onclick=()=>{m.close();startPractice(id)};$('.si-x',m).onclick=()=>m.close()}
 function toolInfo(t,ms){const hv=has(t.id);const m=modal(`<div class="ti-ic"></div><p class="eyebrow">${hv?'WEAPON FORM · '+t.weapon.toUpperCase():'LOCKED · LV '+t.lv+' · '+t.world.toUpperCase()}</p><h2>${hv?t.name:'???'}</h2><p>${hv?t.desc:'You will discover this tool when you understand what it does.'}</p>${hv?`<div class="win raised" style="text-align:left;width:100%"><p class="eyebrow" style="margin-bottom:6px">IN A REAL DAW</p><p style="font-size:15px">${t.daw}</p></div><p class="muted">Mastery ${ms}% · ${S.missions[t.id]||0} missions completed</p>`:''}<button class="btn block ti-x">${hv&&t.id!=='volume'?'USE IN STUDIO':'CLOSE'}</button>`,{dismiss:true});
-  $('.ti-ic',m).append(icon(t.id,t.col,8,!hv));$('.ti-x',m).onclick=()=>{m.close();if(hv&&t.id!=='volume')go('studio')}}
+  $('.ti-ic',m).append(icon(t.id,t.col,8,!hv));$('.ti-x',m).onclick=()=>{m.close();if(hv&&t.id!=='volume')go('studio',t.id==='midi'?{roll:1}:t.id==='groovebox'?{bbox:1}:undefined)}}
 
 /* ================= daily quests ================= */
 RENDER.quests=scr=>{const d=new Date(),mid=new Date(d);mid.setHours(24,0,0,0);const ms=mid-d;const hh=Math.floor(ms/3.6e6),mm=Math.floor(ms%3.6e6/6e4);

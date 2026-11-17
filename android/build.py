@@ -19,9 +19,9 @@ BIN = TOOLS / "bin"
 ANDROID_JAR = TOOLS / "sdk" / "android.jar"
 BUILD = HERE / "build"
 FONTS = HERE / "src" / "fonts"
-APK_OUT = ROOT / "BeatQuest-2.2.1.apk"
-ZIP_OUT = ROOT / "BeatQuest-2.2.1-android.zip"
-VERSION_CODE, VERSION_NAME = 8, "2.2.1"
+APK_OUT = ROOT / "BeatQuest-2.3.apk"
+ZIP_OUT = ROOT / "BeatQuest-2.3-android.zip"
+VERSION_CODE, VERSION_NAME = 9, "2.3"
 MIN_SDK, TARGET_SDK = 24, 34
 
 

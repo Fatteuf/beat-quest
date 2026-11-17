@@ -601,6 +601,23 @@ input[type=range]::-moz-range-thumb{width:18px;height:22px;background:var(--ambe
 .bb-c.ph{outline:2px solid var(--ink);outline-offset:-2px}
 .bb-c.lockc{cursor:default}
 .cert{border:3px solid #ffcc4d;background:radial-gradient(circle at 50% 0,#3a2a08,#120e22 70%);padding:18px;text-align:center;display:flex;flex-direction:column;gap:10px;align-items:center}
+/* MIDI piano roll (studio) */
+.roll-mini{width:100%;height:64px;background:#08060f;border:2px solid var(--edge)}
+.pr-mon{font-size:17px;color:var(--neon);min-height:1.3em}
+.proll{display:grid;grid-template-columns:32px repeat(16,minmax(0,1fr));gap:1px;width:100%;background:#2a2248;border:2px solid var(--edge)}
+.proll button{min-height:0;min-width:0;padding:0;margin:0;border:0;border-radius:0;background:#0d0a18}
+.proll .pk{background:#d4c7aa;color:#2a2248;font-family:var(--f-disp);font-size:7px;letter-spacing:0;display:flex;align-items:center;justify-content:flex-end;padding-right:3px}
+.proll .pk.bk{background:#140d1f;color:#8a7fa8}
+.proll .pk.root{box-shadow:inset 3px 0 0 #a98bff}
+.proll .pc.ik{background:#191334}
+.proll .pc.beat{box-shadow:inset 1px 0 0 #4d4373}
+.proll .pn{background:#a98bff;box-shadow:inset 0 0 0 1px #e6dcff,inset 0 -3px 0 rgba(0,0,0,.3);z-index:2}
+.proll .pph{background:rgba(241,231,208,.16);pointer-events:none;z-index:3}
+.pr-opts{display:flex;flex-direction:column;gap:8px;width:100%}
+.pr-opt{display:grid;grid-template-columns:64px 1fr;gap:8px;align-items:center;text-align:left}
+.pr-seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:4px}
+.pr-seg button{min-height:36px;padding:4px 2px;background:var(--panel2);border:2px solid var(--edge);font-family:var(--f-disp);font-size:9.5px;letter-spacing:.04em;color:var(--ink)}
+.pr-seg button.on{border-color:#a98bff;color:#a98bff;background:#1d1636}
 
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition:none!important}}
 </style>

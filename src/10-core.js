@@ -1,4 +1,4 @@
-const VERSION='2.2.1';
+const VERSION='2.3';
 /* ================= helpers ================= */
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const app=$('#app');
@@ -524,6 +524,9 @@ function drawStudio(g,t,cv){const W=cv.width,H=cv.height,fl=44;
   const glow=(Math.sin(t*6)>.6)?'#6ff8dc':'#3ef0c8';px(g,50,26,16,10,'#140d1f');px(g,51,27,14,8,glow);px(g,52,29,6,1,'#0b2a24');px(g,52,31,9,1,'#0b2a24');px(g,48,36,20,1,'#8a7fa8');
   if(has('drums')){px(g,31,30,15,6,'#2a2248');px(g,31,30,15,1,'#5a4a7a');const pl=seq.on?Math.floor(t*6)%4:-1;['#ffb547','#ff4f9a','#3ef0c8','#a98bff'].forEach((c,i)=>px(g,32+i*3.5,32,3,3,pl===i?'#ffffff':c))}
   if(has('comp')){px(g,67,31,10,5,'#2a1a1a');px(g,67,31,10,1,'#8a5a34');const m=seq.on?Math.floor((Math.sin(t*9)+1)*3):1;px(g,68,33,m+1,2,'#ff5a2a')}
+  /* MIDI keyboard in front of the screen (Synth Caves): a key lights up while the piano roll plays */
+  if(has('midi')){const lit=seq.on&&S.roll&&S.roll.length?Math.floor(t*8)%6:-1;px(g,47,33,19,3,'#3d3166');px(g,48,34,17,2,'#f1e7d0');if(lit>=0)px(g,48+lit*3,34,2,2,'#a98bff');
+    [50,53,56,59,62].forEach(x=>px(g,x,35,1,1,'#8a7fa8'));[50,53,59,62].forEach(x=>px(g,x,34,1,1,'#140d1f'))}
   if(S.done.includes('l3')){[[18,27],[84,27]].forEach(([x,y])=>{const p=seq.on&&Math.floor(t*8)%2?1:0;px(g,x,y,8,18,'#1a1426');px(g,x+1,y+3-p,6,6,'#3d3166');px(g,x+3,y+5-p,2,2,'#0d0a1c');px(g,x+2,y+11,4,4,'#3d3166')})}
   if(S.defeated.includes('slime')){px(g,98,34,6,8,'#8a5a34');px(g,97,34,8,1,'#a8744a');px(g,99,28,2,6,'#4f8a4a');px(g,96,30,3,2,'#6fd36a');px(g,101,27,3,3,'#6fd36a');px(g,98,26,2,2,'#6fd36a')}
   if(S.done.includes('trial')){px(g,36,10,10,12,'#ffcc4d');px(g,37,11,8,10,'#2a1a06');px(g,40,13,2,6,'#ffcc4d');px(g,38,14,6,1,'#ffcc4d')}
