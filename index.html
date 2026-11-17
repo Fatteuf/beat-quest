@@ -601,6 +601,45 @@ input[type=range]::-moz-range-thumb{width:18px;height:22px;background:var(--ambe
 .bb-c.ph{outline:2px solid var(--ink);outline-offset:-2px}
 .bb-c.lockc{cursor:default}
 .cert{border:3px solid #ffcc4d;background:radial-gradient(circle at 50% 0,#3a2a08,#120e22 70%);padding:18px;text-align:center;display:flex;flex-direction:column;gap:10px;align-items:center}
+/* MIDI piano roll (studio) */
+.roll-mini{width:100%;height:64px;background:#08060f;border:2px solid var(--edge)}
+.pr-mon{font-size:17px;color:var(--neon);min-height:1.3em}
+.proll{display:grid;grid-template-columns:32px repeat(16,minmax(0,1fr));gap:1px;width:100%;background:#2a2248;border:2px solid var(--edge)}
+.proll button{min-height:0;min-width:0;padding:0;margin:0;border:0;border-radius:0;background:#0d0a18}
+.proll .pk{background:#d4c7aa;color:#2a2248;font-family:var(--f-disp);font-size:7px;letter-spacing:0;display:flex;align-items:center;justify-content:flex-end;padding-right:3px}
+.proll .pk.bk{background:#140d1f;color:#8a7fa8}
+.proll .pk.root{box-shadow:inset 3px 0 0 #a98bff}
+.proll .pc.ik{background:#191334}
+.proll .pc.beat{box-shadow:inset 1px 0 0 #4d4373}
+.proll .pn{background:#a98bff;box-shadow:inset 0 0 0 1px #e6dcff,inset 0 -3px 0 rgba(0,0,0,.3);z-index:2}
+.proll .pph{background:rgba(241,231,208,.16);pointer-events:none;z-index:3}
+.pr-opts{display:flex;flex-direction:column;gap:8px;width:100%}
+.pr-opt{display:grid;grid-template-columns:64px 1fr;gap:8px;align-items:center;text-align:left}
+.pr-seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:4px}
+.pr-seg button{min-height:36px;padding:4px 2px;background:var(--panel2);border:2px solid var(--edge);font-family:var(--f-disp);font-size:9.5px;letter-spacing:.04em;color:var(--ink)}
+.pr-seg button.on{border-color:#a98bff;color:#a98bff;background:#1d1636}
+/* studio EQ, automation and MY REWARDS */
+.eq-trk{display:flex;flex-wrap:wrap;gap:4px;margin:2px 0 6px}
+.eq-trk button{min-height:34px;padding:4px 8px;background:var(--panel2);border:2px solid var(--edge);font-family:var(--f-disp);font-size:9.5px;letter-spacing:.05em;color:var(--ink)}
+.eq-trk button.on{border-color:var(--tc,#3ef0c8);color:var(--tc,#3ef0c8);background:#141029}
+.mr-tabs{display:flex;flex-wrap:wrap;gap:4px}
+.mr-tab{display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-height:40px;padding:4px 8px;background:var(--panel);border:2px solid var(--edge);font-family:var(--f-disp);font-size:8.5px;letter-spacing:.05em;color:var(--dim)}
+.mr-tab b{font-family:var(--f-num);font-size:15px;font-weight:400;color:var(--wc)}
+.mr-tab.on{border-color:var(--wc);color:var(--ink);background:#141029}
+.mr-new{font-family:var(--f-disp);font-size:8px;color:#07050d;background:var(--neon);padding:1px 4px;margin-left:4px;vertical-align:middle}
+.mr-hero{display:flex;align-items:flex-end;gap:2px;min-width:40px}
+.mr-it small{font-size:12.5px;line-height:1.25}
+.beatled{width:14px;height:14px;flex:none;background:#2a2248;border:2px solid var(--edge);display:inline-block}
+.beatled.on{background:var(--neon)}
+.beatled.on.down{background:var(--amber)}
+.beatled.auto{animation:beatpulse 1s steps(1) infinite}
+@keyframes beatpulse{0%{background:var(--amber)}25%{background:#2a2248}}
+.stepms{font-size:16px;color:var(--dim)}
+.ds-zone{display:block;font-size:8px;color:var(--dim);letter-spacing:.04em}
+.gh .trk .dot.hit{animation:dothit .2s steps(2)}
+@keyframes dothit{0%{transform:scale(1.9);filter:brightness(1.9)}}
+@keyframes mrflash{50%{filter:brightness(1.7)}}
+.mrflash{animation:mrflash .45s steps(2) 3}
 
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition:none!important}}
 </style>
@@ -633,7 +672,7 @@ input[type=range]::-moz-range-thumb{width:18px;height:22px;background:var(--ambe
 
 <script>
 "use strict";
-const VERSION='2.2.1';
+const VERSION='2.4';
 /* ================= helpers ================= */
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const app=$('#app');
@@ -1159,6 +1198,13 @@ function drawStudio(g,t,cv){const W=cv.width,H=cv.height,fl=44;
   const glow=(Math.sin(t*6)>.6)?'#6ff8dc':'#3ef0c8';px(g,50,26,16,10,'#140d1f');px(g,51,27,14,8,glow);px(g,52,29,6,1,'#0b2a24');px(g,52,31,9,1,'#0b2a24');px(g,48,36,20,1,'#8a7fa8');
   if(has('drums')){px(g,31,30,15,6,'#2a2248');px(g,31,30,15,1,'#5a4a7a');const pl=seq.on?Math.floor(t*6)%4:-1;['#ffb547','#ff4f9a','#3ef0c8','#a98bff'].forEach((c,i)=>px(g,32+i*3.5,32,3,3,pl===i?'#ffffff':c))}
   if(has('comp')){px(g,67,31,10,5,'#2a1a1a');px(g,67,31,10,1,'#8a5a34');const m=seq.on?Math.floor((Math.sin(t*9)+1)*3):1;px(g,68,33,m+1,2,'#ff5a2a')}
+  /* Master Trial trophies on a shelf above the window (dim until won), and the framed PRODUCER CERTIFIED */
+  px(g,5,5,28,1,'#6a4630');px(g,5,6,28,1,'#4a3020');px(g,7,7,1,1,'#4a3020');px(g,30,7,1,1,'#4a3020');
+  [['ktrial','#a98bff'],['dtrial','#ffcc4d'],['vtrial','#ff7a3a'],['strial','#6cb8ff'],['mtrial','#f1e7d0']].forEach(([id,c],i)=>{const x=7+i*5,on=S.done.includes(id),k=on?c:'#2e2450';px(g,x,1,3,2,k);px(g,x+1,3,1,1,k);px(g,x,4,3,1,on?shade(c,-.35):'#2e2450');if(on&&Math.sin(t*3+i*1.7)>.85)px(g,x+2,1,1,1,'#ffffff')});
+  if(S.cert||S.done.includes('final')){px(g,48,8,12,11,'#ffcc4d');px(g,49,9,10,9,'#f1e7d0');px(g,50,11,8,1,'#8a7fa8');px(g,50,13,6,1,'#8a7fa8');px(g,50,16,3,1,'#8a7fa8');px(g,55,15,2,2,'#ff4f5a')}
+  /* MIDI keyboard in front of the screen (Synth Caves): a key lights up while the piano roll plays */
+  if(has('midi')){const lit=seq.on&&S.roll&&S.roll.length?Math.floor(t*8)%6:-1;px(g,47,33,19,3,'#3d3166');px(g,48,34,17,2,'#f1e7d0');if(lit>=0)px(g,48+lit*3,34,2,2,'#a98bff');
+    [50,53,56,59,62].forEach(x=>px(g,x,35,1,1,'#8a7fa8'));[50,53,59,62].forEach(x=>px(g,x,34,1,1,'#140d1f'))}
   if(S.done.includes('l3')){[[18,27],[84,27]].forEach(([x,y])=>{const p=seq.on&&Math.floor(t*8)%2?1:0;px(g,x,y,8,18,'#1a1426');px(g,x+1,y+3-p,6,6,'#3d3166');px(g,x+3,y+5-p,2,2,'#0d0a1c');px(g,x+2,y+11,4,4,'#3d3166')})}
   if(S.defeated.includes('slime')){px(g,98,34,6,8,'#8a5a34');px(g,97,34,8,1,'#a8744a');px(g,99,28,2,6,'#4f8a4a');px(g,96,30,3,2,'#6fd36a');px(g,101,27,3,3,'#6fd36a');px(g,98,26,2,2,'#6fd36a')}
   if(S.done.includes('trial')){px(g,36,10,10,12,'#ffcc4d');px(g,37,11,8,10,'#2a1a06');px(g,40,13,2,6,'#ffcc4d');px(g,38,14,6,1,'#ffcc4d')}
@@ -1226,7 +1272,7 @@ function hydrateIcons(root){$$('[data-ic]',root).forEach(el=>{const name=el.data
   if(el.tagName==='CANVAS')drawSprite(el,ICONS[name],pal,sc);else el.replaceWith(sprite(ICONS[name],pal,sc))})}
 function reward(o){return new Promise(res=>{const before=lvProg();S.xp+=o.xp||0;S.coins+=o.coins||0;(o.cosmetics||[]).forEach(id=>{if(!S.owned.includes(id))S.owned.push(id)});save();const after=lvProg();
   const rb=rankFor(before.n),ra=rankFor(after.n);
-  const items=[];if(o.xp)items.push(`<b>+${o.xp}</b> XP`);if(o.coins)items.push(coinRow(o.coins));(o.lines||[]).forEach(l=>items.push(l));(o.cosmetics||[]).forEach(id=>items.push(`<span style="color:var(--violet)">NEW ${cos(id).slot==='kit'?'DRUM KIT':'COSMETIC'}: ${cos(id).name.toUpperCase()}</span>`));
+  const items=[];if(o.xp)items.push(`<b>+${o.xp}</b> XP`);if(o.coins)items.push(coinRow(o.coins));(o.lines||[]).forEach(l=>items.push(l));(o.cosmetics||[]).forEach(id=>items.push(`<span style="color:var(--violet)">NEW ${cos(id).slot==='kit'?'DRUM KIT':'COSMETIC'}: ${cos(id).name.toUpperCase()}</span>`));if((o.cosmetics||[]).length)items.push(`<span class="muted" style="font-size:14px">${o.cosmetics.every(id=>cos(id).slot==='kit')?'Use it':'Put it on'} in MY STUDIO › MY REWARDS</span>`);
   const m=modal(`<p class="eyebrow">${o.eyebrow||'REWARD'}</p><h2 class="rw-t">${o.title}</h2>${o.sub?`<p class="muted">${o.sub}</p>`:''}<div class="rw-list">${items.map((x,i)=>`<div class="rw-i" style="animation-delay:${i*.15}s">${x}</div>`).join('')}</div>
   <div style="width:100%" class="stack"><div class="row sp"><span class="eyebrow">PRODUCER LV <span class="rw-lv">${before.n}</span></span><span class="num muted rw-xp" style="font-size:18px">${before.cur}/${before.need} XP</span></div><div class="bar"><i class="rw-bar" style="width:${before.cur/before.need*100}%"></i></div><p class="lvup" hidden></p>${ra[0]>rb[0]?`<p class="fb good" style="width:100%">NEW RANK · LV ${ra[0]}: “${ra[1]}”</p>`:''}</div>
   <button class="btn block rw-go">${o.btn||'CONTINUE'}</button>`);
@@ -1234,11 +1280,11 @@ function reward(o){return new Promise(res=>{const before=lvProg();S.xp+=o.xp||0;
   setTimeout(()=>{const bar=$('.rw-bar',m);if(!bar)return;if(after.n>before.n){bar.style.width='100%';setTimeout(()=>{bar.style.transition='none';bar.style.width='0%';void bar.offsetWidth;bar.style.transition='';bar.style.width=after.cur/after.need*100+'%';$('.rw-lv',m).textContent=after.n;const up=$('.lvup',m);up.hidden=false;up.textContent='LEVEL UP! PRODUCER LV '+after.n;sfx.level();haptic([30,40,30])},650)}else bar.style.width=after.cur/after.need*100+'%';$('.rw-xp',m).textContent=after.cur+'/'+after.need+' XP'},450);
   $('.rw-go',m).onclick=()=>{sfx.tap();m.close();res()}})}
 function unlockTool(id){if(!S.tools.includes(id))S.tools.push(id);save();const t=TOOLS.find(x=>x.id===id);
-  return new Promise(res=>{const m=modal(`<div class="unlock"><div class="rays"></div><p class="eyebrow" style="color:var(--amber);position:relative">NEW TOOL UNLOCKED</p><div class="ul-icon"></div><h2>${t.name.toUpperCase()}</h2><p class="weapon">WEAPON FORM · ${t.weapon.toUpperCase()}</p><p style="font-size:18px">“${t.tag}”</p><p class="muted" style="max-width:32ch">${t.daw}</p><button class="btn block big ul-try">TRY IT NOW</button><button class="btn ghost block ul-later">LATER</button></div>`,{cls:'dramatic'});
+  return new Promise(res=>{const m=modal(`<div class="unlock"><div class="rays"></div><p class="eyebrow" style="color:var(--amber);position:relative">NEW TOOL UNLOCKED</p><div class="ul-icon"></div><h2>${t.name.toUpperCase()}</h2><p class="weapon">WEAPON FORM · ${t.weapon.toUpperCase()}</p><p style="font-size:18px">“${t.tag}”</p><p class="muted" style="max-width:32ch">${t.daw}</p><p style="font-size:14px;color:var(--neon);max-width:32ch">IN YOUR STUDIO: ${(TOOL_WHERE[id]||'your studio').toUpperCase()}</p><button class="btn block big ul-try">TRY IT NOW</button><button class="btn ghost block ul-later">LATER</button></div>`,{cls:'dramatic'});
     $('.ul-icon',m).append(icon(id,t.col,10));sfx.unlock();haptic([20,60,20,60,80]);
     $('.ul-try',m).onclick=()=>{m.close();res('try')};$('.ul-later',m).onclick=()=>{m.close();res('later')}})}
 function unlockAbility(id){if(hasAb(id))return Promise.resolve();S.abilities.push(id);save();const a=ABILITIES.find(x=>x.id===id);
-  return new Promise(res=>{const m=modal(`<div class="unlock"><div class="rays"></div><p class="eyebrow" style="color:var(--violet);position:relative">ABILITY UNLOCKED</p><div class="ul-icon"></div><h2>${a.name.toUpperCase()}</h2><p class="because">BECAUSE YOU LEARNED: ${a.from.toUpperCase()}</p><p style="font-size:17px;max-width:32ch">${a.desc}</p><button class="btn violet block big ab-ok">I FEEL IT</button></div>`,{cls:'dramatic violetbg'});
+  return new Promise(res=>{const m=modal(`<div class="unlock"><div class="rays"></div><p class="eyebrow" style="color:var(--violet);position:relative">ABILITY UNLOCKED</p><div class="ul-icon"></div><h2>${a.name.toUpperCase()}</h2><p class="because">BECAUSE YOU LEARNED: ${a.from.toUpperCase()}</p><p style="font-size:17px;max-width:32ch">${a.desc}</p><p style="font-size:14px;color:var(--neon);max-width:32ch">${(ABIL_WHERE[id]||'').toUpperCase()} · SEE IT IN MY STUDIO › MY REWARDS</p><button class="btn violet block big ab-ok">I FEEL IT</button></div>`,{cls:'dramatic violetbg'});
     $('.ul-icon',m).append(icon('bolt','#a98bff',12));sfx.ability();haptic([30,50,30,50,90]);$('.ab-ok',m).onclick=()=>{m.close();res()}})}
 function bump(id,n,set){const q=QUESTS.find(x=>x.id===id);if(!q||S.quests.claimed.includes(id))return;if(q.needs==='drums'&&!has('drums'))return;const p=S.quests.prog;const before=p[id]||0;p[id]=clamp(set!=null?set:before+(n||1),0,q.goal);if(before<q.goal&&p[id]>=q.goal){toast('QUEST COMPLETE · '+q.title.toUpperCase());sfx.coin()}save()}
 let typing=null;
@@ -1836,7 +1882,7 @@ l3:{title:'The Drum Trio',teaches:['kick','snare','hihat','patterns'],skills:['k
    $('[data-a=chk]',b).onclick=()=>{const r=test();const ok=r.every(Boolean);ctx.attempt('backbeat',r[1]);const fb=$('.fbh',b);if(ok){sfx.ok();fb.innerHTML='<p class="fb good">That is the backbeat. You just programmed the most common drum pattern in pop music.</p>';done()}else{sfx.bad();fb.innerHTML=`<p class="fb">Not yet. Check the list above: the unticked lines still need work. Listen to the loop and count along.</p>`}};
    ctx.hint(b,{hints:['The snare is the part people clap to. Clap along to any pop song: where do your hands land?','Count ONE-two-THREE-four. Kick on ONE and THREE, snare on two and four. Hats on every half-beat.'],demo:()=>{g.mark([['kick',0],['kick',8],['snare',4],['snare',12]].concat(EIGHTHS.map(i=>['hat',i])));const ref=pat({kick:[0,8],snare:[4,12],hat:EIGHTHS});seq.start({bpm:96,total:32,play:(s,t)=>bt(ref,s,t),onStep:s=>g.step(s%16),onEnd:()=>{g.step(-1);seq.start({bpm:96,play:(s,t)=>bt(p,s,t),onStep:s=>g.step(s%16)})}})},demoText:'That is the target groove. The dashed cells show where each hit goes.',reveal:()=>{p.kick.fill(0);p.snare.fill(0);p.hat.fill(0);p.kick[0]=p.kick[8]=1;p.snare[4]=p.snare[12]=1;EIGHTHS.forEach(i=>p.hat[i]=1);g.paint();test()}})}}]},
 c1:{title:'Taming Peaks',mission:'comp',teaches:['compression','threshold','ratio','attack','release'],skills:['compression','threshold','ratio','attack','release'],xp:120,coins:20,ability:'dynamic',game:'comp',
- after:async()=>{if(!has('comp')){const r=await unlockTool('comp');if(r==='try'){go('studio');return true}}return false},
+ after:async()=>{if(!has('comp')){const r=await unlockTool('comp');if(r==='try'){go('studio',studioTry('comp'));return true}}return false},
  battle:{title:'Peak Beast',custom:(b,done,ctx)=>peakBattle(b,done,ctx)},
  steps:[
  {k:'DISCOVER',render(b,done){b.innerHTML=`<p class="eyebrow" style="color:var(--amber)">COMPRESSION VOLCANO</p><div class="big-title">That thing is hitting way too hard!</div>`;b.append(pipSay(`Listen to the <b>Peak Beast</b>: its slams jump way above everything else. The gap between the quiet parts and the loud parts is called <b>dynamics</b>.<br><br>A <b>compressor</b> turns sound down automatically, but only the part that goes above a line called the <b>threshold</b>. Tame the peaks and the whole groove sits steady.`));
@@ -1874,7 +1920,7 @@ RENDER.lesson=(scr,id)=>{const L=LESSONS[id];let i=0,ok=false,hl=0,leave=[];
     if(first&&L.ability)await unlockAbility(L.ability);
     if(first&&L.game){const gm=GAMES.find(x=>x.id===L.game);toast('EAR GYM · '+gm.name.toUpperCase()+' UNLOCKED')}
     if(first&&L.after&&await L.after())return;
-    if(first&&L.tool&&!has(L.tool)){const r=await unlockTool(L.tool);if(r==='try'){markSeg('new');S.daily.active=null;save();go('studio',L.tool==='groovebox'?{bbox:1}:undefined);return}}
+    if(first&&L.tool&&!has(L.tool)){const r=await unlockTool(L.tool);if(r==='try'){markSeg('new');S.daily.active=null;save();go('studio',studioTry(L.tool));return}}
     finishActivity('new',id==='l3'&&first?['battle','slime']:'region')};
   show()};
 
@@ -2001,7 +2047,7 @@ RENDER.battle=(scr,id)=>{const B=BATTLES[id];const st={hp:B.hp,hearts:5,round:0,
     const first=!S.defeated.includes(id)||!S.done.includes(id);if(first){if(!S.defeated.includes(id))S.defeated.push(id);if(!S.done.includes(id))S.done.push(id);if(B.teaches)learn(B.teaches);addMission(B.mission||'drums');if(id==='slime'&&S.eq.comp==='comp-none')S.eq.comp='comp-cassette'}bump('defeat');save();
     await reward({eyebrow:stg.kind==='WORLD BOSS'?'WORLD BOSS DEFEATED':stg.kind==='MINI-BOSS'?'MINI-BOSS DEFEATED':'MONSTER DEFEATED',title:B.name,xp:first?(stg.xp||B.xp):20,coins:first?B.coins:5,cosmetics:first?(B.cosmetics||[]):[],lines:first?(B.lines||(id==='slime'?['A CASSETTE CRITTER JOINS YOU']:id==='metro'?['LEARNED: QUANTIZATION']:[])):['REMATCH BONUS']});
     if(first&&B.ability)await unlockAbility(B.ability);
-    const tl=id==='metro'?'drums':B.tool;if(first&&tl&&!has(tl)){const r=await unlockTool(tl);if(r==='try'){['new','boss'].forEach(markSeg);S.daily.active=null;save();go('studio');return}}
+    const tl=id==='metro'?'drums':B.tool;if(first&&tl&&!has(tl)){const r=await unlockTool(tl);if(r==='try'){['new','boss'].forEach(markSeg);S.daily.active=null;save();go('studio',studioTry(tl));return}}
     if(first&&stg.kind==='WORLD BOSS')toast(id==='master'?'THE FINAL TRACK AWAITS…':'THE MASTER TRIAL AWAITS…');
     finishActivity(['new','boss'],'region')}
   say(B.intro).then(menu)};
@@ -2016,22 +2062,28 @@ function scoreBeat(p,v){const n=k=>p[k].filter(Boolean).length;const used=['kick
 /* ---- studio FX: pan, reverb send, lead delay, drive and limiter grow with your tools ---- */
 let SG=null;
 function studioGraph(){initAudio();if(!A.ctx)return null;if(SG&&SG.c===A.ctx)return SG;const c=A.ctx;const bus=c.createGain(),drv=c.createWaveShaper(),lim=c.createDynamicsCompressor(),post=c.createGain(),an=c.createAnalyser();an.fftSize=2048;
-  bus.connect(drv);drv.connect(lim);lim.connect(post);post.connect(an);an.connect(A.bus);
+  const alp=c.createBiquadFilter();alp.type='lowpass';alp.frequency.value=20000;alp.Q.value=.71;   /* the AUTOMATION filter on the whole beat */
+  bus.connect(alp);alp.connect(drv);drv.connect(lim);lim.connect(post);post.connect(an);an.connect(A.bus);
   const rev=c.createConvolver();rev.buffer=makeIR(c,2.2,7000,.85);const rg=c.createGain();rg.gain.value=.9;rev.connect(rg);rg.connect(bus);
   const dly=c.createDelay(2),dfb=c.createGain(),dlp=c.createBiquadFilter(),dmix=c.createGain();dlp.type='lowpass';dlp.frequency.value=5000;dly.connect(dlp);dlp.connect(dfb);dfb.connect(dly);dlp.connect(dmix);dmix.connect(bus);
-  const tr={};['kick','snare','hat','bass','lead'].forEach(k=>{const inp=c.createGain(),pn=c.createStereoPanner?c.createStereoPanner():c.createGain(),sg=c.createGain();inp.connect(pn);pn.connect(bus);inp.connect(sg);sg.connect(rev);if(k==='lead')inp.connect(dly);tr[k]={inp,pn,sg}});
-  const rum=rumbleChain(c,bus);tr.kick.inp.connect(rum.inp);SG={c,bus,drv,lim,post,an,dly,dfb,dmix,tr,rum};return SG}
+  /* each track: input → 6-band EQ → pan / reverb send (/ delay for the lead), with an analyser after the EQ */
+  const tr={};['kick','snare','hat','bass','lead'].forEach(k=>{const inp=c.createGain(),pn=c.createStereoPanner?c.createStereoPanner():c.createGain(),sg=c.createGain(),eq=EQ_BANDS().map(()=>{const x=c.createBiquadFilter();eqSetNode(x,null);return x}),tan=c.createAnalyser();tan.fftSize=4096;tan.smoothingTimeConstant=.8;
+    let last=inp;eq.forEach(x=>{last.connect(x);last=x});last.connect(pn);pn.connect(bus);last.connect(sg);sg.connect(rev);last.connect(tan);if(k==='lead')last.connect(dly);tr[k]={inp,pn,sg,eq,an:tan}});
+  const rum=rumbleChain(c,bus);tr.kick.inp.connect(rum.inp);SG={c,bus,alp,drv,lim,post,an,dly,dfb,dmix,tr,rum};return SG}
 function satCurve(k){const n=2048,c=new Float32Array(n),a=1+k*8;for(let i=0;i<n;i++){const x=i/(n-1)*2-1;c[i]=Math.tanh(a*x)/Math.tanh(a)}return c}
 function applyFx(){const G=studioGraph();if(!G)return;const F=S.fx;
   ['kick','snare','hat','bass','lead'].forEach(k=>{const t=G.tr[k];if(t.pn.pan)t.pn.pan.value=hasAb('stereosight')?(F.pan[k]||0):0;t.sg.gain.value=has('reverb')?(F.send[k]||0):0});
   G.dly.delayTime.value=hasAb('space')?.75*60/S.bpm:.3;G.dfb.gain.value=.38;G.dmix.gain.value=has('delay')?F.dly:0;
   G.drv.curve=has('dist')&&F.drive>0?satCurve(F.drive):null;G.rum.set({amt:hasAb('rumblecraft')?(F.rumble||0):0});
-  const lon=has('limiter')&&F.lim;G.lim.threshold.value=lon?F.ceil-2:0;G.lim.ratio.value=lon?20:1;G.lim.knee.value=0;G.lim.attack.value=.002;G.lim.release.value=.08;G.post.gain.value=lon?dbToG(1.5):1}
-function studioStep(p,s,t,vol){const G=studioGraph();if(!G){playStep(p,s,t,vol);return}const i=s%16,R=k=>G.tr[k].inp;
-  withRoute(R('kick'),()=>{if(p.kick[i]){V.kick(t,vol.kick);G.rum.duck(t,60/S.bpm)}});withRoute(R('snare'),()=>{if(p.snare[i])V.snare(t,vol.snare)});withRoute(R('hat'),()=>{if(p.hat[i])V.hat(t,vol.hat)});
-  withRoute(R('bass'),()=>{if(p.bass[i])V.bass(t,p.bass[i],vol.bass)});if(p.lead&&has('synth'))withRoute(R('lead'),()=>{if(p.lead[i])SV(t,leadF(p.lead[i]),.2,S.leadPatch||PRESETS.LEAD,(vol.lead==null?.6:vol.lead)*.5)})}
-function fxRack(host){const trk=['kick','snare','hat','bass'].concat(has('synth')?['lead']:[]);const pan=hasAb('stereosight'),snd=has('reverb');const F=S.fx;
-  const w=h('div','win raised stack');w.innerHTML=`<div class="row sp"><p class="eyebrow" style="color:#6cb8ff">MIX RACK</p>${has('limiter')?`<button class="chip" data-a="lim" style="min-height:36px">LIMITER ${F.lim?'ON':'OFF'}</button>`:''}</div>`;host.append(w);const tip=tipLine(w);
+  const lon=has('limiter')&&F.lim;G.lim.threshold.value=lon?F.ceil-2:0;G.lim.ratio.value=lon?20:1;G.lim.knee.value=0;G.lim.attack.value=.002;G.lim.release.value=.08;G.post.gain.value=lon?dbToG(1.5):1;
+  const eqOn=has('eq');['kick','snare','hat','bass','lead'].forEach(k=>{const B=eqOn?eqBandsOf(k):null;G.tr[k].eq.forEach((x,i)=>eqSetNode(x,B&&B[i]))});
+  if(!(has('auto')&&F.auto&&F.auto.on))autoReset()}
+function studioStep(p,s,t,vol){const G=studioGraph();if(!G){playStep(p,s,t,vol);rollStep(s,t);return}const i=s%16,R=k=>G.tr[k].inp,on=k=>!STUDIO_SOLO||STUDIO_SOLO===k;
+  if(s%64===0&&!AUTO_OFF&&has('auto')&&S.fx.auto&&S.fx.auto.on)autoSchedule(G,t,s===0);
+  withRoute(R('kick'),()=>{if(p.kick[i]&&on('kick')){V.kick(t,vol.kick);G.rum.duck(t,60/S.bpm)}});withRoute(R('snare'),()=>{if(p.snare[i]&&on('snare'))V.snare(t,vol.snare)});withRoute(R('hat'),()=>{if(p.hat[i]&&on('hat'))V.hat(t,vol.hat)});
+  withRoute(R('bass'),()=>{if(p.bass[i]&&on('bass'))V.bass(t,p.bass[i],vol.bass)});if(on('lead')){if(p.lead&&has('synth')&&!has('midi'))withRoute(R('lead'),()=>{if(p.lead[i])SV(t,leadF(p.lead[i]),.2,S.leadPatch||PRESETS.LEAD,(vol.lead==null?.6:vol.lead)*.5)});rollStep(s,t,R('lead'))}}
+function fxRack(host){const trk=['kick','snare','hat','bass'].concat(has('synth')||has('midi')?['lead']:[]);const pan=hasAb('stereosight'),snd=has('reverb');const F=S.fx;
+  const w=h('div','win raised stack fxrack');w.innerHTML=`<div class="row sp"><p class="eyebrow" style="color:#6cb8ff">MIX RACK</p>${has('limiter')?`<button class="chip" data-a="lim" style="min-height:36px">LIMITER ${F.lim?'ON':'OFF'}</button>`:''}</div>`;host.append(w);const tip=tipLine(w);
   const on=()=>{applyFx();save()};
   if(pan||snd)trk.forEach(k=>{const r=h('div','fxrow');r.innerHTML=`<span style="color:${TR[k].c}">${TR[k].n}</span>`;const kr=h('div','krow');kr.style.justifyContent='flex-start';r.append(kr);w.append(r);
     if(pan)knob(kr,{label:'PAN',min:-1,max:1,value:F.pan[k]||0,size:34,bipolar:true,def:0,fmt:v=>Math.abs(v)<.02?'C':(v<0?'L':'R')+Math.round(Math.abs(v)*100),col:'#a98bff',onTouch:()=>{tip.textContent='Pan: keep kick, snare and bass centered; spread hats and the lead.'},onInput:v=>{F.pan[k]=Math.abs(v)<.02?0:v;on()}});
@@ -2044,38 +2096,54 @@ function fxRack(host){const trk=['kick','snare','hat','bass'].concat(has('synth'
   if(hasAb('ceiling')){const lu=h('div','stack');lu.style.gap='2px';lu.innerHTML='<span class="kb-lab">LOUDNESS (SHORT-TERM, APPROX.)</span><div class="lufsbar"><i style="width:0%"></i><b style="left:55.6%"></b></div><span class="num lu" style="font-size:18px">— LUFS</span>';w.append(lu);
     const G=studioGraph(),bf=new Float32Array(2048);let acc=-70;addLive(lu,()=>{if(!G||!seq.on)return;G.an.getFloatTimeDomainData(bf);let e=0;for(let i=0;i<bf.length;i++)e+=bf[i]*bf[i];const db=10*Math.log10(e/bf.length+1e-12)-.7+3;acc=acc*.97+db*.03;$('.lu',lu).textContent=acc.toFixed(1)+' LUFS';$('i',lu).style.width=clamp((acc+24)/18,0,1)*100+'%'})}
   const lb=$('[data-a=lim]',w);if(lb)lb.onclick=()=>{F.lim=!F.lim;lb.textContent='LIMITER '+(F.lim?'ON':'OFF');on()};
-  if(!w.querySelector('.knob2')&&!lb)w.remove();applyFx()}
+  if(has('eq')){const es=h('p','num eq-sum'),eb=h('button','btn block','▶ OPEN THE EQ');es.style.cssText='font-size:16px;color:#3ef0c8';eb.style.background='#3ef0c8';eb.dataset.a='eq';
+    const sum=()=>{const on=EQ_TRACKS().filter(eqActive).map(x=>TR[x].n);es.textContent=on.length?'EQ ON: '+on.join(', '):'EQ: FLAT ON EVERY TRACK'};sum();w.append(es,eb);eb.onclick=()=>openStudioEq(null,sum)}
+  if(!w.querySelector('.knob2')&&!lb&&!has('eq'))w.remove();applyFx()}
 function leadEditor(){const m=modal('<div class="led-h" style="width:100%"></div><button class="btn block fx-close">DONE</button>',{dismiss:true});const rig=synthRig($('.led-h',m),{patch:S.leadPatch,presets:hasAb('wave'),riff:[[69,0,.5],[72,.5,.5],[76,1,.5],[74,1.5,1]],lo:57,hi:81});
   const close=()=>{rig.stop();save();m.close()};$('.fx-close',m).onclick=close}
-RENDER.studio=(scr,arg)=>{const ch=!!(arg&&arg.challenge);const P=S.pattern;let hl=0;if(!P.lead)P.lead=new Array(16).fill(0);if(S.vols.lead==null)S.vols.lead=.6;S.fx=Object.assign({pan:{},send:{},dly:.25,lim:true,ceil:-1,drive:0,rumble:.35},S.fx||{});if(!S.leadPatch)S.leadPatch=mkPatch(PRESETS.LEAD);const TRK=['kick','snare','hat','bass'].concat(has('synth')?['lead']:[]);
+RENDER.studio=(scr,arg)=>{const ch=!!(arg&&arg.challenge);const P=S.pattern;let hl=0;STUDIO_SOLO=null;AUTO_OFF=ch;if(!P.lead)P.lead=new Array(16).fill(0);if(S.vols.lead==null)S.vols.lead=.6;S.fx=Object.assign({pan:{},send:{},dly:.25,lim:true,ceil:-1,drive:0,rumble:.35},S.fx||{});if(!S.leadPatch)S.leadPatch=mkPatch(PRESETS.LEAD);const TRK=['kick','snare','hat','bass'].concat(has('synth')&&!has('midi')?['lead']:[]);
   scr.innerHTML=topbar(ch?'CHALLENGE':'MY STUDIO',ch?'region':null)+`<div class="stack">
    ${ch?`<div class="win cbanner stack"><p class="eyebrow" style="color:var(--amber)">WORLD 1 CHALLENGE · FIRST BEAT</p><h2>Create an 8-bar beat</h2><p style="font-size:15px">Program a 1-bar groove below. It loops for 8 bars. Use all four instruments, then submit. There's no wrong answer, only feedback.</p><div class="check"><div data-r="kick">Kick</div><div data-r="snare">Snare</div><div data-r="hat">Hi-hat</div><div data-r="bass">Bass (tap a bass cell again to change its note)</div></div><div class="hints"></div></div>`:''}
    <div class="win room"><div class="scene"></div></div><div class="gear"></div><div class="daw stack"></div></div>`;hydrateIcons(scr);wireBack(scr);
-  const sc=$('.scene',scr);const cv=lowres(108,56,'bg');sc.append(cv);addLive(cv,drawStudio);const hr=heroEl(3,'sprite bob');hr.style.left='36%';hr.style.bottom='8px';sc.append(hr);
+  const sc=$('.scene',scr);const cv=lowres(108,56,'bg');sc.append(cv);addLive(cv,drawStudio);
+  const placeHero=()=>{$$('.st-hero,.st-comp',sc).forEach(x=>x.remove());const hr=heroEl(3,'sprite bob st-hero');hr.style.left='36%';hr.style.bottom='8px';sc.append(hr);
+    const cp=companionEl(3);if(cp){cp.classList.add('sprite','st-comp');cp.style.left='calc(36% + 62px)';cp.style.bottom='8px';sc.append(cp)}};placeHero();
+  const focus=sel=>{const el=$(sel,scr);if(!el)return false;el.scrollIntoView({behavior:'smooth',block:'center'});el.classList.remove('mrflash');void el.offsetWidth;el.classList.add('mrflash');return true};
+  const onEquip=c=>{placeHero();const dk=$('.dm-kit',scr);if(dk)dk.textContent='DRUM MACHINE · '+cos(S.kit).name.toUpperCase();if(c.slot==='kit'){initAudio();if(A.ctx){V.kick(now()+.02,.9);V.snare(now()+.3,.8)}}};
   const G=[['drums','DRUMS',has('drums')],['synth','SYNTH',has('synth')],['midi','MIDI',has('midi')],['eq','EQ',has('eq')],['comp','COMP',has('comp')],['reverb','REVERB',has('reverb')],['delay','DELAY',has('delay')],['limiter','LIMITER',has('limiter')],['mixer','PAN',hasAb('stereosight')],['volume','VOLUME',1],['dist','DRIVE',has('dist')],['auto','AUTO',has('auto')],['groovebox','GROOVEBOX',has('groovebox')],['subwoofer','RUMBLE',hasAb('rumblecraft')],['drums','909 KIT',S.owned.includes('kit-bunker'),'#ff7a3a']];
   const ge=$('.gear',scr);G.forEach(([ic,n,hv,col])=>{const d=h('div',hv?'have':'');d.append(icon(ic,col,2,!hv));d.append(document.createTextNode(hv?n:'???'));ge.append(d)});
   const daw=$('.daw',scr);
-  if(!has('drums')){daw.innerHTML=`<div class="win raised stack"><p class="eyebrow">JAM PADS · TRAINING GEAR</p><p style="font-size:15px">Your studio is almost empty. Defeat the <b style="color:var(--amber)">Broken Metronome</b> in Beat Forest to install the Drum Machine and start programming beats.</p><div class="pads">${['kick','snare','hat','bass'].map(k=>`<button class="jam" data-k="${k}" style="--c:${TR[k].c}"><span style="color:${TR[k].c}">■</span>${TR[k].n}</button>`).join('')}</div><button class="btn block" data-a="forest">GO TO BEAT FOREST</button></div>`;
-    $$('.jam',daw).forEach(b=>b.addEventListener('pointerdown',()=>{audition(b.dataset.k,1);b.classList.add('hit');setTimeout(()=>b.classList.remove('hit'),120);haptic(8)}));$('[data-a=forest]',daw).onclick=()=>go('region');return}
-  daw.innerHTML=`<div class="win stack"><div class="row sp"><p class="eyebrow">DRUM MACHINE · ${cos(S.kit).name.toUpperCase()}</p><button class="chip" data-a="kit" style="min-height:36px">SWAP KIT</button></div>
-    <div class="transport"><button class="btn neon" data-a="play">▶ PLAY</button><div class="bpmbox"><button data-a="slower" aria-label="Slower">−</button><span class="num bpmv">${S.bpm}</span><button data-a="faster" aria-label="Faster">+</button></div><span class="barc num">BAR –</span></div>
-    ${hasAb('swing')?`<div class="knobrow"><span>SWING</span><input type="range" id="studio-swing" min="0" max="60" value="${S.swing}" aria-label="Swing amount"><span class="num">${S.swing}%</span></div>`:''}
-    <div class="gh"></div><canvas class="px spec" width="96" height="16"></canvas>
-    ${has('comp')?`<div class="win raised stack"><div class="row sp"><p class="eyebrow" style="color:var(--amber)">MASTER COMPRESSOR · DYNAMICS HAMMER</p><button class="chip" data-a="mc">${S.mcomp.on?'ON':'OFF'}</button></div><div class="knobrow"><span>THRESH</span><input type="range" id="mc-thr" min="-40" max="0" value="${S.mcomp.thr}" aria-label="Master threshold"><span class="num">${S.mcomp.thr} dB</span></div><div class="knobrow"><span>RATIO</span><input type="range" id="mc-ratio" min="1" max="12" step=".5" value="${S.mcomp.ratio}" aria-label="Master ratio"><span class="num">${S.mcomp.ratio}:1</span></div><div class="grm"><span>GAIN REDUCTION</span><div class="bar"><i style="width:0%;--c:var(--magenta)"></i></div><span class="num">0.0 dB</span></div></div>`:''}
+  if(!has('drums')){daw.innerHTML=`<div class="win raised stack"><p class="eyebrow">JAM PADS · TRAINING GEAR</p><p style="font-size:15px">Your studio is almost empty. Defeat the <b style="color:var(--amber)">Broken Metronome</b> in Beat Forest to install the Drum Machine and start programming beats.</p><div class="pads">${['kick','snare','hat','bass'].map(k=>`<button class="jam" data-k="${k}" style="--c:${TR[k].c}"><span style="color:${TR[k].c}">■</span>${TR[k].n}${hasAb('drumsense')?`<small class="ds-zone">${DS_ZONE[k]}</small>`:''}</button>`).join('')}</div>
+    ${hasAb('ears')?'<canvas class="px spec" width="96" height="16"></canvas>':''}
+    ${hasAb('pulse')?`<div class="row pulse-row" style="gap:8px;align-items:center"><span class="beatled auto" style="animation-duration:${(60/S.bpm).toFixed(3)}s"></span><span class="kb-lab">PULSE SENSE · ${S.bpm} BPM</span></div>`:''}
+    <div class="stack jamvol" style="gap:4px"><p class="eyebrow" style="padding:0">VOLUME · GAIN FADERS</p>${['kick','snare','hat','bass'].map(k=>`<div class="knobrow"><span style="color:${TR[k].c}">${TR[k].n}</span><input type="range" min="0" max="100" value="${Math.round(S.vols[k]*100)}" data-v="${k}" aria-label="${TR[k].n} volume"><span class="num">${Math.round(S.vols[k]*100)}</span></div>`).join('')}</div>
+    <button class="btn block" data-a="forest">GO TO BEAT FOREST</button></div>`;
+    const sp=$('.spec',daw);if(sp)addLive(sp,specDraw);$$('.jamvol input',daw).forEach(f=>{f.oninput=()=>{S.vols[f.dataset.v]=f.value/100;f.nextElementSibling.textContent=f.value};f.onchange=()=>save()});
+    $$('.jam',daw).forEach(b=>b.addEventListener('pointerdown',()=>{audition(b.dataset.k,1);b.classList.add('hit');setTimeout(()=>b.classList.remove('hit'),120);haptic(8)}));$('[data-a=forest]',daw).onclick=()=>go('region');
+    rewardWall(daw,{go:k=>k==='t:volume'?focus('.jamvol'):k==='a:ears'?focus('.spec'):k==='a:pulse'?focus('.pulse-row'):k==='a:drumsense'?focus('.pads'):k.startsWith('c:')&&focus('.room'),onEquip});return}
+  daw.innerHTML=`<div class="win stack dm-win"><div class="row sp"><p class="eyebrow dm-kit">DRUM MACHINE · ${cos(S.kit).name.toUpperCase()}</p><button class="chip" data-a="kit" style="min-height:36px">SWAP KIT</button></div>
+    <div class="transport"><button class="btn neon" data-a="play">▶ PLAY</button><div class="bpmbox"><button data-a="slower" aria-label="Slower">−</button><span class="num bpmv">${S.bpm}</span><button data-a="faster" aria-label="Faster">+</button></div>${hasAb('pulse')?'<span class="beatled" title="Pulse Sense"></span>':''}<span class="barc num">BAR –</span>${hasAb('perfect')?`<span class="num stepms">${stepMs()}</span>`:''}</div>
+    ${hasAb('swing')?`<div class="knobrow"><span>SWING</span><input type="range" id="studio-swing" min="0" max="60" value="${S.swing}" aria-label="Swing amount"><span class="num">${swingTxt()}</span></div>`:''}
+    <div class="gh${hasAb('drumsense')?' dsense':''}"></div><canvas class="px spec" width="96" height="16"></canvas>
+    ${has('comp')?`<div class="win raised stack mcomp"><div class="row sp"><p class="eyebrow" style="color:var(--amber)">MASTER COMPRESSOR · DYNAMICS HAMMER</p><button class="chip" data-a="mc">${S.mcomp.on?'ON':'OFF'}</button></div><div class="knobrow"><span>THRESH</span><input type="range" id="mc-thr" min="-40" max="0" value="${S.mcomp.thr}" aria-label="Master threshold"><span class="num">${S.mcomp.thr} dB</span></div><div class="knobrow"><span>RATIO</span><input type="range" id="mc-ratio" min="1" max="12" step=".5" value="${S.mcomp.ratio}" aria-label="Master ratio"><span class="num">${S.mcomp.ratio}:1</span></div><div class="grm"><span>GAIN REDUCTION</span><div class="bar"><i style="width:0%;--c:var(--magenta)"></i></div><span class="num">0.0 dB</span></div></div>`:''}
     <div class="fxh"></div>
     <div class="row wrap"><button class="btn ghost sm" data-a="clr">CLEAR</button><button class="btn ghost sm" data-a="bb">LOAD BACKBEAT</button>${has('synth')?'<button class="btn ghost sm" data-a="lead">EDIT LEAD SOUND</button>':''}<button class="btn ghost sm" data-a="pip">ASK PIP</button></div></div>
+    ${!ch&&has('midi')?rollCard():''}
+    ${!ch&&has('auto')?autoCard():''}
     ${!ch&&has('groovebox')?bunkerCard():''}
-    ${ch?'<button class="btn big block" data-a="submit" disabled>SUBMIT BEAT ★</button>':''}`;
+    ${ch?'<button class="btn big block" data-a="submit" disabled>SUBMIT BEAT ★</button>':'<div class="mr-host"></div>'}`;
   addLive($('.spec',daw),specDraw);
   const reqs=()=>{if(!ch)return;const used=['kick','snare','hat','bass'].map(k=>P[k].some(Boolean));$$('[data-r]',scr).forEach((d,i)=>d.classList.toggle('ok',used[i]));$('[data-a=submit]',daw).disabled=!used.every(Boolean)};
   const onChange=()=>{save();reqs()};
-  const g=grid($('.gh',daw),{tracks:TRK,pat:P,edit:true,faders:true,onChange});reqs();fxRack($('.fxh',daw));const lb=$('[data-a=lead]',daw);if(lb)lb.onclick=()=>{seq.stop();leadEditor()};const bbx=$('[data-a=bbox]',daw);if(bbx)bbx.onclick=()=>{seq.stop();openBunkerBox()};
+  const g=grid($('.gh',daw),{tracks:TRK,pat:P,edit:true,faders:true,onChange});reqs();fxRack($('.fxh',daw));const lb=$('[data-a=lead]',daw);if(lb)lb.onclick=()=>{seq.stop();leadEditor()};const bbx=$('[data-a=bbox]',daw);if(bbx)bbx.onclick=()=>{seq.stop();openBunkerBox()};const rc=$('.roll-card',daw),openRoll=rc?wireRollCard(rc,()=>seq.stop()):null;const ac=$('.auto-card',daw);if(ac)wireAutoCard(ac);
+  const led=$('.beatled',daw),dots=$$('.gh.dsense .trk .dot',daw);   /* Pulse Sense: a light on every beat · Drum Sense: each drum's light flashes when it hits */
+  const senseStep=s=>{if(led){led.classList.toggle('on',s%4===0);led.classList.toggle('down',s%16===0)}dots.forEach((d,j)=>{if(P[TRK[j]]&&P[TRK[j]][s%16]){d.classList.remove('hit');void d.offsetWidth;d.classList.add('hit')}})};
   const playB=$('[data-a=play]',daw),barc=$('.barc',daw);let bars=0,practiced=0;
-  const stopUI=()=>{playB.textContent='▶ PLAY';g.step(-1);barc.textContent='BAR –'};
-  const start=total=>{bars=0;playB.textContent='■ STOP';seq.start({bpm:()=>S.bpm,total,play:(s,t)=>{const i=s%16;const spb=60/S.bpm/4;studioStep(P,s,t+(hasAb('swing')&&i%4===2?S.swing/100*spb:0),S.vols)},onStep:s=>{g.step(s%16);if(s%16===0){bars++;barc.textContent='BAR '+bars+(total?'/8':'');if(bars>1&&P.kick.some(Boolean)&&P.snare.some(Boolean)){bump('loop4');if(practiced<6){practiced++;gain(['patterns','kick','snare'],'p',1)}save()}}},onStop:stopUI,onEnd:stopUI})};
+  const stopUI=()=>{playB.textContent='▶ PLAY';g.step(-1);ROLL_PH=-1;AUTO_PH=-1;autoReset();if(led)led.classList.remove('on','down');barc.textContent='BAR –'};
+  const start=total=>{bars=0;playB.textContent='■ STOP';seq.start({bpm:()=>S.bpm,total,play:(s,t)=>{const i=s%16;const spb=60/S.bpm/4;studioStep(P,s,t+(hasAb('swing')&&i%4===2?S.swing/100*spb:0),S.vols)},onStep:s=>{g.step(s%16);ROLL_PH=s%16;AUTO_PH=(s%64)/64;senseStep(s);if(s%16===0){bars++;barc.textContent='BAR '+bars+(total?'/8':'');if(bars>1&&P.kick.some(Boolean)&&P.snare.some(Boolean)){bump('loop4');if(practiced<6){practiced++;gain(['patterns','kick','snare'],'p',1)}save()}}},onStop:stopUI,onEnd:stopUI})};
   playB.onclick=()=>{if(seq.on){seq.stop();return}start(ch?128:0)};
-  const setBpm=d=>{S.bpm=clamp(S.bpm+d,60,180);$('.bpmv',daw).textContent=S.bpm;applyFx();save()};$('[data-a=slower]',daw).onclick=()=>setBpm(-2);$('[data-a=faster]',daw).onclick=()=>setBpm(2);
-  const sw=$('#studio-swing',daw);if(sw)sw.oninput=()=>{S.swing=+sw.value;sw.nextElementSibling.textContent=S.swing+'%';save()};
+  const setBpm=d=>{S.bpm=clamp(S.bpm+d,60,180);$('.bpmv',daw).textContent=S.bpm;const sm=$('.stepms',daw);if(sm)sm.textContent=stepMs();const swl=$('#studio-swing',daw);if(swl)swl.nextElementSibling.textContent=swingTxt();applyFx();save()};$('[data-a=slower]',daw).onclick=()=>setBpm(-2);$('[data-a=faster]',daw).onclick=()=>setBpm(2);
+  const sw=$('#studio-swing',daw);if(sw)sw.oninput=()=>{S.swing=+sw.value;sw.nextElementSibling.textContent=swingTxt();save()};
   if(has('comp')){const applyMC=()=>{const k=A.busComp;if(!k)return;if(S.mcomp.on){k.threshold.value=S.mcomp.thr;k.ratio.value=S.mcomp.ratio;k.knee.value=4;k.attack.value=.01;k.release.value=.15}else transparentComp(k)};initAudio();applyMC();
     $('[data-a=mc]',daw).onclick=e=>{S.mcomp.on=!S.mcomp.on;e.currentTarget.textContent=S.mcomp.on?'ON':'OFF';applyMC();save()};
     ['thr','ratio'].forEach(k=>{const el=$('#mc-'+k,daw);el.oninput=()=>{S.mcomp[k]=+el.value;el.nextElementSibling.textContent=k==='thr'?el.value+' dB':el.value+':1';applyMC();save()}});
@@ -2087,7 +2155,18 @@ RENDER.studio=(scr,arg)=>{const ch=!!(arg&&arg.challenge);const P=S.pattern;let 
   $('[data-a=kit]',daw).onclick=()=>{const kits=COS.filter(c=>c.slot==='kit');const m=modal(`<h2>Drum kits</h2><div class="stack" style="width:100%">${kits.map(k=>{const own=S.owned.includes(k.id);return`<button class="sw ${S.kit===k.id?'on':''} ${own?'':'lock'}" data-k="${k.id}" style="width:100%"><i style="background:${k.col}"></i><span class="grow" style="text-align:left">${k.name}${own?'':`<br><small class="muted">${k.how}</small>`}</span></button>`}).join('')}</div><button class="btn block kit-done">DONE</button>`,{dismiss:true});
     $$('[data-k]',m).forEach(b=>b.onclick=()=>{if(!S.owned.includes(b.dataset.k)){toast('LOCKED · '+cos(b.dataset.k).how.toUpperCase());return}S.kit=b.dataset.k;save();initAudio();if(A.ctx){V.kick(now()+.02,.9);V.snare(now()+.3,.8)}$$('[data-k]',m).forEach(x=>x.classList.toggle('on',x===b))});$('.kit-done',m).onclick=()=>{m.close();seq.stop();RENDER.studio(scr,arg)}};
   if(ch){hintBar($('.hints',scr),{hints:['Start with the backbone: a kick on step 1 and a snare on steps 5 and 13.','Add hats on the 8th notes. Then tap bass cells, and tap again to change the note.'],onLevel:l=>{hl=l},reveal:loadBB});$('[data-a=submit]',daw).onclick=()=>{seq.stop();submitBeat(hl)}}
-  if(arg&&arg.bbox&&has('groovebox')){arg.bbox=0;openBunkerBox()}};
+  /* MY REWARDS: tapping a reward takes you to it */
+  const GO={'t:volume':'.dm-win','t:drums':'.dm-win','a:swing':'.dm-win','a:grid':'.dm-win','a:ears':'.spec','t:comp':'.mcomp','a:dynamic':'.mcomp','t:dist':'.fxrack','t:reverb':'.fxrack','t:delay':'.fxrack','t:limiter':'.fxrack',
+    'a:space':'.fxrack','a:stereosight':'.fxrack','a:ceiling':'.fxrack','a:rumblecraft':'.fxrack','t:auto':'.auto-card','a:pulse':'.transport','a:drumsense':'.dm-win','a:perfect':'.transport'};
+  const goTo=k=>{if(k==='t:midi'&&openRoll){openRoll();return true}if((k==='t:synth'||k==='a:wave')&&lb){lb.click();return true}
+    if(k==='t:eq'||k==='a:freqvision'){const eb=$('[data-a=eq]',daw);if(eb){eb.click();return true}return false}if(k==='t:groovebox'&&bbx){bbx.click();return true}
+    if(k.startsWith('c:'))return focus('.room');return GO[k]?focus(GO[k]):false};
+  const mh=$('.mr-host',daw);if(mh)rewardWall(mh,{go:goTo,onEquip});
+  if(arg&&arg.bbox&&has('groovebox')){arg.bbox=0;openBunkerBox()}
+  if(arg&&arg.roll&&openRoll){arg.roll=0;openRoll()}
+  if(arg&&arg.eq){arg.eq=0;const eb=$('[data-a=eq]',daw);if(eb)eb.click()}
+  if(arg&&arg.lead&&lb){arg.lead=0;lb.click()}
+  if(arg&&arg.focus){const f=arg.focus;arg.focus=0;setTimeout(()=>focus(f),300)}};
 function submitBeat(hl){const r=scoreBeat(S.pattern,S.vols);const label=r.overall>=90?'LEGENDARY LOOP':r.overall>=75?'FRESH GROOVE':r.overall>=55?'SOLID START':'ROUGH DEMO';
   const rows=[['Rhythm',r.rhythm],['Structure',r.structure],['Balance',r.balance],['Creativity',r.creativity],['Completion',r.completion]];
   const m=modal(`<p class="eyebrow">FIRST BEAT · RESULTS</p><h2 class="rw-t">${label}</h2><p class="num" style="font-size:52px;line-height:.9;color:var(--neon)">${r.overall}</p>
@@ -2212,7 +2291,7 @@ function skillInfo(id){const s=S.skills[id]||{u:0,l:0,p:0};const K=SK[id];const 
    ${SKILL_Q[id]&&(s.learned||s.u+s.l+s.p>0)?'<button class="btn block si-p">PRACTICE NOW · 3 QUESTIONS</button>':''}<button class="btn ghost block si-x">CLOSE</button>`,{dismiss:true});
   const p=$('.si-p',m);if(p)p.onclick=()=>{m.close();startPractice(id)};$('.si-x',m).onclick=()=>m.close()}
 function toolInfo(t,ms){const hv=has(t.id);const m=modal(`<div class="ti-ic"></div><p class="eyebrow">${hv?'WEAPON FORM · '+t.weapon.toUpperCase():'LOCKED · LV '+t.lv+' · '+t.world.toUpperCase()}</p><h2>${hv?t.name:'???'}</h2><p>${hv?t.desc:'You will discover this tool when you understand what it does.'}</p>${hv?`<div class="win raised" style="text-align:left;width:100%"><p class="eyebrow" style="margin-bottom:6px">IN A REAL DAW</p><p style="font-size:15px">${t.daw}</p></div><p class="muted">Mastery ${ms}% · ${S.missions[t.id]||0} missions completed</p>`:''}<button class="btn block ti-x">${hv&&t.id!=='volume'?'USE IN STUDIO':'CLOSE'}</button>`,{dismiss:true});
-  $('.ti-ic',m).append(icon(t.id,t.col,8,!hv));$('.ti-x',m).onclick=()=>{m.close();if(hv&&t.id!=='volume')go('studio')}}
+  $('.ti-ic',m).append(icon(t.id,t.col,8,!hv));$('.ti-x',m).onclick=()=>{m.close();if(hv&&t.id!=='volume')go('studio',studioTry(t.id))}}
 
 /* ================= daily quests ================= */
 RENDER.quests=scr=>{const d=new Date(),mid=new Date(d);mid.setHours(24,0,0,0);const ms=mid-d;const hh=Math.floor(ms/3.6e6),mm=Math.floor(ms%3.6e6/6e4);
@@ -2266,6 +2345,221 @@ window.bqPause=()=>{if(CLOUD.on)cloudPush();seq.stop();stopGroup();stopMusic();i
 window.bqResume=()=>{if(!A.ctx)return;const p=A.ctx.resume();if(p&&p.catch)p.catch(()=>{});if(['home','map','region','train','path','quests'].includes(cur))startMusic()};
 document.addEventListener('visibilitychange',()=>{if(document.hidden)bqPause();else bqResume()});
 
+/* ================= the studio's PIANO ROLL: what the MIDI tool gives you =================
+   S.roll holds one bar of MIDI notes as [step, note number, length in 16th steps, velocity 1-127].
+   It plays on the studio's LEAD channel: on training keys before the Synthesizer, then on the player's own lead patch. */
+const ROLL_HI=81,ROLL_LO=57,ROLL_COL='#a98bff';
+const ROLL_LEN=[[1,'1/16'],[2,'1/8'],[4,'1/4'],[8,'1/2']],ROLL_VEL=[[45,'SOFT'],[85,'MEDIUM'],[120,'HARD']];
+const ROLL_KEYS=mkPatch({wt:.22,cut:2600,res:1,fenv:.25,fd:240,a:3,d:520,s:.3,r:320});
+const ROLL_DEMO=[[0,69,3,100],[3,72,1,70],[4,76,4,110],[8,77,2,90],[10,76,6,80]];
+const rollInKey=m=>MINOR.includes(((m-9)%12+12)%12);
+const rollLenName=l=>({1:'1/16',2:'1/8',4:'1/4',8:'1/2',16:'1 BAR'})[l]||l+'/16';
+const rollOk=n=>Array.isArray(n)&&n.length===4&&n.every(Number.isFinite)&&n[0]>=0&&n[0]<16&&n[1]>=ROLL_LO&&n[1]<=ROLL_HI&&n[2]>=1&&n[0]+n[2]<=16&&n[3]>=1&&n[3]<=127;
+let ROLL_PH=-1;
+function rollNotes(){
+  if(!Array.isArray(S.roll)){S.roll=[];const L=S.pattern&&S.pattern.lead;
+    if(L&&L.some(Boolean)){L.forEach((v,i)=>{if(v)S.roll.push([i,69+SEMI[v],1,85])});L.fill(0)}}   /* a lead written in the old step grid becomes MIDI notes */
+  else if(!S.roll.every(rollOk))S.roll=S.roll.filter(rollOk);
+  return S.roll}
+const rollPatch=()=>has('synth')?(S.leadPatch||PRESETS.LEAD):ROLL_KEYS;
+const rollGain=v=>(S.vols.lead==null?.6:S.vols.lead)*.5*v/100;
+function rollStep(s,t,dest){if(!has('midi')||!Array.isArray(S.roll)||!S.roll.length)return;const i=s%16,spb=60/S.bpm/4,P=rollPatch();
+  withRoute(dest||A.route,()=>S.roll.forEach(n=>{if(n[0]===i)SV(t,midiF(n[1]),n[2]*spb*.92,P,rollGain(n[3]))}))}
+function rollHear(m,v){initAudio();if(!A.ctx)return;const G=studioGraph();withRoute(G?G.tr.lead.inp:null,()=>SV(now()+.01,midiF(m),.32,rollPatch(),rollGain(v||85)))}
+function rollSummary(){const n=rollNotes().length;return n?`${n} NOTE${n===1?'':'S'} · ${has('synth')?'YOUR LEAD SYNTH':'TRAINING KEYS'}`:'EMPTY CLIP · NO NOTES YET'}
+/* the clip preview in the studio: one pixel row per note, A3 at the bottom, A5 at the top */
+function rollMiniDraw(g,t,cv){const W=cv.width,H=cv.height,cw=W/16;px(g,0,0,W,H,'#08060f');
+  for(let m=ROLL_HI;m>=ROLL_LO;m--)if(rollInKey(m))px(g,0,ROLL_HI-m,W,1,'#100c20');
+  for(let i=4;i<16;i+=4)px(g,i*cw,0,1,H,'#2a2248');
+  if(seq.on&&ROLL_PH>=0)px(g,ROLL_PH*cw,0,cw,H,'#221a40');
+  (S.roll||[]).forEach(([st,m,l,v])=>px(g,st*cw+1,ROLL_HI-m,l*cw-1,1,v>=100?'#e6dcff':v>=70?ROLL_COL:'#6f5fa8'))}
+function rollCard(){const lv=Math.round((S.vols.lead==null?.6:S.vols.lead)*100);
+  return`<div class="win raised stack roll-card"><div class="row sp"><p class="eyebrow" style="color:${ROLL_COL}">MIDI · PIANO ROLL</p><span class="chip" style="color:${ROLL_COL}">SYNTH CAVES</span></div>
+  <canvas class="px roll-mini" width="96" height="25"></canvas>
+  <p class="num roll-sum" style="font-size:18px;color:${ROLL_COL}">${rollSummary()}</p>
+  <p class="muted" style="font-size:14px">${has('synth')?'Your MIDI notes play through your own synth. EDIT LEAD SOUND changes the sound. The piano roll changes the notes.':'MIDI is notes, not sound. Until you win the Synthesizer (Waves &amp; Oscillators, in the Synth Caves), the studio plays your notes on training keys.'}</p>
+  <div class="knobrow"><span>VOLUME</span><input type="range" class="roll-vol" min="0" max="100" value="${lv}" aria-label="MIDI clip volume"><span class="num">${lv}</span></div>
+  <button class="btn block" data-a="roll" style="background:${ROLL_COL}">▶ OPEN THE PIANO ROLL</button></div>`}
+function wireRollCard(card,before){addLive($('.roll-mini',card),rollMiniDraw);
+  const vs=$('.roll-vol',card);vs.oninput=()=>{S.vols.lead=vs.value/100;vs.nextElementSibling.textContent=vs.value};vs.onchange=()=>{gain('volume','p',1);save()};
+  const open=()=>{if(before)before();openPianoRoll(()=>{$('.roll-sum',card).textContent=rollSummary()})};$('[data-a=roll]',card).onclick=open;return open}
+function openPianoRoll(onDone){seq.stop();rollNotes();initAudio();let len=2,vel=85,beat=true,fold=true,practiced=0,rows=[],ph=null;
+  const m=modal(`<p class="eyebrow" style="color:${ROLL_COL}">PIANO ROLL · MIDI CLIP · 1 BAR</p>
+   <p style="font-size:14.5px;text-align:left">Each block is one MIDI note. Its <b>row</b> is the pitch, its <b>start</b> is when it plays, its <b>length</b> is how long it holds, and its <b>brightness</b> is the velocity: how hard it is played. Tap an empty cell to add a note. Tap a note to delete it.</p>
+   <p class="num pr-mon">MIDI MONITOR · TAP A KEY OR A CELL</p>
+   <div class="proll"></div>
+   <div class="pr-opts"><div class="pr-opt"><span class="kb-lab">LENGTH</span><div class="pr-seg" data-g="len">${ROLL_LEN.map(([l,n])=>`<button data-v="${l}">${n}</button>`).join('')}</div></div>
+    <div class="pr-opt"><span class="kb-lab">VELOCITY</span><div class="pr-seg" data-g="vel">${ROLL_VEL.map(([v,n])=>`<button data-v="${v}">${n}</button>`).join('')}</div></div></div>
+   <div class="transport" style="justify-content:center"><button class="btn neon" data-a="play">▶ PLAY</button><button class="chip neon" data-a="beat">WITH BEAT</button><button class="chip neon" data-a="fold">A MINOR ONLY</button></div>
+   <div class="row wrap" style="justify-content:center"><button class="btn ghost sm" data-a="demo">LOAD EXAMPLE</button><button class="btn ghost sm" data-a="clr">CLEAR</button></div>
+   <p class="muted" style="font-size:13.5px">${has('synth')?'Sound: your lead synth.':'Sound: training keys, until you win the Synthesizer.'} The light rows are the notes of A minor, the key of your bass line.</p>
+   <button class="btn block fx-close">DONE</button>`);
+  const R=$('.proll',m),mon=$('.pr-mon',m),playB=$('[data-a=play]',m);
+  const saved=()=>{save();if(onDone)onDone()};
+  const paintNotes=()=>{$$('.pn',R).forEach(x=>x.remove());S.roll.forEach(n=>{const r=rows.indexOf(n[1]);if(r<0)return;const b=h('button','pn');
+      b.style.gridArea=`${r+1} / ${n[0]+2} / ${r+2} / ${n[0]+2+n[2]}`;b.style.opacity=(.4+.6*n[3]/127).toFixed(2);b.setAttribute('aria-label',`Delete ${noteName(n[1])} at step ${n[0]+1}`);b.onclick=()=>del(n);R.append(b)})};
+  const changed=()=>{paintNotes();saved()};
+  const add=(i,p)=>{const next=S.roll.filter(n=>n[1]===p&&n[0]>i).reduce((a,n)=>Math.min(a,n[0]),16),l=Math.max(1,Math.min(len,next-i));
+    S.roll.push([i,p,l,vel]);S.roll.sort((a,b)=>a[0]-b[0]||b[1]-a[1]);rollHear(p,vel);haptic(6);
+    mon.textContent=`NOTE ON · ${noteName(p)} · #${p} · VELOCITY ${vel} · ${rollLenName(l)}`;changed()};
+  const del=n=>{const k=S.roll.indexOf(n);if(k>=0)S.roll.splice(k,1);haptic(4);mon.textContent=`NOTE DELETED · ${noteName(n[1])} · STEP ${n[0]+1}`;changed()};
+  const build=()=>{R.innerHTML='';const used=new Set(S.roll.map(n=>n[1]));rows=[];for(let p=ROLL_HI;p>=ROLL_LO;p--)if(!fold||rollInKey(p)||used.has(p))rows.push(p);
+    R.style.gridTemplateRows=`repeat(${rows.length},${fold?22:15}px)`;
+    rows.forEach((p,r)=>{const k=h('button','pk'+([1,3,6,8,10].includes(p%12)?' bk':'')+(p%12===9?' root':''),noteName(p));k.style.gridArea=`${r+1} / 1`;k.setAttribute('aria-label','Play '+noteName(p));
+      k.onclick=()=>{rollHear(p,vel);mon.textContent=`NOTE ON · ${noteName(p)} · MIDI #${p} · ${midiF(p).toFixed(1)} Hz`};R.append(k);
+      for(let i=0;i<16;i++){const c=h('button','pc'+(rollInKey(p)?' ik':'')+(i%4===0?' beat':''));c.style.gridArea=`${r+1} / ${i+2}`;c.setAttribute('aria-label',`Add ${noteName(p)} at step ${i+1}`);c.onclick=()=>add(i,p);R.append(c)}});
+    ph=h('div','pph');ph.style.gridRow=`1 / ${rows.length+1}`;ph.style.display='none';R.append(ph);paintNotes()};
+  const setPh=i=>{ROLL_PH=i;if(!ph)return;ph.style.display=i<0?'none':'';if(i>=0)ph.style.gridColumn=String(i+2)};
+  const stopUI=()=>{playB.textContent='▶ PLAY';setPh(-1);autoReset()};
+  playB.onclick=()=>{if(seq.on){seq.stop();return}playB.textContent='■ STOP';
+    seq.start({bpm:()=>S.bpm,total:0,play:(s,t)=>{const i=s%16,tt=t+(hasAb('swing')&&i%4===2?S.swing/100*60/S.bpm/4:0);if(beat)studioStep(S.pattern,s,tt,S.vols);else{const G=studioGraph();rollStep(s,tt,G?G.tr.lead.inp:null)}},
+      onStep:s=>{setPh(s%16);if(s%16===0&&s>0&&S.roll.length>=3&&practiced<6){practiced++;gain(['midi','notes'],'p',1)}},onStop:stopUI,onEnd:stopUI})};
+  const seg=(g,get,set)=>{const w=$(`[data-g=${g}]`,m),bs=$$('button',w),paint=()=>bs.forEach(b=>b.classList.toggle('on',+b.dataset.v===get()));bs.forEach(b=>b.onclick=()=>{set(+b.dataset.v);paint()});paint()};
+  seg('len',()=>len,v=>{len=v});seg('vel',()=>vel,v=>{vel=v});
+  const bt=$('[data-a=beat]',m);bt.onclick=()=>{beat=!beat;bt.textContent=beat?'WITH BEAT':'NOTES ONLY';bt.classList.toggle('neon',beat)};
+  const fb=$('[data-a=fold]',m);fb.onclick=()=>{fold=!fold;fb.textContent=fold?'A MINOR ONLY':'ALL 12 NOTES';fb.classList.toggle('neon',fold);build()};
+  const twice=(b,act)=>{const lab=b.textContent;let armed=0;b.onclick=()=>{if(S.roll.length&&!armed){b.textContent='TAP AGAIN TO CONFIRM';armed=setTimeout(()=>{armed=0;b.textContent=lab},2500);return}clearTimeout(armed);armed=0;b.textContent=lab;act()}};
+  twice($('[data-a=demo]',m),()=>{S.roll=ROLL_DEMO.map(n=>n.slice());build();saved();mon.textContent='EXAMPLE LOADED · 5 NOTES IN A MINOR'});
+  twice($('[data-a=clr]',m),()=>{S.roll.length=0;build();saved();mon.textContent='CLIP CLEARED · TAP A CELL TO START'});
+  $('.fx-close',m).onclick=()=>{seq.stop();ROLL_PH=-1;save();m.close();if(onDone)onDone()};
+  build()}
+/* ================= the studio's EQ (EQ tool) and AUTOMATION (Automation tool) =================
+   S.fx.eq[track] = six bands {f,g,q,on} laid over EQ_BANDS(). The filters live in the studio graph, right after each track input.
+   S.fx.auto = {on, pts:[5 values 0..1]}: a low-pass on the whole beat whose cutoff follows the lane over 4 bars. */
+/* small studio effects of abilities won in Beat Forest: Drum Sense names where each drum sits, Perfect Pulse thinks in milliseconds */
+const DS_ZONE={kick:'LOW THUMP',snare:'MID CRACK',hat:'HIGH TICK',bass:'LOW NOTES'};
+const stepMs=()=>`1/16 = ${Math.round(60000/S.bpm/4)} ms`;
+const swingTxt=()=>S.swing+'%'+(hasAb('perfect')&&S.swing?` · ${Math.round(S.swing/100*60000/S.bpm/4)} ms`:'');
+const EQ_TRACKS=()=>['kick','snare','hat','bass'].concat(has('synth')||has('midi')?['lead']:[]);
+let STUDIO_SOLO=null,AUTO_PH=-1,AUTO_OFF=false;
+function eqBandsOf(k){const B=EQ_BANDS(),st=(S.fx&&S.fx.eq||{})[k];if(Array.isArray(st))st.forEach((b,i)=>{if(B[i]&&b&&isFinite(b.f))Object.assign(B[i],{f:clamp(+b.f,20,20000),g:clamp(+b.g||0,-18,18),q:clamp(+b.q||.71,.3,10),on:!!b.on})});return B}
+function eqStore(k,B){if(!S.fx.eq)S.fx.eq={};S.fx.eq[k]=B.map(b=>({f:Math.round(b.f),g:b.g,q:Math.round(b.q*100)/100,on:!!b.on}))}
+function eqSetNode(x,b){if(!b||!b.on){x.type='peaking';x.frequency.value=1000;x.Q.value=1;x.gain.value=0;return}
+  x.type=b.type;x.frequency.value=b.f;x.Q.value=b.type==='peaking'||b.type.includes('pass')?b.q:.71;x.gain.value=b.type.includes('pass')?0:b.g}
+const eqActive=k=>eqBandsOf(k).some(b=>b.on&&(b.type.includes('pass')||Math.abs(b.g)>=.5));
+function openStudioEq(trk,onDone){seq.stop();initAudio();const G=studioGraph(),TRS=EQ_TRACKS();
+  let k=TRS.includes(trk)?trk:TRS.includes(S.fx.eqSel)?S.fx.eqSel:'kick',sel=3,B=eqBandsOf(k),sv=0;
+  const m=modal('<div class="seq-eq" style="width:100%;text-align:left"></div><button class="btn block fx-close">DONE</button>');
+  const close=()=>{seq.stop();STUDIO_SOLO=null;autoReset();save();m.close();if(onDone)onDone()};$('.fx-close',m).onclick=close;
+  const pg=plug($('.seq-eq',m),{name:'FREQUENCY BLADE',type:'EQ · YOUR TRACKS',col:'#3ef0c8',bypass:false}),body=pg.body,tip=tipLine(body);
+  if(!G){body.append(h('p','muted','Audio is not available here.'));return}
+  tip.textContent='Pick a track, then drag a numbered band: left-right sets the frequency, up-down boosts or cuts.';
+  const chips=h('div','eq-trk');body.append(chips);
+  const R=18,Y=(db,H)=>H/2-db/R*(H/2-10),cur=()=>B.find(x=>x.id===sel);
+  const resp=(nodes,W)=>{const n=Math.floor(W/2),fr=new Float32Array(n),acc=new Float32Array(n),mg=new Float32Array(n),ph=new Float32Array(n);for(let i=0;i<n;i++)fr[i]=FROMLOG20(i/n);nodes.forEach(x=>{x.getFrequencyResponse(fr,mg,ph);for(let i=0;i<n;i++)acc[i]+=gToDb(mg[i])});return acc};
+  const curve=(g,arr,H,col,lw)=>{g.beginPath();arr.forEach((db,i)=>{const y=Y(db,H);if(i===0)g.moveTo(i*2,y);else g.lineTo(i*2,y)});g.strokeStyle=col;g.lineWidth=lw;g.stroke()};
+  const disp=display(body,190,(g,W,H)=>{gridLines(g,W,H,{freq:true,db:R});
+    if(hasAb('freqvision'))TRS.filter(x=>x!==k).forEach(x=>drawSpectrum(g,W,H,G.tr[x].an,null,'rgba(255,79,154,.5)',-110));
+    drawSpectrum(g,W,H,G.tr[k].an,'rgba(62,240,200,.18)',null,-110);
+    const nodes=G.tr[k].eq;B.forEach((b,i)=>{if(b.on)curve(g,resp([nodes[i]],W),H,b.col+'66',1)});curve(g,resp(nodes,W),H,'#f1e7d0',2.5);
+    g.font='10px VT323, monospace';g.fillStyle='#3ef0c8';g.fillText(TR[k].n+(STUDIO_SOLO?' · SOLO':''),6,12);
+    B.forEach(b=>{const x=LOG20(b.f)*W,y=b.type.includes('pass')?H/2:Y(b.g,H);g.beginPath();g.arc(x,y,b.id===sel?10:8,0,7);g.fillStyle=b.on?b.col:'#2a2248';g.fill();g.strokeStyle=b.id===sel?'#f1e7d0':'#07050d';g.lineWidth=2;g.stroke();g.fillStyle='#07050d';g.font='bold 11px VT323, monospace';g.fillText(String(b.id),x-3,y+4)})});
+  addLive(disp.cv,()=>disp.redraw());
+  let drag=null;const pick=e=>{const r=disp.cv.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;let best=null,bd=30;B.forEach(b=>{const d=Math.hypot(LOG20(b.f)*r.width-x,(b.type.includes('pass')?r.height/2:Y(b.g,r.height))-y);if(d<bd){bd=d;best=b}});return best};
+  const move=e=>{const b=B.find(x=>x.id===drag);if(!b)return;const r=disp.cv.getBoundingClientRect();b.f=Math.round(clamp(FROMLOG20((e.clientX-r.left)/r.width),20,20000));if(!b.type.includes('pass'))b.g=Math.round(clamp((r.height/2-(e.clientY-r.top))/(r.height/2-10)*R,-R,R)*2)/2;b.on=true;syncPanel();apply()};
+  disp.cv.addEventListener('pointerdown',e=>{const b=pick(e);if(!b)return;sel=b.id;drag=b.id;try{disp.cv.setPointerCapture(e.pointerId)}catch(err){}tip.textContent=b.type.includes('pass')?`${b.n}: drag left-right to set where the filter starts.`:`${b.n}: drag left-right for the frequency, up-down to boost or cut.`;syncPanel();disp.redraw()});
+  disp.cv.addEventListener('pointermove',e=>{if(drag)move(e)});disp.cv.addEventListener('pointerup',()=>{drag=null});
+  body.append(h('div','dispcap',`<span>DRAG A BAND · TEAL = THIS TRACK${hasAb('freqvision')?' · PINK = YOUR OTHER TRACKS':''}</span>`));
+  const tabs=h('div','seg2');body.append(tabs);const panel=sect(body,'BAND','<button class="plug-btn" data-a="onoff">ON</button>');const kr=h('div','krow');panel.append(kr);
+  const kF=knob(kr,{label:'FREQ',min:20,max:20000,log:true,value:350,fmt:fmtHz,col:'#3ef0c8',onTouch:()=>{tip.textContent='Frequency: where this band works.'},onInput:v=>{cur().f=Math.round(v);cur().on=true;apply()}});
+  const kG=knob(kr,{label:'GAIN',min:-R,max:R,value:0,bipolar:true,def:0,fmt:v=>(v>0?'+':'')+v.toFixed(1)+' dB',col:'#3ef0c8',onTouch:()=>{tip.textContent='Gain: boost (up) or cut (down) this range.'},onInput:v=>{cur().g=Math.round(v*2)/2;cur().on=true;apply()}});
+  const kQ=knob(kr,{label:'Q',min:.3,max:10,log:true,value:1.4,fmt:v=>v.toFixed(2),col:'#3ef0c8',onTouch:()=>{tip.textContent='Q: the width. High Q is narrow and surgical, low Q is broad and musical.'},onInput:v=>{cur().q=v;apply()}});
+  function syncPanel(){const b=cur();tabs.innerHTML=B.map(x=>`<button data-b="${x.id}" class="${x.id===sel?'on':''}" style="${x.on?'':'opacity:.55'}">${x.id} ${x.type==='highpass'?'LC':x.type==='lowpass'?'HC':x.type==='lowshelf'?'LS':x.type==='highshelf'?'HS':'BELL'}</button>`).join('');
+    $$('button',tabs).forEach(t=>t.onclick=()=>{sel=+t.dataset.b;syncPanel();disp.redraw()});
+    $('.sect-h b',panel).textContent=`BAND ${b.id} · ${b.n}`;const oo=$('[data-a=onoff]',panel);oo.textContent=b.on?'ON':'OFF';oo.classList.toggle('on',b.on);kF.set(b.f);kG.set(b.g);kQ.set(b.q);kG.enable(!b.type.includes('pass'));kQ.enable(b.type==='peaking'||b.type.includes('pass'))}
+  $('[data-a=onoff]',panel).onclick=()=>{const b=cur();b.on=!b.on;syncPanel();apply()};
+  const paintChips=()=>{chips.innerHTML=TRS.map(x=>`<button data-t="${x}" class="${x===k?'on':''}" style="--tc:${TR[x].c}">${TR[x].n}${eqActive(x)?' ●':''}</button>`).join('');
+    $$('button',chips).forEach(b=>b.onclick=()=>{k=b.dataset.t;S.fx.eqSel=k;B=eqBandsOf(k);if(STUDIO_SOLO)STUDIO_SOLO=k;syncPanel();paintChips();disp.redraw()})};
+  const row=h('div','row wrap');row.style.gap='6px';body.append(row);
+  const play=h('button','btn neon sm','▶ PLAY'),solo=h('button','chip','SOLO'),reset=h('button','btn ghost sm','RESET TRACK');row.append(play,solo,reset);
+  const stopUI=()=>{play.textContent='▶ PLAY';autoReset()};
+  play.onclick=()=>{if(seq.on){seq.stop();return}play.textContent='■ STOP';seq.start({bpm:()=>S.bpm,total:0,play:(s,t)=>{const i=s%16;studioStep(S.pattern,s,t+(hasAb('swing')&&i%4===2?S.swing/100*60/S.bpm/4:0),S.vols)},onStop:stopUI,onEnd:stopUI})};
+  solo.onclick=()=>{STUDIO_SOLO=STUDIO_SOLO?null:k;solo.classList.toggle('neon',!!STUDIO_SOLO);solo.textContent=STUDIO_SOLO?'SOLO ON':'SOLO';disp.redraw()};
+  reset.onclick=()=>{B=EQ_BANDS();apply();syncPanel();tip.textContent=TR[k].n+' EQ reset: flat, the track sounds as it did.'};
+  body.append(h('p','muted',hasAb('freqvision')?'FREQUENCY VISION: the pink lines are your other tracks. Where one sits on top of this track, cut one of them there.':'Win FREQUENCY VISION (The Spectrum King) to see your other tracks here in pink.'));
+  const apply=()=>{eqStore(k,B);applyFx();paintChips();disp.redraw();clearTimeout(sv);sv=setTimeout(save,300)};
+  paintChips();syncPanel()}
+
+/* ---- automation: 5 points over 4 bars, like the Mixing Castle lesson ---- */
+const AUTO_SHAPES=[['RISE',[.05,.3,.55,.8,1]],['FALL',[1,.75,.5,.25,.05]],['DIP',[1,.35,.1,.35,1]],['FLAT',[.5,.5,.5,.5,.5]]];
+const autoHz=v=>Math.round(150*Math.pow(80,clamp(v,0,1)));
+function autoState(){const a=S.fx.auto;if(!a||!Array.isArray(a.pts)||a.pts.length!==5||!a.pts.every(Number.isFinite))S.fx.auto={on:!!(a&&a.on),pts:AUTO_SHAPES[0][1].slice()};return S.fx.auto}
+/* called on the first step of every 4-bar cycle; only the first cycle clears old events, so a running ramp is never cut */
+function autoSchedule(G,t,first){const au=autoState(),spb=60/S.bpm/4,f=G.alp.frequency;if(first)f.cancelScheduledValues(0);G.alp.Q.setValueAtTime(4,t);
+  au.pts.forEach((v,i)=>{const at=t+i*16*spb;if(i===0)f.setValueAtTime(autoHz(v),at);else f.exponentialRampToValueAtTime(autoHz(v),at)})}
+function autoReset(){if(!SG||SG.c!==A.ctx)return;const f=SG.alp.frequency,t=now();f.cancelScheduledValues(0);f.setValueAtTime(20000,t);SG.alp.Q.cancelScheduledValues(0);SG.alp.Q.setValueAtTime(.71,t)}
+function autoCard(){const au=autoState();return`<div class="win raised stack auto-card"><div class="row sp"><p class="eyebrow" style="color:#ffcc4d">AUTOMATION · MOTION RUNE</p><button class="chip ${au.on?'amber':''}" data-a="auto-on" style="min-height:36px">${au.on?'ON':'OFF'}</button></div>
+  <p class="muted" style="font-size:14px">A filter on your whole beat, drawn over 4 bars. Drag the 5 points: low = dark and closed, high = bright and open. Turn it ON, then press PLAY on the drum machine.</p>
+  <div class="auto-h"></div><div class="row wrap" style="gap:6px">${AUTO_SHAPES.map(([n])=>`<button class="btn ghost sm" data-shape="${n}">${n}</button>`).join('')}</div></div>`}
+function wireAutoCard(card){const au=autoState(),host=$('.auto-h',card);
+  const disp=display(host,130,(g,W,H)=>{gridLines(g,W,H,{cols:16,major:4});g.fillStyle='#6a5f9a';g.font='10px VT323, monospace';for(let b=0;b<4;b++)g.fillText('BAR '+(b+1),b*W/4+4,H-4);
+    const X=i=>i/4*(W-16)+8,Yv=v=>H-14-v*(H-28),on=au.on;g.beginPath();au.pts.forEach((v,i)=>{if(i===0)g.moveTo(X(i),Yv(v));else g.lineTo(X(i),Yv(v))});g.strokeStyle=on?'#ffcc4d':'#6a5f9a';g.lineWidth=2.5;g.stroke();
+    g.lineTo(X(4),H);g.lineTo(X(0),H);g.closePath();g.fillStyle=on?'rgba(255,204,77,.1)':'rgba(106,95,154,.08)';g.fill();
+    au.pts.forEach((v,i)=>{g.beginPath();g.arc(X(i),Yv(v),7,0,7);g.fillStyle='#07050d';g.fill();g.strokeStyle='#f1e7d0';g.lineWidth=2;g.stroke()});
+    if(on&&seq.on&&AUTO_PH>=0){g.fillStyle='rgba(241,231,208,.8)';g.fillRect(X(0)+AUTO_PH*(W-16),0,2,H)}
+    g.fillStyle=on?'#ffcc4d':'#6a5f9a';g.fillText(`CUTOFF ${fmtHz(autoHz(au.pts[0]))} → ${fmtHz(autoHz(au.pts[4]))} Hz${on?'':' · OFF'}`,6,12)});
+  addLive(disp.cv,()=>{if(seq.on)disp.redraw()});
+  let dr=-1;const hit=e=>{const r=disp.cv.getBoundingClientRect();return{x:(e.clientX-r.left)/r.width,y:e.clientY-r.top,h:r.height}};
+  const move=e=>{if(dr<0)return;const p=hit(e);au.pts[dr]=Math.round(clamp(1-(p.y-14)/(p.h-28),0,1)*100)/100;disp.redraw()};
+  disp.cv.addEventListener('pointerdown',e=>{const p=hit(e);dr=clamp(Math.round(p.x*4),0,4);try{disp.cv.setPointerCapture(e.pointerId)}catch(err){}move(e)});
+  disp.cv.addEventListener('pointermove',move);disp.cv.addEventListener('pointerup',()=>{if(dr>=0){dr=-1;save()}});
+  const ob=$('[data-a=auto-on]',card);ob.onclick=()=>{au.on=!au.on;ob.textContent=au.on?'ON':'OFF';ob.classList.toggle('amber',au.on);if(!au.on)autoReset();save();disp.redraw();sfx.tap()};
+  $$('[data-shape]',card).forEach(b=>b.onclick=()=>{const s=AUTO_SHAPES.find(x=>x[0]===b.dataset.shape);s[1].forEach((v,i)=>au.pts[i]=v);save();disp.redraw()});
+  return disp}
+/* ================= MY REWARDS: every reward in the game, and where it lives in the studio =================
+   One index of tools, abilities, certificates and cosmetics, grouped by world. Tapping an owned reward takes you to it
+   (or puts it on, for cosmetics). Rewards not seen yet in the studio are marked NEW (S.rwSeen). */
+const RW_WCOL={forest:'#6fd36a',caves:'#a98bff',desert:'#ffcc4d',volcano:'#ff7a3a',swamp:'#6cb8ff',castle:'#f1e7d0',sky:'#8e9ad6',bunker:'#ff3d7f',quests:'#3ef0c8',shop:'#ffb547'};
+const RW_GNAME=g=>g==='quests'?'Daily quests':g==='shop'?'Shop':WNAME[g];
+const TOOL_FROM={drums:'metro',midi:'k1',synth:'k3',eq:'d2',comp:'c1',dist:'titan',reverb:'s1',delay:'s3',auto:'m3',limiter:'a3',groovebox:'t1'};
+const TOOL_WHERE={volume:'The volume fader on every track',drums:'The drum machine',midi:'The MIDI · PIANO ROLL panel',synth:'EDIT LEAD SOUND, and the sound of your piano roll',eq:'The EQ button in the MIX RACK',comp:'The MASTER COMPRESSOR panel',
+  dist:'The DRIVE knob in the MIX RACK',reverb:'The VERB knobs in the MIX RACK',delay:'The LEAD DELAY knob in the MIX RACK',auto:'The AUTOMATION panel',limiter:'LIMITER and CEILING in the MIX RACK',groovebox:'The BUNKER BOX panel'};
+const ABIL_FROM={ears:'s0',pulse:'l1',grid:'l2',drumsense:'l3',swing:'boss',perfect:'trial',wave:'dragon',freqvision:'king',dynamic:'c1',space:'echoking',stereosight:'lord',ceiling:'master',rumblecraft:'headliner'};
+const ABIL_WHERE={ears:'The live spectrum in your studio',pulse:'The beat light next to your tempo · in battles, monsters show their BPM',grid:'Off-beat notes glow in your drum machine',
+  drumsense:'Each drum lights up when it hits · in battles, weaknesses name the exact drum',
+  swing:'The SWING slider on your drum machine',perfect:'Your steps and swing in milliseconds · in tap challenges, your timing in ms',wave:'The wavetable presets in EDIT LEAD SOUND',freqvision:'Your EQ shows your other tracks in pink',
+  dynamic:'The MASTER COMPRESSOR panel',space:'Your LEAD DELAY locks to your tempo',stereosight:'The PAN knobs in the MIX RACK',ceiling:'The LOUDNESS meter in the MIX RACK',rumblecraft:'The RUMBLE knob in the MIX RACK'};
+const COS_FROM={'hoodie-beast':'boss','phones-leaf':'challenge','comp-cassette':'slime','kit-boom':'trial','hoodie-dragon':'dragon','phones-wave':'ktrial','hoodie-dune':'king','hair-sunset':'dtrial',
+  'hoodie-magma':'titan','phones-ember':'vtrial','phones-bog':'echoking','hair-mist':'strial','hoodie-royal':'lord','hair-star':'mtrial','hoodie-sky':'master','hoodie-cert':'final',
+  'phones-strobe':'bouncer','hoodie-rave':'headliner','kit-bunker':'btrial'};
+const CERTS=[['trial','RHYTHM CERTIFIED','The gold trophy on your studio wall'],['ktrial','SOUND DESIGNER','The violet trophy on the shelf above your window'],['dtrial','EQ MASTER','The gold trophy on the shelf above your window'],
+  ['vtrial','DYNAMICS CERTIFIED','The orange trophy on the shelf above your window'],['strial','SPACE CERTIFIED','The blue trophy on the shelf above your window'],['mtrial','MIX ENGINEER','The white trophy on the shelf above your window'],
+  ['final','PRODUCER CERTIFIED','Your framed certificate on the studio wall'],['btrial','CLUB CERTIFIED','The record plaque on your studio wall']];
+const COS_KIND={hoodie:'HOODIE',phones:'HEADPHONES',hair:'HAIR',comp:'COMPANION',kit:'DRUM KIT'};
+function stageWorld(id){for(const w of WORDER)if((WSTAGES[w]||[]).some(x=>x.id===id))return w;return'forest'}
+function stageTitle(id){for(const w of WORDER){const x=(WSTAGES[w]||[]).find(x=>x.id===id);if(x)return x.title}return id}
+function rewardIndex(){const L=[];
+  TOOLS.forEach(t=>{const st=TOOL_FROM[t.id];L.push({key:'t:'+t.id,w:st?stageWorld(st):'forest',kind:'TOOL',name:t.name,col:t.col,got:has(t.id),where:TOOL_WHERE[t.id]||'Your studio',how:st?stageTitle(st):'Starting gear'})});
+  ABILITIES.forEach(a=>{const st=ABIL_FROM[a.id];L.push({key:'a:'+a.id,w:st?stageWorld(st):'forest',kind:'ABILITY',name:a.name,col:'#3ef0c8',got:hasAb(a.id),where:ABIL_WHERE[a.id]||'Your studio',how:a.from})});
+  CERTS.forEach(([id,n,where])=>L.push({key:'c:'+id,w:stageWorld(id),kind:'CERTIFICATE',name:n,col:'#ffcc4d',got:id==='final'?!!(S.cert||S.done.includes('final')):S.done.includes(id),where,how:stageTitle(id)}));
+  COS.filter(c=>c.price!==0).forEach(c=>{const st=COS_FROM[c.id],sl=c.slot;
+    L.push({key:'o:'+c.id,w:st?stageWorld(st):c.price?'shop':'quests',kind:COS_KIND[sl]||sl.toUpperCase(),name:c.name,col:c.col,got:S.owned.includes(c.id),cos:c,
+      where:sl==='kit'?'SWAP KIT on your drum machine':sl==='comp'?'Your companion, next to you in the studio':'Your hero in the studio',how:c.how||(c.price?`${c.price} coins · PATH › STYLE`:'')})});
+  return L}
+const rwInUse=c=>c.slot==='kit'?S.kit===c.id:S.eq[c.slot]===c.id;
+/* where TRY IT NOW (and USE IN STUDIO) takes you for each tool; a fresh copy each time, the studio clears the flags it uses */
+const STUDIO_TRY={groovebox:{bbox:1},midi:{roll:1},eq:{eq:1},synth:{lead:1},auto:{focus:'.auto-card'},comp:{focus:'.mcomp'},dist:{focus:'.fxrack'},reverb:{focus:'.fxrack'},delay:{focus:'.fxrack'},limiter:{focus:'.fxrack'},drums:{focus:'.dm-win'}};
+const studioTry=id=>STUDIO_TRY[id]?Object.assign({},STUDIO_TRY[id]):undefined;
+function rewardWall(host,o){o=o||{};const L=rewardIndex();
+  if(!Array.isArray(S.rwSeen)){S.rwSeen=L.filter(r=>r.got).map(r=>r.key);save()}      /* first visit: nothing is "new" */
+  const fresh=new Set(L.filter(r=>r.got&&!S.rwSeen.includes(r.key)).map(r=>r.key));
+  const groups=WORDER.concat(['quests','shop']).filter(g=>L.some(r=>r.w===g));
+  const lastDone=S.done.length?stageWorld(S.done[S.done.length-1]):'forest';
+  let tab=o.tab||(fresh.size?L.find(r=>fresh.has(r.key)).w:lastDone);
+  const w=h('div','win raised stack mr-wall');host.append(w);
+  const paint=()=>{const got=L.filter(r=>r.got).length;
+    w.innerHTML=`<div class="row sp"><p class="eyebrow" style="color:#ffcc4d">MY REWARDS · ${got} / ${L.length}</p>${fresh.size?`<span class="chip neon">${fresh.size} NEW</span>`:''}</div>
+     <div class="row" style="gap:10px;align-items:center"><div class="mr-hero"></div><p class="muted grow" style="font-size:14px">Everything you win lands in your studio. Pick a world, then tap a reward to go to it. Tap a cosmetic to put it on.</p></div>
+     <div class="mr-tabs">${groups.map(g=>{const a=L.filter(r=>r.w===g),n=a.filter(r=>r.got).length;return`<button class="mr-tab ${g===tab?'on':''}" data-w="${g}" style="--wc:${RW_WCOL[g]}">${RW_GNAME(g).toUpperCase()}<b>${n}/${a.length}${a.some(r=>fresh.has(r.key))?' ★':''}</b></button>`}).join('')}</div>
+     <div class="stack mr-list" style="gap:6px">${L.filter(r=>r.w===tab).map(r=>`<button class="sw mr-it ${r.got?'on':'lock'}" data-k="${r.key}"><i style="background:${r.col}"></i><span class="grow" style="text-align:left">${r.name}${fresh.has(r.key)?' <b class="mr-new">NEW</b>':''}<br><small class="muted">${r.kind} · ${r.got?(r.cos?(rwInUse(r.cos)?'✓ IN USE · ':'TAP TO USE · '):'✓ ')+r.where:'LOCKED · '+r.how}</small></span></button>`).join('')}</div>`;
+    const hb=$('.mr-hero',w);hb.append(heroEl(2,'bob'));const cp=companionEl(2);if(cp)hb.append(cp);
+    $$('.mr-tab',w).forEach(b=>b.onclick=()=>{tab=b.dataset.w;sfx.tap();paint()});
+    $$('.mr-it',w).forEach(b=>b.onclick=()=>{const r=L.find(x=>x.key===b.dataset.k);if(!r)return;sfx.tap();
+      if(!r.got){toast('LOCKED · '+String(r.how).toUpperCase());return}
+      if(r.cos){if(r.cos.slot==='kit')S.kit=r.cos.id;else S.eq[r.cos.slot]=r.cos.id;save();paint();if(o.onEquip)o.onEquip(r.cos);return}
+      if(!(o.go&&o.go(r.key)))toast(r.where.toUpperCase())})};
+  paint();S.rwSeen=L.filter(r=>r.got).map(r=>r.key);save();
+  return{paint,el:w}}
 /* =====================================================================
    PRO PLUGIN KIT: knobs, faders, meters, displays, keyboard
    ===================================================================== */
