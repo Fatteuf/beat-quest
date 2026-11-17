@@ -1,4 +1,4 @@
-const VERSION='2.3';
+const VERSION='2.4';
 /* ================= helpers ================= */
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const app=$('#app');
@@ -524,6 +524,10 @@ function drawStudio(g,t,cv){const W=cv.width,H=cv.height,fl=44;
   const glow=(Math.sin(t*6)>.6)?'#6ff8dc':'#3ef0c8';px(g,50,26,16,10,'#140d1f');px(g,51,27,14,8,glow);px(g,52,29,6,1,'#0b2a24');px(g,52,31,9,1,'#0b2a24');px(g,48,36,20,1,'#8a7fa8');
   if(has('drums')){px(g,31,30,15,6,'#2a2248');px(g,31,30,15,1,'#5a4a7a');const pl=seq.on?Math.floor(t*6)%4:-1;['#ffb547','#ff4f9a','#3ef0c8','#a98bff'].forEach((c,i)=>px(g,32+i*3.5,32,3,3,pl===i?'#ffffff':c))}
   if(has('comp')){px(g,67,31,10,5,'#2a1a1a');px(g,67,31,10,1,'#8a5a34');const m=seq.on?Math.floor((Math.sin(t*9)+1)*3):1;px(g,68,33,m+1,2,'#ff5a2a')}
+  /* Master Trial trophies on a shelf above the window (dim until won), and the framed PRODUCER CERTIFIED */
+  px(g,5,5,28,1,'#6a4630');px(g,5,6,28,1,'#4a3020');px(g,7,7,1,1,'#4a3020');px(g,30,7,1,1,'#4a3020');
+  [['ktrial','#a98bff'],['dtrial','#ffcc4d'],['vtrial','#ff7a3a'],['strial','#6cb8ff'],['mtrial','#f1e7d0']].forEach(([id,c],i)=>{const x=7+i*5,on=S.done.includes(id),k=on?c:'#2e2450';px(g,x,1,3,2,k);px(g,x+1,3,1,1,k);px(g,x,4,3,1,on?shade(c,-.35):'#2e2450');if(on&&Math.sin(t*3+i*1.7)>.85)px(g,x+2,1,1,1,'#ffffff')});
+  if(S.cert||S.done.includes('final')){px(g,48,8,12,11,'#ffcc4d');px(g,49,9,10,9,'#f1e7d0');px(g,50,11,8,1,'#8a7fa8');px(g,50,13,6,1,'#8a7fa8');px(g,50,16,3,1,'#8a7fa8');px(g,55,15,2,2,'#ff4f5a')}
   /* MIDI keyboard in front of the screen (Synth Caves): a key lights up while the piano roll plays */
   if(has('midi')){const lit=seq.on&&S.roll&&S.roll.length?Math.floor(t*8)%6:-1;px(g,47,33,19,3,'#3d3166');px(g,48,34,17,2,'#f1e7d0');if(lit>=0)px(g,48+lit*3,34,2,2,'#a98bff');
     [50,53,56,59,62].forEach(x=>px(g,x,35,1,1,'#8a7fa8'));[50,53,59,62].forEach(x=>px(g,x,34,1,1,'#140d1f'))}
@@ -594,7 +598,7 @@ function hydrateIcons(root){$$('[data-ic]',root).forEach(el=>{const name=el.data
   if(el.tagName==='CANVAS')drawSprite(el,ICONS[name],pal,sc);else el.replaceWith(sprite(ICONS[name],pal,sc))})}
 function reward(o){return new Promise(res=>{const before=lvProg();S.xp+=o.xp||0;S.coins+=o.coins||0;(o.cosmetics||[]).forEach(id=>{if(!S.owned.includes(id))S.owned.push(id)});save();const after=lvProg();
   const rb=rankFor(before.n),ra=rankFor(after.n);
-  const items=[];if(o.xp)items.push(`<b>+${o.xp}</b> XP`);if(o.coins)items.push(coinRow(o.coins));(o.lines||[]).forEach(l=>items.push(l));(o.cosmetics||[]).forEach(id=>items.push(`<span style="color:var(--violet)">NEW ${cos(id).slot==='kit'?'DRUM KIT':'COSMETIC'}: ${cos(id).name.toUpperCase()}</span>`));
+  const items=[];if(o.xp)items.push(`<b>+${o.xp}</b> XP`);if(o.coins)items.push(coinRow(o.coins));(o.lines||[]).forEach(l=>items.push(l));(o.cosmetics||[]).forEach(id=>items.push(`<span style="color:var(--violet)">NEW ${cos(id).slot==='kit'?'DRUM KIT':'COSMETIC'}: ${cos(id).name.toUpperCase()}</span>`));if((o.cosmetics||[]).length)items.push(`<span class="muted" style="font-size:14px">${o.cosmetics.every(id=>cos(id).slot==='kit')?'Use it':'Put it on'} in MY STUDIO › MY REWARDS</span>`);
   const m=modal(`<p class="eyebrow">${o.eyebrow||'REWARD'}</p><h2 class="rw-t">${o.title}</h2>${o.sub?`<p class="muted">${o.sub}</p>`:''}<div class="rw-list">${items.map((x,i)=>`<div class="rw-i" style="animation-delay:${i*.15}s">${x}</div>`).join('')}</div>
   <div style="width:100%" class="stack"><div class="row sp"><span class="eyebrow">PRODUCER LV <span class="rw-lv">${before.n}</span></span><span class="num muted rw-xp" style="font-size:18px">${before.cur}/${before.need} XP</span></div><div class="bar"><i class="rw-bar" style="width:${before.cur/before.need*100}%"></i></div><p class="lvup" hidden></p>${ra[0]>rb[0]?`<p class="fb good" style="width:100%">NEW RANK · LV ${ra[0]}: “${ra[1]}”</p>`:''}</div>
   <button class="btn block rw-go">${o.btn||'CONTINUE'}</button>`);
@@ -602,11 +606,11 @@ function reward(o){return new Promise(res=>{const before=lvProg();S.xp+=o.xp||0;
   setTimeout(()=>{const bar=$('.rw-bar',m);if(!bar)return;if(after.n>before.n){bar.style.width='100%';setTimeout(()=>{bar.style.transition='none';bar.style.width='0%';void bar.offsetWidth;bar.style.transition='';bar.style.width=after.cur/after.need*100+'%';$('.rw-lv',m).textContent=after.n;const up=$('.lvup',m);up.hidden=false;up.textContent='LEVEL UP! PRODUCER LV '+after.n;sfx.level();haptic([30,40,30])},650)}else bar.style.width=after.cur/after.need*100+'%';$('.rw-xp',m).textContent=after.cur+'/'+after.need+' XP'},450);
   $('.rw-go',m).onclick=()=>{sfx.tap();m.close();res()}})}
 function unlockTool(id){if(!S.tools.includes(id))S.tools.push(id);save();const t=TOOLS.find(x=>x.id===id);
-  return new Promise(res=>{const m=modal(`<div class="unlock"><div class="rays"></div><p class="eyebrow" style="color:var(--amber);position:relative">NEW TOOL UNLOCKED</p><div class="ul-icon"></div><h2>${t.name.toUpperCase()}</h2><p class="weapon">WEAPON FORM · ${t.weapon.toUpperCase()}</p><p style="font-size:18px">“${t.tag}”</p><p class="muted" style="max-width:32ch">${t.daw}</p><button class="btn block big ul-try">TRY IT NOW</button><button class="btn ghost block ul-later">LATER</button></div>`,{cls:'dramatic'});
+  return new Promise(res=>{const m=modal(`<div class="unlock"><div class="rays"></div><p class="eyebrow" style="color:var(--amber);position:relative">NEW TOOL UNLOCKED</p><div class="ul-icon"></div><h2>${t.name.toUpperCase()}</h2><p class="weapon">WEAPON FORM · ${t.weapon.toUpperCase()}</p><p style="font-size:18px">“${t.tag}”</p><p class="muted" style="max-width:32ch">${t.daw}</p><p style="font-size:14px;color:var(--neon);max-width:32ch">IN YOUR STUDIO: ${(TOOL_WHERE[id]||'your studio').toUpperCase()}</p><button class="btn block big ul-try">TRY IT NOW</button><button class="btn ghost block ul-later">LATER</button></div>`,{cls:'dramatic'});
     $('.ul-icon',m).append(icon(id,t.col,10));sfx.unlock();haptic([20,60,20,60,80]);
     $('.ul-try',m).onclick=()=>{m.close();res('try')};$('.ul-later',m).onclick=()=>{m.close();res('later')}})}
 function unlockAbility(id){if(hasAb(id))return Promise.resolve();S.abilities.push(id);save();const a=ABILITIES.find(x=>x.id===id);
-  return new Promise(res=>{const m=modal(`<div class="unlock"><div class="rays"></div><p class="eyebrow" style="color:var(--violet);position:relative">ABILITY UNLOCKED</p><div class="ul-icon"></div><h2>${a.name.toUpperCase()}</h2><p class="because">BECAUSE YOU LEARNED: ${a.from.toUpperCase()}</p><p style="font-size:17px;max-width:32ch">${a.desc}</p><button class="btn violet block big ab-ok">I FEEL IT</button></div>`,{cls:'dramatic violetbg'});
+  return new Promise(res=>{const m=modal(`<div class="unlock"><div class="rays"></div><p class="eyebrow" style="color:var(--violet);position:relative">ABILITY UNLOCKED</p><div class="ul-icon"></div><h2>${a.name.toUpperCase()}</h2><p class="because">BECAUSE YOU LEARNED: ${a.from.toUpperCase()}</p><p style="font-size:17px;max-width:32ch">${a.desc}</p><p style="font-size:14px;color:var(--neon);max-width:32ch">${(ABIL_WHERE[id]||'').toUpperCase()} · SEE IT IN MY STUDIO › MY REWARDS</p><button class="btn violet block big ab-ok">I FEEL IT</button></div>`,{cls:'dramatic violetbg'});
     $('.ul-icon',m).append(icon('bolt','#a98bff',12));sfx.ability();haptic([30,50,30,50,90]);$('.ab-ok',m).onclick=()=>{m.close();res()}})}
 function bump(id,n,set){const q=QUESTS.find(x=>x.id===id);if(!q||S.quests.claimed.includes(id))return;if(q.needs==='drums'&&!has('drums'))return;const p=S.quests.prog;const before=p[id]||0;p[id]=clamp(set!=null?set:before+(n||1),0,q.goal);if(before<q.goal&&p[id]>=q.goal){toast('QUEST COMPLETE · '+q.title.toUpperCase());sfx.coin()}save()}
 let typing=null;

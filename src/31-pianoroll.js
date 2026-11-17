@@ -63,7 +63,7 @@ function openPianoRoll(onDone){seq.stop();rollNotes();initAudio();let len=2,vel=
       for(let i=0;i<16;i++){const c=h('button','pc'+(rollInKey(p)?' ik':'')+(i%4===0?' beat':''));c.style.gridArea=`${r+1} / ${i+2}`;c.setAttribute('aria-label',`Add ${noteName(p)} at step ${i+1}`);c.onclick=()=>add(i,p);R.append(c)}});
     ph=h('div','pph');ph.style.gridRow=`1 / ${rows.length+1}`;ph.style.display='none';R.append(ph);paintNotes()};
   const setPh=i=>{ROLL_PH=i;if(!ph)return;ph.style.display=i<0?'none':'';if(i>=0)ph.style.gridColumn=String(i+2)};
-  const stopUI=()=>{playB.textContent='▶ PLAY';setPh(-1)};
+  const stopUI=()=>{playB.textContent='▶ PLAY';setPh(-1);autoReset()};
   playB.onclick=()=>{if(seq.on){seq.stop();return}playB.textContent='■ STOP';
     seq.start({bpm:()=>S.bpm,total:0,play:(s,t)=>{const i=s%16,tt=t+(hasAb('swing')&&i%4===2?S.swing/100*60/S.bpm/4:0);if(beat)studioStep(S.pattern,s,tt,S.vols);else{const G=studioGraph();rollStep(s,tt,G?G.tr.lead.inp:null)}},
       onStep:s=>{setPh(s%16);if(s%16===0&&s>0&&S.roll.length>=3&&practiced<6){practiced++;gain(['midi','notes'],'p',1)}},onStop:stopUI,onEnd:stopUI})};

@@ -618,6 +618,28 @@ input[type=range]::-moz-range-thumb{width:18px;height:22px;background:var(--ambe
 .pr-seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:4px}
 .pr-seg button{min-height:36px;padding:4px 2px;background:var(--panel2);border:2px solid var(--edge);font-family:var(--f-disp);font-size:9.5px;letter-spacing:.04em;color:var(--ink)}
 .pr-seg button.on{border-color:#a98bff;color:#a98bff;background:#1d1636}
+/* studio EQ, automation and MY REWARDS */
+.eq-trk{display:flex;flex-wrap:wrap;gap:4px;margin:2px 0 6px}
+.eq-trk button{min-height:34px;padding:4px 8px;background:var(--panel2);border:2px solid var(--edge);font-family:var(--f-disp);font-size:9.5px;letter-spacing:.05em;color:var(--ink)}
+.eq-trk button.on{border-color:var(--tc,#3ef0c8);color:var(--tc,#3ef0c8);background:#141029}
+.mr-tabs{display:flex;flex-wrap:wrap;gap:4px}
+.mr-tab{display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-height:40px;padding:4px 8px;background:var(--panel);border:2px solid var(--edge);font-family:var(--f-disp);font-size:8.5px;letter-spacing:.05em;color:var(--dim)}
+.mr-tab b{font-family:var(--f-num);font-size:15px;font-weight:400;color:var(--wc)}
+.mr-tab.on{border-color:var(--wc);color:var(--ink);background:#141029}
+.mr-new{font-family:var(--f-disp);font-size:8px;color:#07050d;background:var(--neon);padding:1px 4px;margin-left:4px;vertical-align:middle}
+.mr-hero{display:flex;align-items:flex-end;gap:2px;min-width:40px}
+.mr-it small{font-size:12.5px;line-height:1.25}
+.beatled{width:14px;height:14px;flex:none;background:#2a2248;border:2px solid var(--edge);display:inline-block}
+.beatled.on{background:var(--neon)}
+.beatled.on.down{background:var(--amber)}
+.beatled.auto{animation:beatpulse 1s steps(1) infinite}
+@keyframes beatpulse{0%{background:var(--amber)}25%{background:#2a2248}}
+.stepms{font-size:16px;color:var(--dim)}
+.ds-zone{display:block;font-size:8px;color:var(--dim);letter-spacing:.04em}
+.gh .trk .dot.hit{animation:dothit .2s steps(2)}
+@keyframes dothit{0%{transform:scale(1.9);filter:brightness(1.9)}}
+@keyframes mrflash{50%{filter:brightness(1.7)}}
+.mrflash{animation:mrflash .45s steps(2) 3}
 
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition:none!important}}
 </style>
