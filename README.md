@@ -15,7 +15,7 @@ Le code source est dans `src/`. Les fichiers sont assemblés dans l'ordre de leu
 | `47-techno.js` | Moteur techno : sons 909, rumble, swing, styles, Bunker Box, Rumble Forge, Acid Box, questions techno |
 | `48-worldkit.js` | Briques communes aux mondes 2 à 7 (manches de combat, Master Trials) |
 | `50-caves.js` à `55-sky.js` | Un fichier par monde : leçons, boss, Master Trial |
-| `56-bunker.js` | Le Techno Bunker : leçons, The Bouncer, The Headliner, Club Trial |
+| `56-bunker.js` | Le Techno Bunker : leçons, The Bouncer, The Headliner, Club Trial, panneau Bunker Box du studio |
 | `60-final.js` | Le Final Track et le certificat |
 | `90-boot.js` | Démarrage |
 
@@ -50,3 +50,7 @@ python build.py
 Pour publier une mise à jour, augmente `VERSION_CODE` dans `build.py`.
 
 La clé de signature (`android/beatquest.jks` et `android/signing.properties`) n'est pas dans le dépôt, volontairement. Garde-la en lieu sûr : Android refuse d'installer une mise à jour signée avec une autre clé.
+
+## Mettre à jour le site
+
+Le site (https://fatteuf.github.io/beat-quest/) est servi par GitHub Pages depuis la branche `gh-pages`. Elle ne contient que `index.html` (une copie de `beat-quest.html`), l'APK et un fichier vide `.nojekyll`. Pour publier une nouvelle version, remplace ces fichiers sur cette branche puis pousse-la. Le site se met à jour une ou deux minutes plus tard.
