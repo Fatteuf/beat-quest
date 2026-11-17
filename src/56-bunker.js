@@ -43,11 +43,18 @@ function unpackBB(o){if(!o||!o.pat)return null;const st=mkSt({});BB_KEYS.forEach
   Object.assign(st.vol,o.vol||{});if(o.acid)st.acid=JSON.parse(JSON.stringify(o.acid));if(o.syn)st.syn=synClean(o.syn);return st}
 function bbSummary(){const st=unpackBB(S.bbox);if(!st)return'NO JAM SAVED YET';const n=TT_ORDER.filter(k=>st.pat[k].some(Boolean)).length,sy=st.syn?SYN_KEYS.filter(k=>st.syn[k].clip.length).length:0;
   return`YOUR JAM · ${st.bpm} BPM · ${n} TRACK${n===1?'':'S'}${sy?` · ${sy} SYNTH${sy===1?'':'S'}`:''}`}
-function openBunkerBox(){const m=modal('<p class="eyebrow" style="color:#ff7a3a">STUDIO · FREE JAM · AUTO-SAVED</p><div class="bbx-h" style="width:100%"></div><button class="btn block fx-close">DONE</button>');
-  const keep=st=>{S.bbox=packBB(st);save();const s=$('.bbx-sum');if(s)s.textContent=bbSummary()};
+/* the Bunker Box has its own screen (bottom bar · BUNKER BOX); the jam is kept in S.bbox and saved on every change */
+let BB_RIG=null;
+function openBunkerBox(){go('bbox')}
+RENDER.bbox=scr=>{if(BB_RIG){BB_RIG.stop();BB_RIG=null}
+  if(!has('groovebox')){scr.innerHTML=topbar('BUNKER BOX')+`<div class="stack"><div class="win raised stack" style="border-color:#ff7a3a"><p class="eyebrow" style="color:#ff7a3a">GROOVEBOX · LOCKED</p><h3>The Bunker Box</h3>
+    <p style="font-size:15px">A techno groovebox: 14 drum tracks, an offbeat bass and 2 synths with a MIDI piano roll. You win it in the Techno Bunker, at the end of the lesson “The Techno Engine”.</p>
+    ${worldOpen('bunker')?'<button class="btn block" data-a="go" style="background:#ff7a3a">GO TO THE TECHNO BUNKER ▶</button>':'<p class="muted">The Techno Bunker opens once Beat Forest is cleared.</p>'}</div></div>`;
+    hydrateIcons(scr);const b=$('[data-a=go]',scr);if(b)b.onclick=()=>{sfx.tap();go('region','bunker')};return}
+  scr.innerHTML=topbar('BUNKER BOX')+`<div class="stack"><div class="row sp" style="align-items:center;gap:8px"><p class="eyebrow" style="color:#ff7a3a">FREE JAM · AUTO-SAVED</p><p class="num bbx-sum" style="font-size:16px;color:#ff7a3a">${bbSummary()}</p></div><div class="bbx-h" style="width:100%"></div></div>`;hydrateIcons(scr);
   const st=unpackBB(S.bbox)||mkSt({bpm:132,pat:{kick:BEATS}});if(!st.syn)st.syn=synNew();
-  const rig=bunkerRig($('.bbx-h',m),{presets:true,synths:true,show:['swing','rumble','drive','bass','len','stop'],state:st,onChange:keep});
-  $('.fx-close',m).onclick=()=>{rig.stop();keep(rig.st);m.close()}}
+  const keep=s=>{S.bbox=packBB(s);save();const e=$('.bbx-sum',scr);if(e)e.textContent=bbSummary()};
+  BB_RIG=bunkerRig($('.bbx-h',scr),{presets:true,synths:true,show:['swing','rumble','drive','bass','len','stop'],state:st,onChange:keep})};
 /* what the Bunker gives you, and where it shows up */
 const BUNKER_LOOT=[['GROOVEBOX · BUNKER BOX','#ff7a3a',()=>has('groovebox'),'Finish “The Techno Engine”','this panel'],['STROBE CANS','#ff3d7f',()=>S.owned.includes('phones-strobe'),'Defeat The Bouncer','your wardrobe'],
   ['RUMBLE KNOB','#a98bff',()=>hasAb('rumblecraft'),'Defeat The Headliner','the Mix Rack'],['RAVE NEON HOODIE','#3ef0c8',()=>S.owned.includes('hoodie-rave'),'Defeat The Headliner','your wardrobe'],['BUNKER 909 KIT','#ff7a3a',()=>S.owned.includes('kit-bunker'),'Pass the Club Trial','SWAP KIT']];

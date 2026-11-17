@@ -1,9 +1,9 @@
 /* ================= navigation ================= */
 const RENDER={};let cur='title',booted=false,playBack='train';
-const NAVSCREENS=['home','map','region','studio','train','path','quests','shop'];
-function go(name,arg){seq.stop();stopGroup();if(typing)typing.finish();$$('.modal-back,.sheet').forEach(m=>m.remove());if(A.busComp)transparentComp(A.busComp);
+const NAVSCREENS=['home','map','region','studio','train','path','quests','shop','bbox'];
+function go(name,arg){seq.stop();stopGroup();if(BB_RIG&&name!=='bbox'){BB_RIG.stop();BB_RIG=null}if(typing)typing.finish();$$('.modal-back,.sheet').forEach(m=>m.remove());if(A.busComp)transparentComp(A.busComp);
   $$('.screen').forEach(s=>{s.hidden=s.id!=='s-'+name});const scr=$('#s-'+name);scr.scrollTop=0;scr.classList.remove('enter','puzzle');
-  $('#nav').hidden=!NAVSCREENS.includes(name);const navOn={region:'map',quests:'home',shop:'home'}[name]||name;$$('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.go===navOn));
+  $('#nav').hidden=!NAVSCREENS.includes(name);const navOn={region:'map',quests:'home'}[name]||name;$$('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.go===navOn));
   if(booted){void scr.offsetWidth;scr.classList.add('enter');const w=$('#wipe');w.classList.remove('go');void w.offsetWidth;w.classList.add('go')}booted=true;
   cur=name;RENDER[name](scr,arg);updateBadge();
   if(['home','map','region','train','path','quests','shop'].includes(name))startMusic();else stopMusic()}
