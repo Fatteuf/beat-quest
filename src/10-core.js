@@ -1,4 +1,4 @@
-const VERSION='2.5';
+const VERSION='2.6';
 /* ================= helpers ================= */
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const app=$('#app');

@@ -36,43 +36,52 @@ function rollCard(){const lv=Math.round((S.vols.lead==null?.6:S.vols.lead)*100);
 function wireRollCard(card,before){addLive($('.roll-mini',card),rollMiniDraw);
   const vs=$('.roll-vol',card);vs.oninput=()=>{S.vols.lead=vs.value/100;vs.nextElementSibling.textContent=vs.value};vs.onchange=()=>{gain('volume','p',1);save()};
   const open=()=>{if(before)before();openPianoRoll(()=>{$('.roll-sum',card).textContent=rollSummary()})};$('[data-a=roll]',card).onclick=open;return open}
-function openPianoRoll(onDone){seq.stop();rollNotes();initAudio();let len=2,vel=85,beat=true,fold=true,practiced=0,rows=[],ph=null;
-  const m=modal(`<p class="eyebrow" style="color:${ROLL_COL}">PIANO ROLL · MIDI CLIP · 1 BAR</p>
+/* the studio clip: S.roll in A minor, A3–A5, played over the studio beat */
+function openPianoRoll(onDone){rollNotes();let practiced=0;
+  pianoRollModal({title:'PIANO ROLL · MIDI CLIP · 1 BAR',col:ROLL_COL,notes:S.roll,lo:ROLL_LO,hi:ROLL_HI,root:9,keyName:'A MINOR',demo:ROLL_DEMO,
+    soundLine:has('synth')?'Sound: your lead synth.':'Sound: training keys, until you win the Synthesizer.',footer:'The light rows are the notes of A minor, the key of your bass line.',
+    hear:rollHear,bpm:()=>S.bpm,
+    play:(s,t,beat)=>{const i=s%16,tt=t+(hasAb('swing')&&i%4===2?S.swing/100*60/S.bpm/4:0);if(beat)studioStep(S.pattern,s,tt,S.vols);else{const G=studioGraph();rollStep(s,tt,G?G.tr.lead.inp:null)}},
+    onStep:s=>{ROLL_PH=s%16;if(s%16===0&&s>0&&S.roll.length>=3&&practiced<6){practiced++;gain(['midi','notes'],'p',1)}},
+    onStop:()=>{ROLL_PH=-1;autoReset()},onChange:()=>{save();if(onDone)onDone()},onClose:()=>{ROLL_PH=-1;save();if(onDone)onDone()}})}
+/* a MIDI piano roll in a modal, for any one-bar clip. c.notes ([step, note, length, velocity]) is edited in place;
+   c.play(s,t,withBeat) schedules one step, c.hear(note,vel) auditions one note, c.root is the pitch class of the minor key */
+function pianoRollModal(c){seq.stop();initAudio();const notes=c.notes,inKey=p=>MINOR.includes(((p-c.root)%12+12)%12);let len=2,vel=85,beat=true,fold=true,rows=[],ph=null;
+  const m=modal(`<p class="eyebrow" style="color:${c.col}">${c.title}</p>
    <p style="font-size:14.5px;text-align:left">Each block is one MIDI note. Its <b>row</b> is the pitch, its <b>start</b> is when it plays, its <b>length</b> is how long it holds, and its <b>brightness</b> is the velocity: how hard it is played. Tap an empty cell to add a note. Tap a note to delete it.</p>
    <p class="num pr-mon">MIDI MONITOR · TAP A KEY OR A CELL</p>
    <div class="proll"></div>
    <div class="pr-opts"><div class="pr-opt"><span class="kb-lab">LENGTH</span><div class="pr-seg" data-g="len">${ROLL_LEN.map(([l,n])=>`<button data-v="${l}">${n}</button>`).join('')}</div></div>
     <div class="pr-opt"><span class="kb-lab">VELOCITY</span><div class="pr-seg" data-g="vel">${ROLL_VEL.map(([v,n])=>`<button data-v="${v}">${n}</button>`).join('')}</div></div></div>
-   <div class="transport" style="justify-content:center"><button class="btn neon" data-a="play">▶ PLAY</button><button class="chip neon" data-a="beat">WITH BEAT</button><button class="chip neon" data-a="fold">A MINOR ONLY</button></div>
-   <div class="row wrap" style="justify-content:center"><button class="btn ghost sm" data-a="demo">LOAD EXAMPLE</button><button class="btn ghost sm" data-a="clr">CLEAR</button></div>
-   <p class="muted" style="font-size:13.5px">${has('synth')?'Sound: your lead synth.':'Sound: training keys, until you win the Synthesizer.'} The light rows are the notes of A minor, the key of your bass line.</p>
+   <div class="transport" style="justify-content:center"><button class="btn neon" data-a="play">▶ PLAY</button><button class="chip neon" data-a="beat">WITH BEAT</button><button class="chip neon" data-a="fold">${c.keyName} ONLY</button></div>
+   <div class="row wrap" style="justify-content:center">${c.demo?'<button class="btn ghost sm" data-a="demo">LOAD EXAMPLE</button>':''}<button class="btn ghost sm" data-a="clr">CLEAR</button></div>
+   <p class="muted" style="font-size:13.5px">${c.soundLine} ${c.footer}</p>
    <button class="btn block fx-close">DONE</button>`);
   const R=$('.proll',m),mon=$('.pr-mon',m),playB=$('[data-a=play]',m);
-  const saved=()=>{save();if(onDone)onDone()};
-  const paintNotes=()=>{$$('.pn',R).forEach(x=>x.remove());S.roll.forEach(n=>{const r=rows.indexOf(n[1]);if(r<0)return;const b=h('button','pn');
+  const saved=()=>{if(c.onChange)c.onChange()};
+  const paintNotes=()=>{$$('.pn',R).forEach(x=>x.remove());notes.forEach(n=>{const r=rows.indexOf(n[1]);if(r<0)return;const b=h('button','pn');
       b.style.gridArea=`${r+1} / ${n[0]+2} / ${r+2} / ${n[0]+2+n[2]}`;b.style.opacity=(.4+.6*n[3]/127).toFixed(2);b.setAttribute('aria-label',`Delete ${noteName(n[1])} at step ${n[0]+1}`);b.onclick=()=>del(n);R.append(b)})};
   const changed=()=>{paintNotes();saved()};
-  const add=(i,p)=>{const next=S.roll.filter(n=>n[1]===p&&n[0]>i).reduce((a,n)=>Math.min(a,n[0]),16),l=Math.max(1,Math.min(len,next-i));
-    S.roll.push([i,p,l,vel]);S.roll.sort((a,b)=>a[0]-b[0]||b[1]-a[1]);rollHear(p,vel);haptic(6);
+  const add=(i,p)=>{const next=notes.filter(n=>n[1]===p&&n[0]>i).reduce((a,n)=>Math.min(a,n[0]),16),l=Math.max(1,Math.min(len,next-i));
+    notes.push([i,p,l,vel]);notes.sort((a,b)=>a[0]-b[0]||b[1]-a[1]);c.hear(p,vel);haptic(6);
     mon.textContent=`NOTE ON · ${noteName(p)} · #${p} · VELOCITY ${vel} · ${rollLenName(l)}`;changed()};
-  const del=n=>{const k=S.roll.indexOf(n);if(k>=0)S.roll.splice(k,1);haptic(4);mon.textContent=`NOTE DELETED · ${noteName(n[1])} · STEP ${n[0]+1}`;changed()};
-  const build=()=>{R.innerHTML='';const used=new Set(S.roll.map(n=>n[1]));rows=[];for(let p=ROLL_HI;p>=ROLL_LO;p--)if(!fold||rollInKey(p)||used.has(p))rows.push(p);
+  const del=n=>{const k=notes.indexOf(n);if(k>=0)notes.splice(k,1);haptic(4);mon.textContent=`NOTE DELETED · ${noteName(n[1])} · STEP ${n[0]+1}`;changed()};
+  const build=()=>{R.innerHTML='';const used=new Set(notes.map(n=>n[1]));rows=[];for(let p=c.hi;p>=c.lo;p--)if(!fold||inKey(p)||used.has(p))rows.push(p);
     R.style.gridTemplateRows=`repeat(${rows.length},${fold?22:15}px)`;
-    rows.forEach((p,r)=>{const k=h('button','pk'+([1,3,6,8,10].includes(p%12)?' bk':'')+(p%12===9?' root':''),noteName(p));k.style.gridArea=`${r+1} / 1`;k.setAttribute('aria-label','Play '+noteName(p));
-      k.onclick=()=>{rollHear(p,vel);mon.textContent=`NOTE ON · ${noteName(p)} · MIDI #${p} · ${midiF(p).toFixed(1)} Hz`};R.append(k);
-      for(let i=0;i<16;i++){const c=h('button','pc'+(rollInKey(p)?' ik':'')+(i%4===0?' beat':''));c.style.gridArea=`${r+1} / ${i+2}`;c.setAttribute('aria-label',`Add ${noteName(p)} at step ${i+1}`);c.onclick=()=>add(i,p);R.append(c)}});
+    rows.forEach((p,r)=>{const k=h('button','pk'+([1,3,6,8,10].includes(p%12)?' bk':'')+(((p-c.root)%12+12)%12===0?' root':''),noteName(p));k.style.gridArea=`${r+1} / 1`;k.setAttribute('aria-label','Play '+noteName(p));
+      k.onclick=()=>{c.hear(p,vel);mon.textContent=`NOTE ON · ${noteName(p)} · MIDI #${p} · ${midiF(p).toFixed(1)} Hz`};R.append(k);
+      for(let i=0;i<16;i++){const b=h('button','pc'+(inKey(p)?' ik':'')+(i%4===0?' beat':''));b.style.gridArea=`${r+1} / ${i+2}`;b.setAttribute('aria-label',`Add ${noteName(p)} at step ${i+1}`);b.onclick=()=>add(i,p);R.append(b)}});
     ph=h('div','pph');ph.style.gridRow=`1 / ${rows.length+1}`;ph.style.display='none';R.append(ph);paintNotes()};
-  const setPh=i=>{ROLL_PH=i;if(!ph)return;ph.style.display=i<0?'none':'';if(i>=0)ph.style.gridColumn=String(i+2)};
-  const stopUI=()=>{playB.textContent='▶ PLAY';setPh(-1);autoReset()};
+  const setPh=i=>{if(!ph)return;ph.style.display=i<0?'none':'';if(i>=0)ph.style.gridColumn=String(i+2)};
+  const stopUI=()=>{playB.textContent='▶ PLAY';setPh(-1);if(c.onStop)c.onStop()};
   playB.onclick=()=>{if(seq.on){seq.stop();return}playB.textContent='■ STOP';
-    seq.start({bpm:()=>S.bpm,total:0,play:(s,t)=>{const i=s%16,tt=t+(hasAb('swing')&&i%4===2?S.swing/100*60/S.bpm/4:0);if(beat)studioStep(S.pattern,s,tt,S.vols);else{const G=studioGraph();rollStep(s,tt,G?G.tr.lead.inp:null)}},
-      onStep:s=>{setPh(s%16);if(s%16===0&&s>0&&S.roll.length>=3&&practiced<6){practiced++;gain(['midi','notes'],'p',1)}},onStop:stopUI,onEnd:stopUI})};
+    seq.start({bpm:c.bpm,total:0,play:(s,t)=>c.play(s,t,beat),onStep:s=>{setPh(s%16);if(c.onStep)c.onStep(s)},onStop:stopUI,onEnd:stopUI})};
   const seg=(g,get,set)=>{const w=$(`[data-g=${g}]`,m),bs=$$('button',w),paint=()=>bs.forEach(b=>b.classList.toggle('on',+b.dataset.v===get()));bs.forEach(b=>b.onclick=()=>{set(+b.dataset.v);paint()});paint()};
   seg('len',()=>len,v=>{len=v});seg('vel',()=>vel,v=>{vel=v});
   const bt=$('[data-a=beat]',m);bt.onclick=()=>{beat=!beat;bt.textContent=beat?'WITH BEAT':'NOTES ONLY';bt.classList.toggle('neon',beat)};
-  const fb=$('[data-a=fold]',m);fb.onclick=()=>{fold=!fold;fb.textContent=fold?'A MINOR ONLY':'ALL 12 NOTES';fb.classList.toggle('neon',fold);build()};
-  const twice=(b,act)=>{const lab=b.textContent;let armed=0;b.onclick=()=>{if(S.roll.length&&!armed){b.textContent='TAP AGAIN TO CONFIRM';armed=setTimeout(()=>{armed=0;b.textContent=lab},2500);return}clearTimeout(armed);armed=0;b.textContent=lab;act()}};
-  twice($('[data-a=demo]',m),()=>{S.roll=ROLL_DEMO.map(n=>n.slice());build();saved();mon.textContent='EXAMPLE LOADED · 5 NOTES IN A MINOR'});
-  twice($('[data-a=clr]',m),()=>{S.roll.length=0;build();saved();mon.textContent='CLIP CLEARED · TAP A CELL TO START'});
-  $('.fx-close',m).onclick=()=>{seq.stop();ROLL_PH=-1;save();m.close();if(onDone)onDone()};
-  build()}
+  const fb=$('[data-a=fold]',m);fb.onclick=()=>{fold=!fold;fb.textContent=fold?c.keyName+' ONLY':'ALL 12 NOTES';fb.classList.toggle('neon',fold);build()};
+  const twice=(b,act)=>{if(!b)return;const lab=b.textContent;let armed=0;b.onclick=()=>{if(notes.length&&!armed){b.textContent='TAP AGAIN TO CONFIRM';armed=setTimeout(()=>{armed=0;b.textContent=lab},2500);return}clearTimeout(armed);armed=0;b.textContent=lab;act()}};
+  twice($('[data-a=demo]',m),()=>{notes.length=0;c.demo.forEach(n=>notes.push(n.slice()));build();saved();mon.textContent=`EXAMPLE LOADED · ${notes.length} NOTES IN ${c.keyName}`});
+  twice($('[data-a=clr]',m),()=>{notes.length=0;build();saved();mon.textContent='CLIP CLEARED · TAP A CELL TO START'});
+  $('.fx-close',m).onclick=()=>{seq.stop();m.close();if(c.onClose)c.onClose()};
+  build();return m}

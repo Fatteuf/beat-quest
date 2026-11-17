@@ -10,7 +10,7 @@ Le code source est dans `src/`. Les fichiers sont assemblés dans l'ordre de leu
 | `15-audio2.js` | Synthé, chanson de démo, mesure LUFS, export WAV, décors et monstres |
 | `20-learn.js` | Questions du monde 1, quiz, Ear Gym |
 | `30-screens.js` | Écrans : accueil, carte, régions, studio, Beat Forest, combats |
-| `31-pianoroll.js` | Le piano roll MIDI du studio (débloqué par l'outil MIDI) |
+| `31-pianoroll.js` | Le piano roll MIDI : le clip du studio (débloqué par l'outil MIDI) et les synthés de la Bunker Box |
 | `32-studiomix.js` | L'EQ et l'automation du studio (débloqués par les outils EQ et Automation) |
 | `33-rewards.js` | MY REWARDS : toutes les récompenses du jeu et leur place dans le studio |
 | `40-rigs.js` | Plugins : synthé, EQ, compresseur, reverb, delay, mixeur, automation, limiteur |

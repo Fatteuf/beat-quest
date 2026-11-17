@@ -41,7 +41,7 @@ function packBB(st){const o={pat:{},len:{},vol:Object.assign({},st.vol)};BB_KEYS
 function unpackBB(o){if(!o||!o.pat)return null;const st=mkSt({});BB_KEYS.forEach(k=>{if(o[k]!=null)st[k]=o[k]});
   TT_ORDER.forEach(k=>{const a=o.pat[k];if(Array.isArray(a)&&a.length===16)st.pat[k]=a.map(v=>+v||0);if(o.len&&BB_LEN.includes(o.len[k]))st.len[k]=o.len[k]});
   Object.assign(st.vol,o.vol||{});if(o.acid)st.acid=JSON.parse(JSON.stringify(o.acid));if(o.syn)st.syn=synClean(o.syn);return st}
-function bbSummary(){const st=unpackBB(S.bbox);if(!st)return'NO JAM SAVED YET';const n=TT_ORDER.filter(k=>st.pat[k].some(Boolean)).length,sy=st.syn?SYN_KEYS.filter(k=>st.syn[k].notes.some(Boolean)).length:0;
+function bbSummary(){const st=unpackBB(S.bbox);if(!st)return'NO JAM SAVED YET';const n=TT_ORDER.filter(k=>st.pat[k].some(Boolean)).length,sy=st.syn?SYN_KEYS.filter(k=>st.syn[k].clip.length).length:0;
   return`YOUR JAM · ${st.bpm} BPM · ${n} TRACK${n===1?'':'S'}${sy?` · ${sy} SYNTH${sy===1?'':'S'}`:''}`}
 function openBunkerBox(){const m=modal('<p class="eyebrow" style="color:#ff7a3a">STUDIO · FREE JAM · AUTO-SAVED</p><div class="bbx-h" style="width:100%"></div><button class="btn block fx-close">DONE</button>');
   const keep=st=>{S.bbox=packBB(st);save();const s=$('.bbx-sum');if(s)s.textContent=bbSummary()};
