@@ -37,20 +37,22 @@ function bassShapeViz(host){const d=display(host,92,(g,W,H)=>{gridLines(g,W,H,{c
 function rulesFeedback(fb,rows,okMsg){const bad=rows.filter(r=>!r.ok);fb.innerHTML=bad.length?`<p class="fb">${bad.map(r=>r.bad).join(' ')}</p>`:`<p class="fb good">${okMsg}</p>`;return!bad.length}
 /* ---- the studio's Bunker Box: the jam is kept in S.bbox (saved like the rest of the game) ---- */
 const BB_KEYS=['bpm','swing','rumble','drive','kdrive','bassMode','root'];
-function packBB(st){const o={pat:{},len:{},vol:Object.assign({},st.vol)};BB_KEYS.forEach(k=>o[k]=st[k]);TT_ORDER.forEach(k=>{o.pat[k]=st.pat[k].slice();o.len[k]=st.len[k]||16});o.acid=st.acid?JSON.parse(JSON.stringify(st.acid)):null;return o}
+function packBB(st){const o={pat:{},len:{},vol:Object.assign({},st.vol)};BB_KEYS.forEach(k=>o[k]=st[k]);TT_ORDER.forEach(k=>{o.pat[k]=st.pat[k].slice();o.len[k]=st.len[k]||16});o.acid=st.acid?JSON.parse(JSON.stringify(st.acid)):null;o.syn=st.syn?synClean(st.syn):null;return o}
 function unpackBB(o){if(!o||!o.pat)return null;const st=mkSt({});BB_KEYS.forEach(k=>{if(o[k]!=null)st[k]=o[k]});
   TT_ORDER.forEach(k=>{const a=o.pat[k];if(Array.isArray(a)&&a.length===16)st.pat[k]=a.map(v=>+v||0);if(o.len&&BB_LEN.includes(o.len[k]))st.len[k]=o.len[k]});
-  Object.assign(st.vol,o.vol||{});if(o.acid)st.acid=JSON.parse(JSON.stringify(o.acid));return st}
-function bbSummary(){const st=unpackBB(S.bbox);if(!st)return'NO JAM SAVED YET';const n=TT_ORDER.filter(k=>st.pat[k].some(Boolean)).length;return`YOUR JAM · ${st.bpm} BPM · ${n} TRACK${n===1?'':'S'}`}
+  Object.assign(st.vol,o.vol||{});if(o.acid)st.acid=JSON.parse(JSON.stringify(o.acid));if(o.syn)st.syn=synClean(o.syn);return st}
+function bbSummary(){const st=unpackBB(S.bbox);if(!st)return'NO JAM SAVED YET';const n=TT_ORDER.filter(k=>st.pat[k].some(Boolean)).length,sy=st.syn?SYN_KEYS.filter(k=>st.syn[k].notes.some(Boolean)).length:0;
+  return`YOUR JAM · ${st.bpm} BPM · ${n} TRACK${n===1?'':'S'}${sy?` · ${sy} SYNTH${sy===1?'':'S'}`:''}`}
 function openBunkerBox(){const m=modal('<p class="eyebrow" style="color:#ff7a3a">STUDIO · FREE JAM · AUTO-SAVED</p><div class="bbx-h" style="width:100%"></div><button class="btn block fx-close">DONE</button>');
   const keep=st=>{S.bbox=packBB(st);save();const s=$('.bbx-sum');if(s)s.textContent=bbSummary()};
-  const rig=bunkerRig($('.bbx-h',m),{presets:true,show:['swing','rumble','drive','bass','len','stop'],state:unpackBB(S.bbox)||mkSt({bpm:132,pat:{kick:BEATS}}),onChange:keep});
+  const st=unpackBB(S.bbox)||mkSt({bpm:132,pat:{kick:BEATS}});if(!st.syn)st.syn=synNew();
+  const rig=bunkerRig($('.bbx-h',m),{presets:true,synths:true,show:['swing','rumble','drive','bass','len','stop'],state:st,onChange:keep});
   $('.fx-close',m).onclick=()=>{rig.stop();keep(rig.st);m.close()}}
 /* what the Bunker gives you, and where it shows up */
 const BUNKER_LOOT=[['GROOVEBOX · BUNKER BOX','#ff7a3a',()=>has('groovebox'),'Finish “The Techno Engine”','this panel'],['STROBE CANS','#ff3d7f',()=>S.owned.includes('phones-strobe'),'Defeat The Bouncer','your wardrobe'],
   ['RUMBLE KNOB','#a98bff',()=>hasAb('rumblecraft'),'Defeat The Headliner','the Mix Rack'],['RAVE NEON HOODIE','#3ef0c8',()=>S.owned.includes('hoodie-rave'),'Defeat The Headliner','your wardrobe'],['BUNKER 909 KIT','#ff7a3a',()=>S.owned.includes('kit-bunker'),'Pass the Club Trial','SWAP KIT']];
 function bunkerCard(){return`<div class="win raised stack bbx-card"><div class="row sp"><p class="eyebrow" style="color:#ff7a3a">GROOVEBOX · BUNKER BOX</p><span class="chip" style="color:#ff7a3a">TECHNO BUNKER</span></div>
-  <p style="font-size:15px">The techno drum machine you won in the Bunker: 14 tracks, MPC swing, loop lengths, rumble, drive and an offbeat bass. Load a style with ◀ ▶ and make it yours.</p>
+  <p style="font-size:15px">The techno drum machine you won in the Bunker: 14 tracks, MPC swing, loop lengths, rumble, drive, an offbeat bass and 2 synths (stab, lead, pad, pluck, acid, or your own synth). Load a style with ◀ ▶ and make it yours.</p>
   <p class="num bbx-sum" style="font-size:18px;color:#ff7a3a">${bbSummary()}</p><button class="btn block" data-a="bbox" style="background:#ff7a3a">▶ OPEN THE BUNKER BOX</button>
   <p class="eyebrow" style="padding:0">BUNKER REWARDS</p><div class="stack bbx-loot" style="gap:6px">${BUNKER_LOOT.map(([n,col,got,how,where])=>{const g=got();return`<div class="sw ${g?'on':'lock'}"><i style="background:${col}"></i><span class="grow">${n}<br><small class="muted">${g?'✓ IN '+where.toUpperCase():how+' · then in '+where}</small></span></div>`}).join('')}</div></div>`}
 const FLAT_ACID={acc:new Array(16).fill(0),sl:new Array(16).fill(0),reso:.2,env:.25};

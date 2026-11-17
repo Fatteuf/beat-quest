@@ -43,6 +43,32 @@ function acidVoice(t,steps,spb,midis,P,acc,d){const c=AC();d=d||OUT();const o=c.
 const BASS_ST=[0,0,3,5,7,10,12];
 function acidStep(a,s,t,spb,d){const i=s%16,n=a.notes[i];if(!n)return;const p=(i+15)%16;if(a.sl[p]&&a.notes[p]&&(i>0||s>0))return;
   let k=1;while(k<16&&a.sl[(i+k-1)%16]&&a.notes[(i+k)%16])k++;const ms=[];for(let j=0;j<k;j++)ms.push(a.root+BASS_ST[a.notes[(i+j)%16]]);acidVoice(t,k,spb,ms,a,a.acc[i],d)}
+/* ================= the synth tracks of the studio Bunker Box =================
+   st.syn = {syn1:{snd,oct,notes}, syn2:{…}}: each of the 16 steps holds a degree of the minor scale over the bass root (0 = rest),
+   so the synths always follow the key of the loaded style. Lessons never get st.syn, so they sound exactly as before. */
+const SYN_KEYS=['syn1','syn2'],SYN_DEG=[0,2,3,5,7,8,10,12],SYN_SCALE=[0,2,3,5,7,8,10,12,14,15,17,19,20,22,24];
+const SYN_SOUNDS={
+  stab:{n:'STAB',c:'#ff5a2a',base:24,tip:'STAB: a short minor chord on every note, the hit of Detroit techno and hard bounce.'},
+  lead:{n:'LEAD',c:'#6cb8ff',base:36,hold:2,v:.32,patch:()=>PRESETS.LEAD,tip:'LEAD: a bright detuned saw. Each note holds up to 2 steps, until the next note.'},
+  pad:{n:'PAD',c:'#8fbf3a',base:24,hold:16,triad:true,v:.12,patch:()=>PRESETS.PAD,tip:'PAD: soft chords built on each note of the scale. A chord holds until the next note.'},
+  pluck:{n:'PLUCK',c:'#ffcc4d',base:36,gate:1,v:.32,patch:()=>PRESETS.PLUCK,tip:'PLUCK: short and percussive, for fast riffs.'},
+  acid:{n:'ACID',c:'#ffe27a',base:12,tip:'ACID: the 303 squelch, one note per step, an octave above the bass.'},
+  mine:{n:'MY SYNTH',short:'MINE',c:'#a98bff',base:24,hold:4,v:.3,need:'synth',patch:()=>S.leadPatch||PRESETS.LEAD,tip:'MY SYNTH: the sound you designed in EDIT LEAD SOUND. Notes hold up to 4 steps.'}};
+const SYN_ACID={cut:.3,reso:.72,env:.6,dec:.3,accent:.6};
+/* ready-made synth parts; degrees: 1 root, 2 second, 3 minor third, 4 fourth, 5 fifth, 6 minor sixth, 7 minor seventh, 8 octave */
+const SYN_IDEAS=[{n:'DETROIT STABS',why:'minor chord stabs on the offbeats, answering the kick.',syn1:{snd:'stab',notes:{2:1,6:1,10:1,13:4}},syn2:{snd:'pad',notes:{}}},
+  {n:'240 HITS',why:'one short hit on the beat and nothing else. The space is the hook.',syn1:{snd:'stab',notes:{0:1}},syn2:{snd:'pad',notes:{}}},
+  {n:'ACID RIFF',why:'a 303 riff on the root, jumping to the octave and the minor third.',syn1:{snd:'acid',notes:{0:1,2:1,3:8,5:1,7:3,8:1,10:6,11:1,13:5,14:3}},syn2:{snd:'pad',notes:{}}},
+  {n:'DARK PAD',why:'chords moving from the root to the minor sixth: dark and wide under the drums.',syn1:{snd:'stab',notes:{}},syn2:{snd:'pad',notes:{0:1,8:6}}},
+  {n:'SIGH LEAD',why:'a lead falling from the minor sixth to the fifth, the classic minor sigh, over the dark pad.',syn1:{snd:'lead',notes:{0:1,4:3,8:6,12:5}},syn2:{snd:'pad',notes:{0:1,8:6}}}];
+const synNew=()=>({syn1:{snd:'stab',oct:0,notes:new Array(16).fill(0)},syn2:{snd:'pad',oct:0,notes:new Array(16).fill(0)}});
+function synClean(o){const n=synNew();SYN_KEYS.forEach(k=>{const T=o&&o[k];if(!T)return;if(SYN_SOUNDS[T.snd])n[k].snd=T.snd;n[k].oct=clamp(Math.round(+T.oct||0),-1,1);if(Array.isArray(T.notes)&&T.notes.length===16)n[k].notes=T.notes.map(v=>clamp(Math.round(+v||0),0,8))});return n}
+const synBase=(st,T)=>st.root+(SYN_SOUNDS[T.snd]||SYN_SOUNDS.stab).base+12*(T.oct||0);
+const synNote=(st,T,deg)=>synBase(st,T)+SYN_DEG[deg-1];
+function synVoice(st,k,s,t,d){const T=st.syn&&st.syn[k];if(!T)return;const i=s%16,val=T.notes[i];if(!val)return;const P=SYN_SOUNDS[T.snd]||SYN_SOUNDS.stab,spb=60/st.bpm/4,m=synNote(st,T,val);
+  if(T.snd==='stab'){TV.hit(t,1,m,d);return}if(T.snd==='acid'){acidVoice(t,1,spb,[m],SYN_ACID,false,d);return}
+  let dur=(P.gate||1)*spb;if(P.hold){let n=1;while(n<P.hold&&i+n<16&&!T.notes[i+n])n++;dur=n*spb*.95}
+  const b0=synBase(st,T),notes=P.triad?[0,2,4].map(j=>b0+SYN_SCALE[val-1+j]):[m];withRoute(d,()=>notes.forEach(x=>SV(t,midiF(x),dur,P.patch(),P.v)))}
 /* rumble: kick → dark reverb → low-pass → duck (on every kick) → drive */
 function rumbleChain(c,dest){const inp=c.createGain(),pre=c.createBiquadFilter(),cv=c.createConvolver(),lp=c.createBiquadFilter(),hp=c.createBiquadFilter(),ws=c.createWaveShaper(),dk=c.createGain(),out=c.createGain();
   pre.type='lowpass';pre.frequency.value=350;lp.type='lowpass';lp.Q.value=1.1;hp.type='highpass';hp.frequency.value=32;inp.connect(pre);pre.connect(cv);cv.connect(lp);lp.connect(hp);hp.connect(ws);ws.connect(dk);dk.connect(out);out.connect(dest);
@@ -59,9 +85,9 @@ function mkSt(o){const st={bpm:132,swing:50,rumble:0,drive:0,kdrive:0,bassMode:'
   for(const k in o||{}){const v=o[k];if(k==='pat'){for(const tk in v){const x=v[tk];if(Array.isArray(x))x.forEach(i=>{if(Array.isArray(i))st.pat[tk][i[0]]=i[1];else st.pat[tk][i]=1});else for(const i in x)st.pat[tk][+i]=x[i]}}
     else if(k==='len'||k==='vol')Object.assign(st[k],v);else st[k]=v}return st}
 function bunkerGraph(c,dest){const G={c,bus:{},mix:c.createGain(),kdry:c.createGain(),drive:c.createWaveShaper(),post:c.createGain()};G.mix.connect(G.drive);G.drive.connect(G.post);if(dest)G.post.connect(dest);
-  TT_ORDER.concat(['acid']).forEach(k=>{const g=c.createGain();if(k!=='kick')g.connect(G.mix);G.bus[k]=g});G.bus.kick.connect(G.kdry);G.kdry.connect(G.mix);
+  TT_ORDER.concat(['acid'],SYN_KEYS).forEach(k=>{const g=c.createGain();if(k!=='kick')g.connect(G.mix);G.bus[k]=g});G.bus.kick.connect(G.kdry);G.kdry.connect(G.mix);
   G.rum=rumbleChain(c,G.mix);G.bus.kick.connect(G.rum.inp);
-  G.set=st=>{G.drive.curve=st.drive>0?tcurve(st.drive*.7):null;G.post.gain.value=1/(1+(st.drive||0)*1.1);for(const k of TT_ORDER)G.bus[k].gain.value=(st.vol&&st.vol[k]!=null?st.vol[k]:1)*(st.mute&&st.mute[k]?0:1);G.kdry.gain.value=st.soloRumble?0:1;
+  G.set=st=>{G.drive.curve=st.drive>0?tcurve(st.drive*.7):null;G.post.gain.value=1/(1+(st.drive||0)*1.1);for(const k of TT_ORDER.concat(SYN_KEYS))G.bus[k].gain.value=(st.vol&&st.vol[k]!=null?st.vol[k]:1)*(st.mute&&st.mute[k]?0:1);G.kdry.gain.value=st.soloRumble?0:1;
     G.rum.set({amt:st.rumble||0,dec:st.rdec||2.4,cut:st.rcut||140,duck:st.rduck==null?.85:st.rduck,drive:st.rdrive==null?.35:st.rdrive})};return G}
 function tvoice(st,k,val,t,G,i){const d=G.bus[k],v=val===2?.42:1,spb=60/st.bpm/4;
   switch(k){case'kick':TV.kick(t,.95*v,d,st.kdrive||0);G.rum.duck(t,spb*4);break;case'clap':TV.clap(t,v,d);break;case'chat':TV.chat(t,v,d);break;case'ohat':TV.ohat(t,v,d);break;case'ride':TV.ride(t,v,d);break;
@@ -71,7 +97,8 @@ function tvoice(st,k,val,t,G,i){const d=G.bus[k],v=val===2?.42:1,spb=60/st.bpm/4
 function technoStep(st,s,t,G){const spb=60/st.bpm/4,i=s%16,tt=t+(s%2?swingDelay(st.swing,spb):0);
   if(st.stopReq&&i===0){st.stopReq=false;st.stopUntil=s+16}const stopped=st.stopUntil!=null&&s<st.stopUntil;
   for(const k of TT_ORDER){const L=st.len[k]||16,val=st.pat[k][s%L];if(!val||stopped&&(k==='kick'||k==='bass'))continue;tvoice(st,k,val,tt,G,i)}
-  if(st.acid&&st.acid.on!==false)acidStep(st.acid,s,t,spb,G.bus.acid)}
+  if(st.acid&&st.acid.on!==false)acidStep(st.acid,s,t,spb,G.bus.acid);
+  if(st.syn)for(const k of SYN_KEYS)synVoice(st,k,s,tt,G.bus[k])}
 function playStyle(dest,st,bars){const c=AC(),G=bunkerGraph(c,dest);G.set(st);const spb=60/st.bpm/4,t0=now()+.06;for(let s=0;s<16*(bars||2);s++)technoStep(st,s,t0+s*spb,G)}
 let LGR=null;function LG(){initAudio();if(!A.ctx)return null;if(!LGR||LGR.c!==A.ctx)LGR=bunkerGraph(A.ctx,A.bus);return LGR}
 /* A/B items for abWidget built from two Bunker states */
@@ -129,6 +156,7 @@ function bunkerRig(host,o){o=o||{};initAudio();const st=o.state||mkSt(o.init);co
   const pg=plug(host,{name:'BUNKER BOX',type:'TECHNO GROOVEBOX',col:'#ff7a3a',bypass:false,extra:o.presets?'<button class="plug-btn" data-a="pp" aria-label="Previous style">◀</button><span class="chip pname" style="min-width:104px;justify-content:center">STYLES</span><button class="plug-btn" data-a="pn" aria-label="Next style">▶</button>':''});
   const B=pg.body,tip=tipLine(B);if(!A.ctx){B.textContent='Audio is not available here.';return{st,stop(){},paint(){},set(){}}}
   const out=rigOut(),G=bunkerGraph(A.ctx,out.g);const fire=()=>{G.set(st);if(o.onChange)o.onChange(st)};
+  const syn=o.synths&&st.syn?SYN_KEYS:[],scells={},snm={};let synPaint=()=>{};
   const top=h('div','row wrap');top.style.cssText='gap:8px;align-items:center';B.append(top);const playB=h('button','btn neon sm','▶ PLAY'),barc=h('span','num','BAR –');barc.style.cssText='font-size:20px;color:var(--dim)';top.append(playB,barc);
   if(show.includes('stop')){const sb=h('button','btn ghost sm','STOP 1 BAR');top.append(sb);sb.onclick=()=>{st.stopReq=true;tip.textContent='Stop: kick and bass drop out for one bar, then slam back in.';if(!seq.on)playB.click();if(o.onStopUsed)o.onStopUsed()}}
   const kr=h('div','krow');B.append(kr);const K={};
@@ -136,6 +164,7 @@ function bunkerRig(host,o){o=o||{};initAudio();const st=o.state||mkSt(o.init);co
   if(show.includes('swing'))K.swing=knob(kr,{label:'SWING',min:50,max:75,step:1,value:st.swing,fmt:v=>Math.round(v)+'%',col:'#ff4f9a',onTouch:()=>{tip.textContent=`MPC-style swing: 50% is straight; every second 16th moves later. ${st.swing}% = +${Math.round(swingDelay(st.swing,60/st.bpm/4)*1000)} ms at ${st.bpm} BPM.`},onInput:v=>{st.swing=Math.round(v);tip.textContent=`${st.swing}% swing = every second 16th +${Math.round(swingDelay(st.swing,60/st.bpm/4)*1000)} ms late at ${st.bpm} BPM.`;fire()}});
   if(show.includes('rumble'))K.rumble=knob(kr,{label:'RUMBLE',min:0,max:1,value:st.rumble,fmt:v=>Math.round(v*100)+'%',col:'#a98bff',onTouch:()=>{tip.textContent='Rumble: the kick through a dark, filtered reverb, ducked by every kick.'},onInput:v=>{st.rumble=v;fire()}});
   if(show.includes('drive'))K.drive=knob(kr,{label:'DRIVE',min:0,max:1,value:st.drive,fmt:v=>Math.round(v*100)+'%',col:'#ff4f5a',onTouch:()=>{tip.textContent='Drive: saturates the kick and the whole loop. Hard techno pushes it hard.'},onInput:v=>{st.drive=v;st.kdrive=v*.85;fire()}});
+  syn.forEach((k,j)=>{K[k]=knob(kr,{label:'SYNTH '+(j+1),min:0,max:1.5,value:st.vol[k]==null?1:st.vol[k],fmt:v=>Math.round(v*100)+'%',col:'#a98bff',onTouch:()=>{tip.textContent=`Synth ${j+1} volume. Keep synths under the kick: the kick still leads.`},onInput:v=>{st.vol[k]=v;fire()}})});
   let bo=()=>{};if(show.includes('bass')){const bs=h('div','seg2');bs.style.setProperty('--pc','#a98bff');bs.innerHTML=['pluck','reverse','rolling'].map(m=>`<button data-m="${m}">BASS: ${BASSN[m]}</button>`).join('');B.append(bs);bo=()=>$$('button',bs).forEach(b=>b.classList.toggle('on',b.dataset.m===st.bassMode));bo();
     $$('button',bs).forEach(b=>b.onclick=()=>{st.bassMode=b.dataset.m;bo();tip.textContent={pluck:'Pluck: a short bass right after each kick, dying away.',reverse:'Reverse: the bass swells into the next kick and cuts just before it.',rolling:'Rolling: short 16th notes between the kicks.'}[st.bassMode];fire()})}
   const gw=h('div','bb');B.append(gw);const hd=h('div','bb-row bb-hd');hd.innerHTML='<span></span>'+ALL16.map(i=>`<span class="${i%4?'':'b'}">${i%4?['','e','&amp;','a'][i%4]:i/4+1}</span>`).join('');gw.append(hd);
@@ -147,12 +176,25 @@ function bunkerRig(host,o){o=o||{};initAudio();const st=o.state||mkSt(o.init);co
     ALL16.forEach(i=>{const b=h('button','bb-c'+(i%4===0?' beat':''));b.setAttribute('aria-label',`${T.n} step ${i+1}`);if(!ed)b.classList.add('lockc');
       b.onclick=()=>{if(!ed||i>=(st.len[k]||16))return;const p=st.pat[k];if(k==='bass')p[i]=(p[i]+1)%7;else if(k==='hit'||k==='kick'||!ghosts)p[i]=p[i]?0:1;else p[i]=(p[i]+1)%3;paint();if(p[i])tvoice(st,k,p[i],now()+.01,G,i);haptic(6);fire()};
       cells[k].push(b);row.append(b)});gw.append(row)});
+  syn.forEach((k,j)=>{const row=h('div','bb-row syn-r');const nm=h('div','bb-nm');snm[k]=nm;row.append(nm);scells[k]=[];
+    ALL16.forEach(i=>{const b=h('button','bb-c'+(i%4===0?' beat':''));b.setAttribute('aria-label',`Synth ${j+1} step ${i+1}`);
+      b.onclick=()=>{const T=st.syn[k];T.notes[i]=(T.notes[i]+1)%9;paint();if(T.notes[i])synVoice(st,k,i,now()+.01,G.bus[k]);haptic(6);fire()};scells[k].push(b);row.append(b)});gw.append(row)});
   if(ghosts)B.append(h('p','muted','Tap a cell to add a hit, tap again for a softer ghost note, a third time to clear.'+(tracks.includes('bass')?' Bass cells cycle through notes.':'')));
-  function paint(){tracks.forEach(k=>{const L=st.len[k]||16;cells[k].forEach((b,i)=>{const v=st.pat[k][i];b.classList.toggle('on',k==='bass'?!!v:v===1);b.classList.toggle('gh',k!=='bass'&&v===2);b.classList.toggle('out',i>=L);b.textContent=k==='bass'&&v?NOTE_NAMES[(st.root+BASS_ST[v])%12]:''});if(lens[k])lens[k].textContent=String(st.len[k]||16)})}
-  const onStep=s=>{tracks.forEach(k=>{const L=st.len[k]||16;cells[k].forEach((b,i)=>b.classList.toggle('ph',s>=0&&i===s%L))});barc.textContent=s>=0?'BAR '+(Math.floor(s/16)+1):'BAR –';if(s>=0&&o.onStep)o.onStep(s)};
+  if(syn.length){const sc=sect(B,'SYNTHS','<button class="plug-btn" data-a="sidea">IDEA ▶</button>');
+    const rows=syn.map((k,j)=>{const r=h('div','syn-row');r.innerHTML=`<span class="kb-lab">SYNTH ${j+1}</span><div class="seg2">${Object.entries(SYN_SOUNDS).map(([id,P])=>`<button data-s="${id}"${P.need&&!has(P.need)?' disabled':''}>${P.n}</button>`).join('')}</div><span></span><div class="row" style="gap:6px;align-items:center"><button class="plug-btn" data-o="-1" aria-label="Synth ${j+1} octave down">OCT −</button><span class="num syn-oct"></span><button class="plug-btn" data-o="1" aria-label="Synth ${j+1} octave up">OCT +</button></div>`;sc.append(r);
+      $$('[data-s]',r).forEach(b=>b.onclick=()=>{const T=st.syn[k];T.snd=b.dataset.s;paint();fire();tip.textContent=SYN_SOUNDS[T.snd].tip;const i=T.notes.findIndex(Boolean);if(i>=0&&!seq.on)synVoice(st,k,i,now()+.01,G.bus[k])});
+      $$('[data-o]',r).forEach(b=>b.onclick=()=>{const T=st.syn[k];T.oct=clamp((T.oct||0)+(+b.dataset.o),-1,1);paint();fire();const i=T.notes.findIndex(Boolean);if(i>=0&&!seq.on)synVoice(st,k,i,now()+.01,G.bus[k])});return r});
+    if(!has('synth'))sc.append(h('p','muted','MY SYNTH unlocks with the Synthesizer (Synth Caves): your own sound, played right here.'));
+    sc.append(h('p','muted','Synth cells: each tap moves the note up the minor scale of your bass (root, 2nd, minor 3rd, 4th, 5th, minor 6th, minor 7th, octave). One more tap clears it.'));
+    synPaint=()=>syn.forEach((k,j)=>{const T=st.syn[k];$$('[data-s]',rows[j]).forEach(b=>b.classList.toggle('on',b.dataset.s===T.snd));rows[j].style.setProperty('--pc',(SYN_SOUNDS[T.snd]||SYN_SOUNDS.stab).c);$('.syn-oct',rows[j]).textContent=(T.oct>0?'+':'')+(T.oct||0)});
+    let ii=-1;$('[data-a=sidea]',sc).onclick=()=>{ii=(ii+1)%SYN_IDEAS.length;const I=SYN_IDEAS[ii];SYN_KEYS.forEach(k=>{if(!I[k])return;const T=st.syn[k];T.snd=I[k].snd;T.oct=0;T.notes=new Array(16).fill(0);for(const i in I[k].notes)T.notes[+i]=I[k].notes[i]});paint();fire();tip.textContent=I.n+': '+I.why;if(!seq.on)playB.click()}}
+  function paint(){tracks.forEach(k=>{const L=st.len[k]||16;cells[k].forEach((b,i)=>{const v=st.pat[k][i];b.classList.toggle('on',k==='bass'?!!v:v===1);b.classList.toggle('gh',k!=='bass'&&v===2);b.classList.toggle('out',i>=L);b.textContent=k==='bass'&&v?NOTE_NAMES[(st.root+BASS_ST[v])%12]:''});if(lens[k])lens[k].textContent=String(st.len[k]||16)});
+    syn.forEach((k,j)=>{const T=st.syn[k],P=SYN_SOUNDS[T.snd]||SYN_SOUNDS.stab;snm[k].innerHTML=`<b style="color:${P.c}">S${j+1} ${P.short||P.n}</b>`;snm[k].parentNode.style.setProperty('--rc',P.c);
+      scells[k].forEach((b,i)=>{const v=T.notes[i];b.classList.toggle('on',!!v);b.textContent=v?NOTE_NAMES[synNote(st,T,v)%12]:''})});synPaint()}
+  const onStep=s=>{tracks.forEach(k=>{const L=st.len[k]||16;cells[k].forEach((b,i)=>b.classList.toggle('ph',s>=0&&i===s%L))});syn.forEach(k=>scells[k].forEach((b,i)=>b.classList.toggle('ph',s>=0&&i===s%16)));barc.textContent=s>=0?'BAR '+(Math.floor(s/16)+1):'BAR –';if(s>=0&&o.onStep)o.onStep(s)};
   playB.onclick=()=>{if(seq.on){seq.stop();return}G.set(st);stopMusic();playB.textContent='■ STOP';seq.start({bpm:()=>st.bpm,play:(s,t)=>technoStep(st,s,t,G),onStep,onStop:()=>{playB.textContent='▶ PLAY';onStep(-1)}});if(o.onPlay)o.onPlay()};
-  const syncKnobs=()=>{if(K.bpm)K.bpm.set(st.bpm);if(K.swing)K.swing.set(st.swing);if(K.rumble)K.rumble.set(st.rumble);if(K.drive)K.drive.set(st.drive);bo()};
-  const api={st,G,paint,set(v){Object.assign(st,v);syncKnobs();paint();fire()},setPat(tk,arr){arr.forEach((x,i)=>st.pat[tk][i]=x);paint();fire()},load(id){const ns=styleState(id);Object.keys(st).forEach(k=>delete st[k]);Object.assign(st,ns);syncKnobs();paint();fire()},stop(){seq.stop();out.kill()}};
+  const syncKnobs=()=>{if(K.bpm)K.bpm.set(st.bpm);if(K.swing)K.swing.set(st.swing);if(K.rumble)K.rumble.set(st.rumble);if(K.drive)K.drive.set(st.drive);syn.forEach(k=>K[k].set(st.vol[k]==null?1:st.vol[k]));bo()};
+  const api={st,G,paint,set(v){Object.assign(st,v);syncKnobs();paint();fire()},setPat(tk,arr){arr.forEach((x,i)=>st.pat[tk][i]=x);paint();fire()},load(id){const ns=styleState(id),ks=st.syn,kv={};SYN_KEYS.forEach(k=>{if(st.vol&&st.vol[k]!=null)kv[k]=st.vol[k]});Object.keys(st).forEach(k=>delete st[k]);Object.assign(st,ns);if(ks)st.syn=ks;Object.assign(st.vol,kv);syncKnobs();paint();fire()},   /* a style changes drums, bass and key; your synth parts stay and follow the new key */stop(){seq.stop();out.kill()}};
   if(o.presets){const ids=Object.keys(STYLES);let pi=-1;const setP=i=>{pi=(i+ids.length)%ids.length;api.load(ids[pi]);$('.pname',pg.el).textContent=STYLES[ids[pi]].name;tip.textContent=STYLES[ids[pi]].why;if(!seq.on)playB.click()};$('[data-a=pp]',pg.el).onclick=()=>setP(pi-1);$('[data-a=pn]',pg.el).onclick=()=>setP(pi+1)}
   paint();G.set(st);return api}
 
